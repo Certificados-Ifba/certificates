@@ -1,0 +1,77 @@
+version: "3"
+services:
+  gateway:
+    build: ./services/gateway
+    restart: always
+    hostname: gateway
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+      - frontend
+  event:
+    build: ./services/event
+    restart: always
+    hostname: event
+    env_file:
+      - .env
+    networks:
+      - backend
+    links:
+      - db
+  token:
+    build: ./services/token
+    restart: always
+    hostname: token
+    env_file:
+      - .env
+    networks:
+      - backend
+    links:
+      - db
+  mailer:
+    build: ./services/mailer
+    restart: always
+    hostname: mailer
+    env_file:
+      - .env
+    networks:
+      - backend
+  permission:
+    build: ./services/permission
+    restart: always
+    hostname: permission
+    env_file:
+      - .env
+    networks:
+      - backend
+  user:
+    build: ./services/user
+    restart: always
+    hostname: user
+    env_file:
+      - .env
+    networks:
+      - backend
+    links:
+      - mailer
+      - db
+  db:
+    image: "bitnami/mongodb:latest"
+    restart: always
+    environment:
+      - MONGODB_USERNAME=${MONGO_USER}
+      - MONGODB_PASSWORD=${MONGO_PASSWORD}
+      - MONGODB_DATABASE=${MONGO_DATABASE}
+    ports:
+      - ${MONGO_PORT}:27017
+    networks:
+      - backend
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    external:
+      name: infrastructure

@@ -1,0 +1,15 @@
+{
+  "name": "certificates-api",
+  "version": "1.0.0",
+  "description": "API for certificate system information",
+  "main": "index.js",
+  "scripts": {
+    "lint": "npm --prefix event run lint && npm --prefix user run lint && npm --prefix token run lint && npm --prefix gateway run lint && npm --prefix mailer run lint && npm --prefix permission run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mastercoks/certificates.git"
+  },
+  "author": "Matheus Coqueiro <matheusbdo1@gmail.com> (https://github.com/mastercoks/)",
+  "license": "MIT"
+}
