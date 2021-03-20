@@ -1,5 +1,16 @@
 version: "3"
 services:
+  web:
+    build: ./services/web
+    restart: always
+    hostname: web
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+      #- ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
+    networks:
+      - frontend
   gateway:
     build: ./services/gateway
     restart: always
