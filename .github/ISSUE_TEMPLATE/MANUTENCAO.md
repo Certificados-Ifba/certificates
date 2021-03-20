@@ -1,7 +1,7 @@
 ---
 name: Manutenção do repositório
 about: Issue destinada a tarefas de manutenção deste repositório
-title: "[TAREFA]"
+title: "[MANUTENÇÃO]"
 labels: 'Tipo: Manutenção ♻'
 assignees: ''
 
