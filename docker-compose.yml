@@ -75,10 +75,31 @@ services:
       - MONGODB_USERNAME=${MONGO_USER}
       - MONGODB_PASSWORD=${MONGO_PASSWORD}
       - MONGODB_DATABASE=${MONGO_DATABASE}
+    volumes:
+      - ./docker/db:/bitnami/mongodb
     ports:
       - ${MONGO_PORT}:27017
     networks:
       - backend
+  gui-db:
+    image: "mongo-express"
+    restart: always
+    ports:
+      - ${MONGO_GUI_PORT}:8081
+    environment:
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_GUI_USER}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_GUI_PASSWORD}
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
+      - ME_CONFIG_MONGODB_SERVER=${MONGO_HOST}
+      - ME_CONFIG_MONGODB_PORT=${MONGO_PORT}
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGO_DATABASE}
+      - ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_USER}
+      - ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_PASSWORD}
+    links:
+      - db
+    networks:
+      - backend
+      - frontend
 networks:
   backend:
     driver: bridge
