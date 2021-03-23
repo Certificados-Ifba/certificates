@@ -1,18 +1,17 @@
 version: "3"
 services:
   web:
-    build: ./services/web
+    build: ./packages/web
     restart: always
     hostname: web
-    env_file:
-      - .env
+    environment:
+      - PORT=${WEB_PORT}
     ports:
-      - 3000:3000
-      #- ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
+      - ${WEB_PORT}:${WEB_PORT}
     networks:
       - frontend
   gateway:
-    build: ./services/gateway
+    build: ./packages/gateway
     restart: always
     hostname: gateway
     env_file:
@@ -23,7 +22,7 @@ services:
       - backend
       - frontend
   event:
-    build: ./services/event
+    build: ./packages/event
     restart: always
     hostname: event
     env_file:
@@ -33,7 +32,7 @@ services:
     links:
       - db
   token:
-    build: ./services/token
+    build: ./packages/token
     restart: always
     hostname: token
     env_file:
@@ -43,7 +42,7 @@ services:
     links:
       - db
   mailer:
-    build: ./services/mailer
+    build: ./packages/mailer
     restart: always
     hostname: mailer
     env_file:
@@ -51,7 +50,7 @@ services:
     networks:
       - backend
   permission:
-    build: ./services/permission
+    build: ./packages/permission
     restart: always
     hostname: permission
     env_file:
@@ -59,7 +58,7 @@ services:
     networks:
       - backend
   user:
-    build: ./services/user
+    build: ./packages/user
     restart: always
     hostname: user
     env_file:

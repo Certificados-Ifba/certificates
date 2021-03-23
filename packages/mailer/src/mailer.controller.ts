@@ -1,4 +1,4 @@
-import { MailerService } from '@nest-modules/mailer'
+import { MailerService } from '@nestjs-modules/mailer'
 import { Controller, HttpStatus } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
 

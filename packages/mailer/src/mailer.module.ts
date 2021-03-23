@@ -1,4 +1,4 @@
-import { MailerModule } from '@nest-modules/mailer'
+import { MailerModule } from '@nestjs-modules/mailer'
 import { Module } from '@nestjs/common'
 
 import { MailerController } from './mailer.controller'
