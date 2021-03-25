@@ -18,5 +18,5 @@ coverage
 
 .env
 
-docker/*
+docker/db/*
 !*.gitkeep
