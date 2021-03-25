@@ -68,6 +68,12 @@ services:
     links:
       - mailer
       - db
+  fix-db-permissions:
+    image: 'bitnami/mongodb:latest'
+    user: root
+    command: chown -R 1001:1001 /bitnami/mongodb
+    volumes:
+      - ./docker/db:/bitnami/mongodb
   db:
     image: "bitnami/mongodb:latest"
     restart: always
@@ -81,6 +87,8 @@ services:
       - ${MONGO_PORT}:27017
     networks:
       - backend
+    depends_on:
+      - fix-db-permissions
   gui-db:
     image: "mongo-express"
     restart: always
