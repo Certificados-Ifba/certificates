@@ -12,7 +12,7 @@ import {
 } from '../styles/components/Appbar'
 
 const Appbar: React.FC = () => {
-  const name = 'Matheus Coqueiro Andrade'
+  const name = 'Lucas Nascimento Bertoldi'
   const type = 'Administrador'
   const { toogleActive } = useContext(SidebarContext)
   return (

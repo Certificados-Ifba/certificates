@@ -19,20 +19,20 @@ import {
   ApiBearerAuth
 } from '@nestjs/swagger'
 
-import { Authorization } from './decorators/authorization.decorator'
-import { Permission } from './decorators/permission.decorator'
-import { IAuthorizedRequest } from './interfaces/common/authorized-request.interface'
-import { CreateEventResponseDto } from './interfaces/event/dto/create-event-response.dto'
-import { CreateEventDto } from './interfaces/event/dto/create-event.dto'
-import { DeleteEventResponseDto } from './interfaces/event/dto/delete-event-response.dto'
-import { EventIdDto } from './interfaces/event/dto/event-id.dto'
-import { GetEventsResponseDto } from './interfaces/event/dto/get-events-response.dto'
-import { UpdateEventResponseDto } from './interfaces/event/dto/update-event-response.dto'
-import { UpdateEventDto } from './interfaces/event/dto/update-event.dto'
-import { IServiceEventCreateResponse } from './interfaces/event/service-event-create-response.interface'
-import { IServiceEventDeleteResponse } from './interfaces/event/service-event-delete-response.interface'
-import { IServiceEventSearchByUserIdResponse } from './interfaces/event/service-event-search-by-user-id-response.interface'
-import { IServiceEventUpdateByIdResponse } from './interfaces/event/service-event-update-by-id-response.interface'
+import { Authorization } from '../decorators/authorization.decorator'
+import { Permission } from '../decorators/permission.decorator'
+import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
+import { CreateEventResponseDto } from '../interfaces/event/dto/create-event-response.dto'
+import { CreateEventDto } from '../interfaces/event/dto/create-event.dto'
+import { DeleteEventResponseDto } from '../interfaces/event/dto/delete-event-response.dto'
+import { EventIdDto } from '../interfaces/event/dto/event-id.dto'
+import { GetEventsResponseDto } from '../interfaces/event/dto/get-events-response.dto'
+import { UpdateEventResponseDto } from '../interfaces/event/dto/update-event-response.dto'
+import { UpdateEventDto } from '../interfaces/event/dto/update-event.dto'
+import { IServiceEventCreateResponse } from '../interfaces/event/service-event-create-response.interface'
+import { IServiceEventDeleteResponse } from '../interfaces/event/service-event-delete-response.interface'
+import { IServiceEventSearchByUserIdResponse } from '../interfaces/event/service-event-search-by-user-id-response.interface'
+import { IServiceEventUpdateByIdResponse } from '../interfaces/event/service-event-update-by-id-response.interface'
 
 @Controller('events')
 @ApiBearerAuth('JWT')
@@ -67,6 +67,7 @@ export class EventsController {
     }
   }
 
+  
   @Post()
   @Authorization(true)
   @Permission('event_create')

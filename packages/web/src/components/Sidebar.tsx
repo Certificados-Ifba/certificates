@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isActive }) => {
     },
     {
       name: 'Eventos',
-      link: '/eventos',
+      link: '/event',
       icon: <FiCalendar size={24} />
     },
     {

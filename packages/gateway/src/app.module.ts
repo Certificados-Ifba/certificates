@@ -2,15 +2,16 @@ import { Module } from '@nestjs/common'
 import { APP_GUARD } from '@nestjs/core'
 import { ClientProxyFactory } from '@nestjs/microservices'
 
-import { EventsController } from './events.controller'
+import { EventsController } from './controllers/events.controller'
+import { TestEventsController } from './controllers/test-events.controller'
+import { UsersController } from './controllers/users.controller'
 import { ConfigService } from './services/config/config.service'
 import { AuthGuard } from './services/guards/authorization.guard'
 import { PermissionGuard } from './services/guards/permission.guard'
-import { UsersController } from './users.controller'
 
 @Module({
   imports: [],
-  controllers: [UsersController, EventsController],
+  controllers: [UsersController, EventsController, TestEventsController],
   providers: [
     ConfigService,
     {
