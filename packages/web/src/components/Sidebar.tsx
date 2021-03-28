@@ -1,9 +1,9 @@
 import Link from 'next/link'
+import React from 'react'
 import {
   FiCalendar,
-  FiFileText,
   FiHome,
-  FiTool,
+  FiSettings,
   FiUserCheck,
   FiUsers
 } from 'react-icons/fi'
@@ -30,28 +30,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isActive }) => {
     },
     {
       name: 'Eventos',
-      link: '/event',
+      link: '/events',
       icon: <FiCalendar size={24} />
     },
     {
       name: 'Participantes',
-      link: '/participantes',
+      link: '/participants',
       icon: <FiUserCheck size={24} />
     },
     {
-      name: 'Funções',
-      link: '/funcoes',
-      icon: <FiTool size={24} />
-    },
-    {
-      name: 'Atividades',
-      link: '/atividades',
-      icon: <FiFileText size={24} />
-    },
-    {
       name: 'Usuários',
-      link: '/usuarios',
+      link: '/users',
       icon: <FiUsers size={24} />
+    },
+    {
+      name: 'Configurações',
+      link: '/settings',
+      icon: <FiSettings size={24} />
     }
   ]
   const active = isActive ? 'active' : ''

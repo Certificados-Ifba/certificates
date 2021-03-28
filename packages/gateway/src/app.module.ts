@@ -3,7 +3,7 @@ import { APP_GUARD } from '@nestjs/core'
 import { ClientProxyFactory } from '@nestjs/microservices'
 
 import { EventsController } from './controllers/events.controller'
-import { TestEventsController } from './controllers/test-events.controller'
+import { TestEventsController } from './controllers/test.controller'
 import { UsersController } from './controllers/users.controller'
 import { ConfigService } from './services/config/config.service'
 import { AuthGuard } from './services/guards/authorization.guard'

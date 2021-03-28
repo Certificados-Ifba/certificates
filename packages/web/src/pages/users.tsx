@@ -1,66 +1,43 @@
 import Head from 'next/head'
-import { useMemo, useState } from 'react'
-import {
-  FiAward,
-  FiBarChart2,
-  FiBook,
-  FiCalendar,
-  FiDelete,
-  FiEdit,
-  FiEdit2,
-  FiEdit3,
-  FiFileText,
-  FiInfo,
-  FiPlus,
-  FiSearch,
-  FiTool,
-  FiTrash,
-  FiTrash2,
-  FiTrendingDown,
-  FiUser,
-  FiUserCheck,
-  FiUserPlus,
-  FiUsers
-} from 'react-icons/fi'
-
+import React from 'react'
+import { FiAward, FiEdit, FiInfo, FiPlus, FiSearch, FiTrash2, FiUserPlus, FiUsers } from 'react-icons/fi'
 import Button from '../components/Button'
 import Card from '../components/Card'
-import CardIcon from '../components/CardIcon'
 import Input from '../components/Input'
 import PaginatedTable from '../components/PaginatedTable'
-import Table from '../components/Table'
 import usePaginatedRequest from '../services/usePaginatedRequest'
-import { Container, ListCards } from '../styles/pages/Home'
+import { Container } from '../styles/pages/Home'
 
-const Event: React.FC = () => {
+const users: React.FC = () => {
   const request = usePaginatedRequest<any>({
-    url: 'http://localhost:3001/test-events'
+    url: 'http://localhost:3001/test/users'
   })
-
   return (
     <Container>
       <Head>
-        <title>Eventos | Certificados</title>
+        <title>Usuários | Certificados</title>
       </Head>
       <header>
         <div>
-          <h1>Eventos</h1>
-          <h2>Informações do sistema</h2>
+          <h1>
+            <FiUsers size={24} /> Usuários
+          </h1>
+          <h2>São pessoas que terão acesso gerencial ao sistema.</h2>
         </div>
         <nav>
           <Button>
             <FiPlus size={20} />
-            <span className="hide-md-down">Novo Evento</span>
+            <span className="hide-md-down">Adicionar Usuário</span>
           </Button>
         </nav>
       </header>
       <Card>
         <header>
-          <h2>Últimos Eventos</h2>
+          <h2>Usuários Cadastrados</h2>
           <form>
             <Input
               type="text"
-              placeholder="Buscar evento"
+              placeholder="Buscar usuário"
               icon={<FiSearch size={20} />}
             />
           </form>
@@ -70,20 +47,17 @@ const Event: React.FC = () => {
           <thead>
             <tr>
               <th>Nome</th>
-              <th>Sigla</th>
-              <th>Ano</th>
-              <th>Data Inicial</th>
-              <th>Data Final</th>
+              <th>E-mail</th>
+              <th>Tipo</th>
               <th style={{ width: 32 }} />
             </tr>
           </thead>
           <tbody>
-            {request.data?.events?.map(event => (
-              <tr key={event.name}>
-                <td>{event.initials}</td>
-                <td>{event.year}</td>
-                <td>{event.start_date}</td>
-                <td>{event.end_date}</td>
+            {request.data?.data?.users?.map(user => (
+              <tr key={user.email}>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>{user.type}</td>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <Button
@@ -167,46 +141,9 @@ const Event: React.FC = () => {
             ))}
           </tbody>
         </PaginatedTable>
-        {/* <table>
-          <thead>
-            <tr>
-              <td>Nome</td>
-              <td>Ano</td>
-              <td>Sigla</td>
-              <td />
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Projeto de Incentivo à Aprendizagem</td>
-              <td>2016</td>
-              <td>PINA</td>
-            </tr>
-            <tr>
-              <td>Semana de Tecnologia da Informação</td>
-              <td>2017</td>
-              <td>Week-IT</td>
-            </tr>
-            <tr>
-              <td>Semana Nacional de Ciência e Tecnologia</td>
-              <td>2017</td>
-              <td>SNCT</td>
-            </tr>
-            <tr>
-              <td>Projeto de Extensão do NAPNEE</td>
-              <td>2017</td>
-              <td>Curso TEA</td>
-            </tr>
-            <tr>
-              <td>Jornada Pedagógica</td>
-              <td>2017</td>
-              <td>JP</td>
-            </tr>
-          </tbody>
-        </table> */}
       </Card>
     </Container>
   )
 }
 
-export default Event
+export default users
