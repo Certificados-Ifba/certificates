@@ -15,6 +15,7 @@ const Appbar: React.FC = () => {
   const name = 'Lucas Nascimento Bertoldi'
   const type = 'Administrador'
   const { toogleActive } = useContext(SidebarContext)
+
   return (
     <Container>
       <Button onClick={toogleActive}>

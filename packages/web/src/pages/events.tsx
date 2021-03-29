@@ -1,5 +1,6 @@
+import { Form } from '@unform/web'
 import Head from 'next/head'
-import React from 'react'
+import { useCallback } from 'react'
 import {
   FiAward,
   FiCalendar,
@@ -22,6 +23,10 @@ const Events: React.FC = () => {
   const request = usePaginatedRequest<any>({
     url: 'http://localhost:3001/test/events'
   })
+
+  const handleFilter = useCallback(data => {
+    console.log(data)
+  }, [])
 
   return (
     <Container>
@@ -47,13 +52,9 @@ const Events: React.FC = () => {
       <Card>
         <header>
           <h2>Últimos Eventos</h2>
-          <form>
-            <Input
-              type="text"
-              placeholder="Buscar evento"
-              icon={<FiSearch size={20} />}
-            />
-          </form>
+          <Form onSubmit={handleFilter}>
+            <Input name="search" placeholder="Buscar função" icon={FiSearch} />
+          </Form>
         </header>
         {/* <Table columns={columns} data={data} /> */}
         <PaginatedTable request={request}>

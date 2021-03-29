@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import React, { useMemo } from 'react'
 import {
   FiCalendar,
   FiHome,
@@ -14,23 +13,7 @@ import CardIcon from '../components/CardIcon'
 import { Container, ListCards } from '../styles/pages/Home'
 
 const Home: React.FC = () => {
-  const columns = useMemo(
-    () => [
-      {
-        Header: 'Nome',
-        accessor: 'name'
-      },
-      {
-        Header: 'Ano',
-        accessor: 'year'
-      },
-      {
-        Header: 'Sigla',
-        accessor: 'initials'
-      }
-    ],
-    []
-  )
+  const name = 'Lucas Nascimento Bertoldi'
   return (
     <Container>
       <Head>
@@ -38,8 +21,10 @@ const Home: React.FC = () => {
       </Head>
       <header>
         <div>
-          <h1><FiHome size={24} /> Dashboard</h1>
-          <h2>Seja bem vindo, Lucas</h2>
+          <h1>
+            <FiHome size={24} /> Dashboard
+          </h1>
+          <h2>Seja bem vindo, {name.split(' ')[0]}</h2>
         </div>
         <nav>
           <Button>

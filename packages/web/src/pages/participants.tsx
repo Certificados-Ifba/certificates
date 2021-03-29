@@ -1,10 +1,16 @@
+import { Form } from '@unform/web'
 import Head from 'next/head'
-import React from 'react'
+import { useCallback } from 'react'
 import {
   FiAward,
   FiEdit,
   FiInfo,
-  FiPlus, FiSearch, FiTrash2, FiUserCheck, FiUserPlus} from 'react-icons/fi'
+  FiPlus,
+  FiSearch,
+  FiTrash2,
+  FiUserCheck,
+  FiUserPlus
+} from 'react-icons/fi'
 
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -17,6 +23,11 @@ const participants: React.FC = () => {
   const request = usePaginatedRequest<any>({
     url: 'http://localhost:3001/test/participants'
   })
+
+  const handleFilter = useCallback(data => {
+    console.log(data)
+  }, [])
+
   return (
     <Container>
       <Head>
@@ -24,8 +35,12 @@ const participants: React.FC = () => {
       </Head>
       <header>
         <div>
-          <h1><FiUserCheck size={24} /> Participantes</h1>
-          <h2>Todas as pessoas que participaram ou vão participar dos eventos</h2>
+          <h1>
+            <FiUserCheck size={24} /> Participantes
+          </h1>
+          <h2>
+            Todas as pessoas que participaram ou vão participar dos eventos
+          </h2>
         </div>
         <nav>
           <Button>
@@ -37,13 +52,9 @@ const participants: React.FC = () => {
       <Card>
         <header>
           <h2>Participantes dos Últimos Eventos</h2>
-          <form>
-            <Input
-              type="text"
-              placeholder="Buscar participante"
-              icon={<FiSearch size={20} />}
-            />
-          </form>
+          <Form onSubmit={handleFilter}>
+            <Input name="search" placeholder="Buscar função" icon={FiSearch} />
+          </Form>
         </header>
         {/* <Table columns={columns} data={data} /> */}
         <PaginatedTable request={request}>
@@ -61,7 +72,7 @@ const participants: React.FC = () => {
           <tbody>
             {request.data?.data?.participants?.map(participant => (
               <tr key={participant.cpf}>
-               <td>{participant.cpf}</td>
+                <td>{participant.cpf}</td>
                 <td>{participant.name}</td>
                 <td>{participant.birth_date}</td>
                 <td>{participant.email}</td>

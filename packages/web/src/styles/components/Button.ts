@@ -3,7 +3,14 @@ import { ButtonHTMLAttributes } from 'react'
 import styled, { css } from 'styled-components'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  color?: 'primary' | 'secondary' | 'danger' | 'warning'
+  color?:
+    | 'primary'
+    | 'secondary'
+    | 'danger'
+    | 'warning'
+    | 'dark'
+    | 'medium'
+    | 'light'
   size?: 'small' | 'default' | 'big'
   ghost?: boolean
   outline?: boolean
@@ -146,6 +153,84 @@ const colors = {
           : props.theme.colors.warningTint};
       border-color: ${(props: any) =>
         props.ghost ? 'transparent' : props.theme.colors.warningTint};
+    }
+  `,
+  dark: css`
+    background: ${(props: any) =>
+      props.outline || props.ghost ? 'transparent' : props.theme.colors.dark};
+    border-color: ${(props: any) =>
+      props.ghost ? 'transparent' : props.theme.colors.dark};
+    color: ${(props: any) =>
+      props.outline || props.ghost
+        ? props.theme.colors.dark
+        : props.theme.colors.light};
+    &:hover {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.8, props.theme.colors.dark)
+          : props.theme.colors.darkShade};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.darkShade};
+    }
+    &:active {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.9, props.theme.colors.dark)
+          : props.theme.colors.darkTint};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.darkTint};
+    }
+  `,
+  medium: css`
+    background: ${(props: any) =>
+      props.outline || props.ghost ? 'transparent' : props.theme.colors.medium};
+    border-color: ${(props: any) =>
+      props.ghost ? 'transparent' : props.theme.colors.medium};
+    color: ${(props: any) =>
+      props.outline || props.ghost
+        ? props.theme.colors.medium
+        : props.theme.colors.light};
+    &:hover {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.8, props.theme.colors.medium)
+          : props.theme.colors.mediumShade};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.mediumShade};
+    }
+    &:active {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.9, props.theme.colors.medium)
+          : props.theme.colors.mediumTint};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.mediumTint};
+    }
+  `,
+  ligth: css`
+    background: ${(props: any) =>
+      props.outline || props.ghost ? 'transparent' : props.theme.colors.ligth};
+    border-color: ${(props: any) =>
+      props.ghost ? 'transparent' : props.theme.colors.ligth};
+    color: ${(props: any) =>
+      props.outline || props.ghost
+        ? props.theme.colors.ligth
+        : props.theme.colors.dark};
+    &:hover {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.8, props.theme.colors.ligth)
+          : props.theme.colors.ligthShade};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.ligthShade};
+    }
+    &:active {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.9, props.theme.colors.ligth)
+          : props.theme.colors.ligthTint};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.ligthTint};
     }
   `
 }

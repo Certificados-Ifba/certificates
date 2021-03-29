@@ -51,10 +51,5 @@ export default createGlobalStyle`
   #app {
     display: flex;
     align-items: stretch;
-    /* display: grid;
-    grid-template:
-      "sidebar appbar" 100px
-      "sidebar content" 100%
-      / 100px 1fr; */
   }
 `

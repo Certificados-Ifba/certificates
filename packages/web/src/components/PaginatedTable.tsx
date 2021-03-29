@@ -1,14 +1,17 @@
 // import Spinner from 'components/Spinner'
-import { useMemo } from 'react'
-import { FiArrowLeft, FiArrowRight } from 'react-icons/fi'
-
-import { PaginatedRequest } from '../services/usePaginatedRequest'
+import { Form } from '@unform/web'
+import { useCallback, useMemo } from 'react'
 import {
-  Container,
-  DataTable,
-  Pagination
-} from '../styles/components/PaginatedTable'
+  FiChevronLeft,
+  FiChevronRight,
+  FiChevronsLeft,
+  FiChevronsRight
+} from 'react-icons/fi'
+
+import { PaginatedRequest, OptionType } from '../services/usePaginatedRequest'
+import { DataTable, Pagination } from '../styles/components/PaginatedTable'
 import Button from './Button'
+import Select from './Select'
 
 interface Props {
   request: PaginatedRequest<any, any>
@@ -19,10 +22,15 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
   const {
     data,
     response,
-    hasPreviousPage,
-    hasNextPage,
+    page,
+    perPage,
+    resetPage,
+    loadNext,
     loadPrevious,
-    loadNext
+    goToPage,
+    handlePerPage,
+    hasPreviousPage,
+    hasNextPage
   } = request
 
   // const numberOfRegisters = useMemo(() => response?.headers['x-total-count'], [
@@ -44,8 +52,13 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
       ),
     [response]
   )
+
+  const loadLast = useCallback(() => {
+    goToPage(numberOfPages)
+  }, [])
+
   return (
-    <Container>
+    <>
       {data ? (
         <div style={{ overflowY: 'auto' }}>
           <DataTable>{children}</DataTable>
@@ -56,16 +69,34 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
       )}
       {data && (
         <Pagination>
-          <p>
+          <div>
             <span>Linhas por página</span>
-            <select name="" id="">
-              <option value="10">10</option>
-              <option value="10">20</option>
-              <option value="10">30</option>
-              <option value="10">40</option>
-              <option value="10">50</option>
-            </select>
-          </p>
+            <Select
+              isSearchable={false}
+              pageSize={2}
+              onChange={handlePerPage}
+              defaultValue={perPage}
+              value={perPage}
+              options={[
+                {
+                  value: 10,
+                  label: '10'
+                },
+                {
+                  value: 25,
+                  label: '25'
+                },
+                {
+                  value: 50,
+                  label: '50'
+                },
+                {
+                  value: 100,
+                  label: '100'
+                }
+              ]}
+            />
+          </div>
           {/* <p>
             <span>
               {numberOfRegisters}
@@ -82,24 +113,46 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
               ghost
               square
               size="small"
+              color="dark"
               disabled={!hasPreviousPage}
-              onClick={loadPrevious}
+              onClick={resetPage}
             >
-              <FiArrowLeft size={20} />
+              <FiChevronsLeft size={18} />
             </Button>
             <Button
               ghost
               square
               size="small"
+              color="dark"
+              disabled={!hasPreviousPage}
+              onClick={loadPrevious}
+            >
+              <FiChevronLeft size={18} />
+            </Button>
+            <Button
+              ghost
+              square
+              size="small"
+              color="dark"
               disabled={!hasNextPage}
               onClick={loadNext}
             >
-              <FiArrowRight size={20} />
+              <FiChevronRight size={18} />
+            </Button>
+            <Button
+              ghost
+              square
+              size="small"
+              color="dark"
+              disabled={!hasNextPage}
+              onClick={loadLast}
+            >
+              <FiChevronsRight size={18} />
             </Button>
           </nav>
         </Pagination>
       )}
-    </Container>
+    </>
   )
 }
 

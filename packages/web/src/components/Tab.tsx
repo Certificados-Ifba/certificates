@@ -1,8 +1,8 @@
-import React, { ReactNode } from 'react'
-import { Container } from '../styles/components/Tab'
-import { useState } from 'react'
-import Card from './Card'
+import { ReactNode, useState } from 'react'
 import { IconBaseProps } from 'react-icons'
+
+import { Container } from '../styles/components/Tab'
+import Card from './Card'
 
 interface TabsProps {
   id?: string
@@ -12,30 +12,32 @@ interface TabsProps {
 }
 
 const Tab: React.FC<{ tabs: TabsProps[] }> = ({ tabs }) => {
-  const [selectedTab, setSelectedTab] = useState<TabsProps>(tabs[0])
+  const [selectedTab, setSelectedTab] = useState(0)
   return (
     <>
       <Container>
         {tabs.map((tab, index) => {
           if (!tab.id)
-            tab.id = 'tab' + index + "_" + tab.name.toLowerCase().replace(" ", "_");
+            tab.id =
+              'tab' + index + '_' + tab.name.toLowerCase().replace(' ', '_')
           return (
             <span key={tab.id}>
               <input
-                defaultChecked={selectedTab.id == tab.id}
+                defaultChecked={selectedTab === index}
                 type="radio"
                 id={tab.id}
                 name="tabs"
-                onChange={() => setSelectedTab(tab)}
+                onChange={() => setSelectedTab(index)}
               />
               <label htmlFor={tab.id}>
-                <tab.icon /> <span className="hide-md-down">{tab.name}</span>
+                <tab.icon size={18} />
+                <span className="hide-md-down">{tab.name}</span>
               </label>
             </span>
           )
         })}
       </Container>
-      <Card>{selectedTab.children}</Card>
+      <Card>{tabs[selectedTab]?.children}</Card>
     </>
   )
 }

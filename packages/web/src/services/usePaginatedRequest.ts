@@ -3,10 +3,19 @@ import { useState, useCallback, useMemo } from 'react'
 
 import useRequest, { Return } from './useRequest'
 
+export interface OptionType {
+  label: string
+  value: number
+}
+
 export interface PaginatedRequest<Data, Error> extends Return<Data, Error> {
+  page: number
+  perPage: OptionType
   resetPage: () => void
   loadPrevious: () => void
   loadNext: () => void
+  goToPage: (newPage: number) => void
+  handlePerPage: (option: OptionType) => void
   hasPreviousPage: boolean
   hasNextPage: boolean
 }
@@ -15,10 +24,14 @@ export default function usePaginatedRequest<Data = any, Error = any>(
   request: AxiosRequestConfig
 ): PaginatedRequest<Data, Error> {
   const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState<OptionType>({
+    value: 10,
+    label: '10'
+  })
 
   const { response, requestKey, ...rest } = useRequest<any, Error>({
     ...request,
-    params: { page, ...request.params }
+    params: { page, perPage: perPage.value, ...request.params }
   })
 
   const hasPreviousPage = useMemo(() => page > 1, [page])
@@ -43,13 +56,38 @@ export default function usePaginatedRequest<Data = any, Error = any>(
     setPage(current => (hasNextPage ? current + 1 : current))
   }, [hasNextPage])
 
+  const goToPage = useCallback(
+    (newPage: number) => {
+      setPage(current =>
+        newPage <=
+          Math.ceil(
+            response?.data?.data?.movie_count / response?.data?.data?.limit
+          ) && newPage > 0
+          ? newPage
+          : current
+      )
+    },
+    [response]
+  )
+
+  const handlePerPage = useCallback(
+    (option: OptionType) => {
+      setPerPage(option)
+    },
+    [setPerPage]
+  )
+
   return {
     ...rest,
     requestKey,
     response,
+    page,
+    perPage,
     resetPage,
     loadNext,
     loadPrevious,
+    goToPage,
+    handlePerPage,
     hasPreviousPage,
     hasNextPage
   }

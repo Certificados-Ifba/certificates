@@ -1,6 +1,17 @@
+import { Form } from '@unform/web'
 import Head from 'next/head'
-import React from 'react'
-import { FiAward, FiEdit, FiInfo, FiPlus, FiSearch, FiTrash2, FiUserPlus, FiUsers } from 'react-icons/fi'
+import { useCallback } from 'react'
+import {
+  FiAward,
+  FiEdit,
+  FiInfo,
+  FiPlus,
+  FiSearch,
+  FiTrash2,
+  FiUserPlus,
+  FiUsers
+} from 'react-icons/fi'
+
 import Button from '../components/Button'
 import Card from '../components/Card'
 import Input from '../components/Input'
@@ -12,6 +23,11 @@ const users: React.FC = () => {
   const request = usePaginatedRequest<any>({
     url: 'http://localhost:3001/test/users'
   })
+
+  const handleFilter = useCallback(data => {
+    console.log(data)
+  }, [])
+
   return (
     <Container>
       <Head>
@@ -34,15 +50,10 @@ const users: React.FC = () => {
       <Card>
         <header>
           <h2>Usuários Cadastrados</h2>
-          <form>
-            <Input
-              type="text"
-              placeholder="Buscar usuário"
-              icon={<FiSearch size={20} />}
-            />
-          </form>
+          <Form onSubmit={handleFilter}>
+            <Input name="search" placeholder="Buscar função" icon={FiSearch} />
+          </Form>
         </header>
-        {/* <Table columns={columns} data={data} /> */}
         <PaginatedTable request={request}>
           <thead>
             <tr>
@@ -60,82 +71,22 @@ const users: React.FC = () => {
                 <td>{user.type}</td>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="secondary"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
+                    <Button inline ghost square color="secondary" size="small">
                       <FiInfo size={20} />
                     </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="secondary"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
+                    <Button inline ghost square color="secondary" size="small">
                       <FiUserPlus size={20} />
                     </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="primary"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
+                    <Button inline ghost square color="primary" size="small">
                       <FiAward size={20} />
                     </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="warning"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
+                    <Button inline ghost square color="warning" size="small">
                       <FiEdit size={20} />
                     </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="danger"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
+                    <Button inline ghost square color="danger" size="small">
                       <FiTrash2 size={20} />
                     </Button>
                   </div>
-                  {/*
-                </Button>
-                <Button inline size="small" color="danger">
-                  Deletar
-                </Button> */}
                 </td>
               </tr>
             ))}

@@ -1,16 +1,10 @@
 import { shade } from 'polished'
 import styled from 'styled-components'
 
-export const Container = styled.div`
-  /* margin-top: 32px; */
-  /* padding: 30px; */
-`
-
 export const DataTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   tr {
-    /* height: 58px; */
     height: 58px;
     border-bottom: 2px solid ${props => props.theme.colors.lightShade};
     th,
@@ -122,17 +116,18 @@ export const Pagination = styled.footer`
   align-items: center;
   padding: 20px 30px;
 
-  > p {
+  > div {
     color: ${props => props.theme.colors.darkShade};
     font-size: 12px;
     font-weight: 600;
-    span + select {
+    display: inline-flex;
+    align-items: center;
+
+    > div {
       margin-left: 20px;
-      padding: 8px;
+      width: 80px;
       font-size: 12px;
-      font-weight: 500px;
-      border-radius: 5px;
-      border: 2px solid ${props => props.theme.colors.mediumTint};
+      font-weight: 500;
     }
   }
 
