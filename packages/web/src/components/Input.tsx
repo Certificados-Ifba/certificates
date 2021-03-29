@@ -9,7 +9,7 @@ import {
 import { IconBaseProps } from 'react-icons'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
 
-import { Container } from '../styles/components/Input'
+import { Container, Label } from '../styles/components/Input'
 
 interface BaseProps<Multiline = false>
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -85,18 +85,21 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
   }
 
   return (
-    <Container>
-      {label && <label htmlFor={fieldName}>{label}</label>}
-      <div>{Icon && <Icon size={20} />}</div>
-      {multiline ? (
-        <textarea {...(props as TextAreaProps)} />
-      ) : (
-        <input {...(props as InputProps)} />
-      )}
-      {secure && (
-        <div>{isShowPass ? <FiEye size={20} /> : <FiEyeOff size={20} />}</div>
-      )}
-    </Container>
+    <>
+      {label && <Label htmlFor={fieldName}>{label}</Label>}
+      <Container hidden={restaux.hidden}>
+        <div>{Icon && <Icon size={20} />}</div>
+        {multiline ? (
+          <textarea {...(props as TextAreaProps)} />
+        ) : (
+          <input {...(props as InputProps)} />
+        )}
+        {secure && (
+          <div>{isShowPass ? <FiEye size={20} /> : <FiEyeOff size={20} />}</div>
+        )}
+      </Container>
+      {error && <span>{error}</span>}
+    </>
   )
 }
 

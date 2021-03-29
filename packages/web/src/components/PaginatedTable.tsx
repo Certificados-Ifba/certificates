@@ -70,7 +70,7 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
       {data && (
         <Pagination>
           <div>
-            <span>Linhas por página</span>
+            <span className="hide-md-down">Linhas por página</span>
             <Select
               isSearchable={false}
               pageSize={2}

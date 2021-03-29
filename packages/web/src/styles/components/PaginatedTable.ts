@@ -122,9 +122,11 @@ export const Pagination = styled.footer`
     font-weight: 600;
     display: inline-flex;
     align-items: center;
+    > span {
+      margin-right: 20px;
+    }
 
     > div {
-      margin-left: 20px;
       width: 80px;
       font-size: 12px;
       font-weight: 500;

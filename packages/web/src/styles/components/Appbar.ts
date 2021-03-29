@@ -9,7 +9,7 @@ export const Container = styled.header`
   justify-content: space-between;
   align-items: center;
 
-  z-index: 1;
+  /* z-index: 1; */
 `
 
 export const Button = styled.button`
