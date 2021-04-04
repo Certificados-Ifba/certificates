@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "allowJs": true,
+    "checkJs": false,
+    "strict": false,
+    "jsx": "preserve"
+  },
+  "include": [
+    "**/next-env.d.ts",
+    "**/react-table-config.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

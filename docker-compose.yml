@@ -1,18 +1,18 @@
-version: "3"
+version: '3'
 services:
   web:
-    build: ./packages/web
-    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.web
     hostname: web
-    environment:
-      - PORT=${WEB_PORT}
     ports:
-      - ${WEB_PORT}:${WEB_PORT}
+      - '${WEB_PORT}:${WEB_PORT}'
     networks:
       - frontend
   gateway:
-    build: ./packages/gateway
-    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.gateway
     hostname: gateway
     env_file:
       - .env
@@ -22,52 +22,56 @@ services:
       - backend
       - frontend
   event:
-    build: ./packages/event
-    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.event
     hostname: event
     env_file:
       - .env
-    networks:
-      - backend
     links:
       - db
+    networks:
+      - backend
   token:
-    build: ./packages/token
-    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.token
     hostname: token
     env_file:
       - .env
-    networks:
-      - backend
     links:
       - db
+    networks:
+      - backend
   mailer:
-    build: ./packages/mailer
-    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.mailer
     hostname: mailer
     env_file:
       - .env
+    links:
+      - db
     networks:
       - backend
   permission:
-    build: ./packages/permission
-    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.permission
     hostname: permission
     env_file:
       - .env
     networks:
       - backend
   user:
-    build: ./packages/user
-    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.user
     hostname: user
     env_file:
       - .env
     networks:
       - backend
-    links:
-      - mailer
-      - db
   fix-db-permissions:
     image: 'bitnami/mongodb:latest'
     user: root
@@ -76,7 +80,6 @@ services:
       - ./docker/db:/bitnami/mongodb
   db:
     image: "bitnami/mongodb:latest"
-    restart: always
     environment:
       - MONGODB_USERNAME=${MONGO_USER}
       - MONGODB_PASSWORD=${MONGO_PASSWORD}
@@ -85,10 +88,10 @@ services:
       - ./docker/db:/bitnami/mongodb
     ports:
       - ${MONGO_PORT}:27017
-    networks:
-      - backend
     depends_on:
       - fix-db-permissions
+    networks:
+      - backend
   gui-db:
     image: "mongo-express"
     restart: always

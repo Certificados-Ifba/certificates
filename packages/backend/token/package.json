@@ -1,0 +1,34 @@
+{
+  "private": true,
+  "name": "@certificates/token",
+  "version": "1.0.0",
+  "license": "SEE LICENSE IN ../../../LICENSE",
+  "scripts": {
+    "build": "rimraf dist && nest build && yarn copy:templates",
+    "dev": "nest start --watch",
+    "prod": "yarn build && node dist/main",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
+    "copy:templates": "cpx './src/templates/**' 'dist/templates'"
+  },
+  "dependencies": {
+    "@nestjs/cli": "^7.6.0",
+    "@nestjs/common": "7.6.14",
+    "@nestjs/core": "7.6.14",
+    "@nestjs/microservices": "7.6.14",
+    "@nestjs/mongoose": "7.1.2",
+    "@nestjs/platform-express": "7.6.14",
+    "@nestjs/jwt": "7.2.0",
+    "mongoose": "5.10.0",
+    "reflect-metadata": "0.1.13",
+    "rimraf": "3.0.2",
+    "rxjs": "6.6.3"
+  },
+  "devDependencies": {
+    "@types/express": "4.17.8",
+    "@types/mongoose": "5.10.2",
+    "@types/node": "14.0.27",
+    "dotenv": "8.2.0",
+    "ts-node": "9.0.0",
+    "tsconfig-paths": "3.9.0"
+  }
+}
