@@ -1,15 +1,24 @@
 {
-  "name": "certificates-api",
+  "name": "certificates",
+  "private": true,
   "version": "1.0.0",
-  "description": "API for certificate system information",
   "main": "index.js",
-  "scripts": {
-    "lint": "npm --prefix event run lint && npm --prefix user run lint && npm --prefix token run lint && npm --prefix gateway run lint && npm --prefix mailer run lint && npm --prefix permission run lint"
+  "license": "EUPL-1.2",
+  "description": "API for certificate system information",
+  "workspaces": {
+    "packages": [
+      "packages/backend/*",
+      "packages/frontend/*",
+      "packages/shared/*"
+    ]
+  },
+  "devDependencies": {
+    "@certificates/eslint-config": "*",
+    "typescript": "^4.2.3"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/mastercoks/certificates.git"
   },
-  "author": "Matheus Coqueiro <matheusbdo1@gmail.com> (https://github.com/mastercoks/)",
-  "license": "MIT"
+  "author": "Matheus Coqueiro <matheusbdo1@gmail.com> (https://github.com/mastercoks/)"
 }

@@ -1,0 +1,28 @@
+version: '3'
+services:
+  web:
+    command: yarn workspace @certificates/web prod
+    restart: always
+  gateway:
+    command: yarn workspace @certificates/gateway prod
+    restart: always
+  event:
+    command: yarn workspace @certificates/event prod
+    restart: always
+  token:
+    command: yarn workspace @certificates/token prod
+    restart: always
+  mailer:
+    command: yarn workspace @certificates/mailer prod
+    restart: always
+  permission:
+    command: yarn workspace @certificates/permission prod
+    restart: always
+  user:
+    command: yarn workspace @certificates/user prod
+    restart: always
+  db:
+    restart: always
+  gui-db:
+    restart: always
+
