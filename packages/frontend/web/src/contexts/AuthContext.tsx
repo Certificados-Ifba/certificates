@@ -63,7 +63,6 @@ const AuthProvider: React.FC = ({ children }) => {
     })
 
     const { token } = response.data?.data
-
     setToken(token)
     const payload: any = decode(token || '')
 

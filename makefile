@@ -1,17 +1,17 @@
 build.dev:
-	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
+	COMPOSE_DOCKER_CLI_BUILD=0 docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache --compress --force-rm
 
 build.prod:
-	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
+	COMPOSE_DOCKER_CLI_BUILD=0 docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache --compress --force-rm
 
 up.dev:
-	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+	make build.dev && docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans
 
 up.prod:
-	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+	make build.dev && docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
 
 down.dev:
-	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
 
 down.prod:
-	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml down

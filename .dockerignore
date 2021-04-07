@@ -1,7 +1,6 @@
 node_modules
 **/node_modules
 **/.next
-packages/frontend
 .github
 .git
 docker

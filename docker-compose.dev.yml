@@ -3,28 +3,28 @@ services:
   web:
     command: yarn workspace @certificates/web dev
     volumes:
-      - .:/usr/src/app
+      - ./packages/frontend/web:/usr/src/app/packages/frontend/web
   gateway:
     command: yarn workspace @certificates/gateway dev
     volumes:
-      - .:/usr/src/app
+      - ./packages/backend/gateway:/usr/src/app/packages/backend/gateway
   event:
     command: yarn workspace @certificates/event dev
     volumes:
-      - .:/usr/src/app
+      - ./packages/backend/event:/usr/src/app/packages/backend/event
   token:
     command: yarn workspace @certificates/token dev
     volumes:
-      - .:/usr/src/app
+      - ./packages/backend/token:/usr/src/app/packages/backend/token
   mailer:
     command: yarn workspace @certificates/mailer dev
     volumes:
-      - .:/usr/src/app
+      - ./packages/backend/mailer:/usr/src/app/packages/backend/mailer
   permission:
     command: yarn workspace @certificates/permission dev
     volumes:
-      - .:/usr/src/app
+      - ./packages/backend/permission:/usr/src/app/packages/backend/permission
   user:
     command: yarn workspace @certificates/user dev
     volumes:
-      - .:/usr/src/app
+      - ./packages/backend/user:/usr/src/app/packages/backend/user

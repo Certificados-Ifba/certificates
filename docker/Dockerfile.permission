@@ -2,6 +2,10 @@ FROM node:alpine
 
 WORKDIR /usr/src/app
 
-COPY . .
+COPY package.json yarn.lock prettier.config.js tsconfig.json .eslintrc.js .eslintignore ./
+COPY packages/shared ./packages/shared
+COPY packages/backend/permission/package.json ./packages/backend/permission/
 
 RUN yarn && yarn cache clean
+
+COPY packages/backend/permission/ ./packages/backend/permission/
