@@ -17,6 +17,7 @@ import {
   ApiCreatedResponse,
   ApiBearerAuth
 } from '@nestjs/swagger'
+
 import { Authorization } from '../decorators/authorization.decorator'
 import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
 import { IServiveTokenCreateResponse } from '../interfaces/token/service-token-create-response.interface'
@@ -89,7 +90,7 @@ export class UsersController {
 
     const createTokenResponse: IServiveTokenCreateResponse = await this.tokenServiceClient
       .send('token_create', {
-        userId: createUserResponse.user.id
+        user: createUserResponse.user
       })
       .toPromise()
 
@@ -127,7 +128,7 @@ export class UsersController {
 
     const createTokenResponse: IServiveTokenCreateResponse = await this.tokenServiceClient
       .send('token_create', {
-        userId: getUserResponse.user.id
+        user: getUserResponse.user
       })
       .toPromise()
 

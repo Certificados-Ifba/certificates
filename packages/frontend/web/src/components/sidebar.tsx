@@ -14,7 +14,7 @@ import {
   LogoArea,
   ScrollBar,
   Buttons
-} from '../styles/components/Sidebar'
+} from '../styles/components/sidebar'
 
 interface SidebarProps {
   isActive: boolean

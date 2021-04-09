@@ -1,4 +1,4 @@
-import { ButtonProps, Container } from '../styles/components/Button'
+import { ButtonProps, Container } from '../styles/components/button'
 
 const Button: React.FC<ButtonProps> = ({ children, ...rest }) => {
   return (

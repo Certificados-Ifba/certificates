@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { FiLogOut, FiMenu } from 'react-icons/fi'
 
-import { SidebarContext } from '../contexts/SidebarContext'
+import { SidebarContext } from '../contexts/sidebarContext'
 import useAuth from '../hooks/useAuth'
 import {
   Container,
@@ -10,12 +10,12 @@ import {
   Info,
   Avatar,
   Right
-} from '../styles/components/Appbar'
+} from '../styles/components/appbar'
 
 const Appbar: React.FC = () => {
-  const { signOut } = useAuth()
-  const name = 'Lucas Nascimento Bertoldi'
-  const type = 'Administrador'
+  const { user, signOut } = useAuth()
+  console.log(user)
+
   const { toogleActive } = useContext(SidebarContext)
 
   return (
@@ -26,10 +26,10 @@ const Appbar: React.FC = () => {
       <Right>
         <UserInfo className="hide-md-down">
           <Info>
-            <b>{name}</b>
-            <span>{type}</span>
+            <b>{user?.name}</b>
+            <span>{user?.role}</span>
           </Info>
-          <Avatar>{name.substr(0, 1).toUpperCase()}</Avatar>
+          <Avatar>{user?.name.substr(0, 1).toUpperCase()}</Avatar>
         </UserInfo>
         <Button>
           <FiLogOut size={24} onClick={signOut} />

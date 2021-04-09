@@ -1,13 +1,13 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { transparentize } from 'polished'
 import { BaseHTMLAttributes, useContext } from 'react'
 import SimpleBar from 'simplebar-react'
 import styled from 'styled-components'
 
-import Appbar from '../../components/Appbar'
-import Sidebar from '../../components/Sidebar'
+import Appbar from '../components/appbar'
+import Sidebar from '../components/sidebar'
+import { SidebarContext } from '../contexts/sidebarContext'
+
 import 'simplebar/dist/simplebar.min.css'
-import { SidebarContext } from '../../contexts/SidebarContext'
 
 interface MainProps extends BaseHTMLAttributes<HTMLDivElement> {
   isActive: boolean

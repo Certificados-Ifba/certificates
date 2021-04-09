@@ -1,5 +1,5 @@
-import { Container, CloseArea } from '../styles/components/Modal'
-import Card from './Card'
+import { Container, CloseArea } from '../styles/components/modal'
+import Card from './card'
 
 interface ModalProps {
   open: boolean

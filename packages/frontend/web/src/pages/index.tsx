@@ -8,18 +8,22 @@ import {
   FiUsers
 } from 'react-icons/fi'
 
-import Button from '../components/Button'
-import CardIcon from '../components/CardIcon'
+import PageWithLayoutType from '../@types/pageWithLayout'
+import Button from '../components/button'
+import CardIcon from '../components/cardIcon'
+import withAuth from '../hocs/withAuth'
 import useAuth from '../hooks/useAuth'
-import { Container, ListCards } from '../styles/pages/Home'
+import DefaultLayout from '../layouts/defaultLayout'
+import { Container, ListCards } from '../styles/pages/home'
 
 const Home: React.FC = () => {
-  const { user } = useAuth()
+  // const { user } = useAuth()
   const name = 'Lucas Nascimento Bertoldi'
+  // console.log(user)
 
-  if (!user) {
-    return <div>loading...</div>
-  }
+  // if (!user) {
+  //   return <div>loading...</div>
+  // }
 
   return (
     <Container>
@@ -70,4 +74,7 @@ const Home: React.FC = () => {
   )
 }
 
+;(Home as PageWithLayoutType).layout = DefaultLayout
+
 export default Home
+// export default withAuth(Home)

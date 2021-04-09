@@ -1,4 +1,3 @@
-// import Spinner from 'components/Spinner'
 import { useCallback, useMemo } from 'react'
 import {
   FiChevronLeft,
@@ -8,9 +7,11 @@ import {
 } from 'react-icons/fi'
 
 import { PaginatedRequest, OptionType } from '../services/usePaginatedRequest'
-import { DataTable, Pagination } from '../styles/components/PaginatedTable'
-import Button from './Button'
-import Select from './Select'
+import { DataTable, Pagination } from '../styles/components/paginatedTable'
+import theme from '../styles/theme'
+import Button from './button'
+import Select from './select'
+import Spinner from './spinner'
 
 interface Props {
   request: PaginatedRequest<any, any>
@@ -63,8 +64,7 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
           <DataTable>{children}</DataTable>
         </div>
       ) : (
-        <span>Carregando...</span>
-        // <Spinner size={50} color={'#0091d4'} />
+        <Spinner size={50} color={theme.colors.secondary} />
       )}
       {data && (
         <Pagination>

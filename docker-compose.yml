@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile.web
     hostname: web
+    env_file:
+      - .env
     ports:
       - '${WEB_PORT}:${WEB_PORT}'
     networks:

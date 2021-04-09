@@ -1,4 +1,4 @@
-import { Container } from '../styles/components/Card'
+import { Container } from '../styles/components/card'
 
 const Card: React.FC = ({ children }) => {
   return <Container>{children}</Container>

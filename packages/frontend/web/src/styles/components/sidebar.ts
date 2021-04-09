@@ -1,6 +1,5 @@
 import SimpleBar from 'simplebar-react'
 import styled from 'styled-components'
-// eslint-disable-next-line import/no-extraneous-dependencies
 import 'simplebar/dist/simplebar.min.css'
 
 export const Container = styled.aside`

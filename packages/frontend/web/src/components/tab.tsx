@@ -1,8 +1,8 @@
 import { ReactNode, useState } from 'react'
 import { IconBaseProps } from 'react-icons'
 
-import { Container } from '../styles/components/Tab'
-import Card from './Card'
+import { Container } from '../styles/components/tab'
+import Card from './card'
 
 interface TabsProps {
   name: string

@@ -1,6 +1,6 @@
 import { FiInfo, FiAlertCircle } from 'react-icons/fi'
 
-import { Container } from '../styles/components/Alert'
+import { Container } from '../styles/components/alert'
 
 export interface AlertProps {
   type: 'info' | 'warning' | 'danger'

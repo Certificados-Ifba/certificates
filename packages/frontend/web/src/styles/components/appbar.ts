@@ -39,6 +39,7 @@ export const Info = styled.div`
   flex-direction: column;
   align-items: flex-end;
   text-align: end;
+  text-transform: capitalize;
   span {
     color: ${props => props.theme.colors.mediumShade};
   }

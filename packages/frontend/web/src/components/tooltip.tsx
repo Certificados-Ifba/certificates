@@ -1,4 +1,4 @@
-import { Container } from '../styles/components/Tooltip'
+import { Container } from '../styles/components/tooltip'
 
 interface TooltipProps {
   title: string

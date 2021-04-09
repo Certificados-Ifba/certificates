@@ -4,6 +4,7 @@ import { MessagePattern } from '@nestjs/microservices'
 import { ITokenDataResponse } from './interfaces/token-data-response.interface'
 import { ITokenDestroyResponse } from './interfaces/token-destroy-response.interface'
 import { ITokenResponse } from './interfaces/token-response.interface'
+import { IUser } from './interfaces/user.interface'
 import { TokenService } from './services/token.service'
 
 @Controller('token')
@@ -11,12 +12,12 @@ export class TokenController {
   constructor(private readonly tokenService: TokenService) {}
 
   @MessagePattern('token_create')
-  public async createToken(data: { userId: string }): Promise<ITokenResponse> {
+  public async createToken(data: { user: IUser }): Promise<ITokenResponse> {
     let result: ITokenResponse
 
-    if (data && data.userId) {
+    if (data && data.user) {
       try {
-        const createResult = await this.tokenService.createToken(data.userId)
+        const createResult = await this.tokenService.createToken(data.user)
         result = {
           status: HttpStatus.CREATED,
           message: 'token_create_success',

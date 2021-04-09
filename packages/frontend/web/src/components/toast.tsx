@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { FiAlertCircle, FiCheckCircle, FiInfo, FiXCircle } from 'react-icons/fi'
 
-import { ToastMessage } from '../contexts/ToastContext'
+import { ToastMessage } from '../contexts/toastContext'
 import useToast from '../hooks/useToast'
-import { Container } from '../styles/components/Toast'
+import { Container } from '../styles/components/toast'
 
 interface ToastProps {
   message: ToastMessage

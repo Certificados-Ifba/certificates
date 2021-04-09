@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useRouter } from 'next/router'
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/'
+  baseURL: process.env.baseURL || 'http://localhost:3001'
 })
 
 // api.interceptors.request.use(config => {
@@ -20,7 +20,7 @@ api.interceptors.response.use(
     const { data } = error.response
 
     if (data?.code === 'token.expired') {
-      localStorage.clear()
+      // localStorage.clear()
 
       router.push('/login')
     }

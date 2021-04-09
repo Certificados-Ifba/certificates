@@ -10,7 +10,7 @@ import {
 import { IconBaseProps } from 'react-icons'
 import { FiAlertCircle, FiEye, FiEyeOff } from 'react-icons/fi'
 
-import { Container, Label, Error } from '../styles/components/Input'
+import { Container, Label, Error } from '../styles/components/input'
 
 interface BaseProps<Multiline = false>
   extends InputHTMLAttributes<HTMLInputElement> {

@@ -6,9 +6,11 @@ import useStickyState from '../hooks/useStickyState'
 import api from '../services/axios'
 
 interface User {
-  id: string
+  id?: string
   name: string
   email: string
+  role: string
+  is_confirmed: boolean
 }
 
 interface AuthState {
@@ -32,11 +34,11 @@ export interface AuthContextData {
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData)
 
 const AuthProvider: React.FC = ({ children }) => {
-  const [loading, setLoading] = useState(true)
   const [token, setToken] = useStickyState('', '@Certificates:token')
   const router = useRouter()
   const [data, setData] = useState<AuthState>(() => {
     const payload: any = decode(token || '', { json: false })
+    console.log(token)
 
     if (token) {
       return {
@@ -76,32 +78,37 @@ const AuthProvider: React.FC = ({ children }) => {
   }, [])
 
   useEffect(() => {
-    const checkAuth = () => {
-      const payload: any = decode(token || '')
+    console.log(token)
+  }, [token])
 
-      setData({
-        token,
-        user: payload?.userId,
-        permissions: payload?.permissions
-      })
+  // useEffect(() => {
+  //   const checkAuth = () => {
+  //     const payload: any = decode(token || '')
 
-      // if no redirect needed, just return (example: already on /dashboard)
-      // if user data not yet there (fetch in progress, logged in or not) then don't do anything yet
-      if (!token) {
-        router.push('/login')
-      }
+  //     setData({
+  //       token,
+  //       user: payload?.userId,
+  //       permissions: payload?.permissions
+  //     })
 
-      // if (
-      //   // If redirectTo is set, redirect if the user was not found.
-      //   (redirectTo && !redirectIfFound && !user?.isLoggedIn) ||
-      //   // If redirectIfFound is also set, redirect if the user was found
-      //   (redirectIfFound && user?.isLoggedIn)
-      // ) {
-      // }
-    }
-    if (!loading) checkAuth()
-    setLoading(false)
-  }, [loading, token])
+  //     // if no redirect needed, just return (example: already on /dashboard)
+  //     // if user data not yet there (fetch in progress, logged in or not) then don't do anything yet
+  //     if (!token) {
+  //       router.push('/login')
+  //     }
+
+  //     // if (
+  //     //   // If redirectTo is set, redirect if the user was not found.
+  //     //   (redirectTo && !redirectIfFound && !user?.isLoggedIn) ||
+  //     //   // If redirectIfFound is also set, redirect if the user was found
+  //     //   (redirectIfFound && user?.isLoggedIn)
+  //     // ) {
+  //     // }
+  //   }
+  //   if (!loading) checkAuth()
+  //   setLoading(false)
+  // }, [loading, token])
+  console.log(data, token)
 
   return (
     <AuthContext.Provider

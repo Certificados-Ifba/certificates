@@ -4,7 +4,7 @@ import {
   CardIconElement,
   Container,
   IconArea
-} from '../styles/components/CardIcon'
+} from '../styles/components/cardIcon'
 
 interface CardIconProps extends CardIconElement {
   title?: string

@@ -4,12 +4,15 @@ import { useCallback, useRef, useState } from 'react'
 import { FiLock, FiUser } from 'react-icons/fi'
 import * as Yup from 'yup'
 
+import PageWithLayoutType from '../@types/pageWithLayout'
 import Logo from '../assets/logo-full.svg'
-import Button from '../components/Button'
-import Input from '../components/Input'
+import Button from '../components/button'
+import Input from '../components/input'
+import withoutAuth from '../hocs/withoutAuth'
 import useAuth from '../hooks/useAuth'
 import useToast from '../hooks/useToast'
-import { Container, FormArea, LogoArea } from '../styles/pages/Login'
+import AuthLayout from '../layouts/authLayout'
+import { Container, FormArea, LogoArea } from '../styles/pages/login'
 import getValidationErrors from '../utils/getValidationErrors'
 
 interface LoginFormData {
@@ -17,7 +20,7 @@ interface LoginFormData {
   password: string
 }
 
-const login: React.FC = () => {
+const Login: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const formRef = useRef<FormHandles>(null)
   const router = useRouter()
@@ -99,4 +102,7 @@ const login: React.FC = () => {
   )
 }
 
-export default login
+;(Login as PageWithLayoutType).layout = AuthLayout
+
+export default Login
+// export default withoutAuth(Login)
