@@ -10,7 +10,12 @@ import {
 import { IconBaseProps } from 'react-icons'
 import { FiAlertCircle, FiEye, FiEyeOff } from 'react-icons/fi'
 
-import { Container, Label, Error } from '../styles/components/input'
+import {
+  Container,
+  Label,
+  Error,
+  SecureToggle
+} from '../styles/components/input'
 
 interface BaseProps<Multiline = false>
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -108,7 +113,10 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
       <Container
         hidden={restaux.hidden}
         marginBottom={marginBottom}
-        error={error}
+        isErrored={!!error}
+        isFilled={isFilled}
+        isFocused={isFocused}
+        isDisabled={!!props?.disabled}
       >
         <fieldset>
           <div>{Icon && <Icon size={20} />}</div>
@@ -118,9 +126,9 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
             <input {...(props as InputProps)} />
           )}
           {secure && (
-            <div>
+            <SecureToggle onClick={handleShowPass}>
               {isShowPass ? <FiEye size={20} /> : <FiEyeOff size={20} />}
-            </div>
+            </SecureToggle>
           )}
         </fieldset>
         {error && (

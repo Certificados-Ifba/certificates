@@ -1,17 +1,16 @@
 import { FormHandles } from '@unform/core'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useRef, useState } from 'react'
 import { FiLock, FiUser } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import PageWithLayoutType from '../@types/pageWithLayout'
 import Logo from '../assets/logo-full.svg'
 import Button from '../components/button'
 import Input from '../components/input'
 import withoutAuth from '../hocs/withoutAuth'
-import useAuth from '../hooks/useAuth'
-import useToast from '../hooks/useToast'
-import AuthLayout from '../layouts/authLayout'
+import { useAuth } from '../providers/auth'
+import { useToast } from '../providers/toast'
 import { Container, FormArea, LogoArea } from '../styles/pages/login'
 import getValidationErrors from '../utils/getValidationErrors'
 
@@ -47,7 +46,7 @@ const Login: React.FC = () => {
         })
 
         setLoading(false)
-        router.push('/')
+        router.replace('/')
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err)
@@ -72,6 +71,9 @@ const Login: React.FC = () => {
 
   return (
     <Container>
+      <Head>
+        <title>Login | Certificados</title>
+      </Head>
       <LogoArea>
         <Logo />
         <h2>Faça seu login na plataforma</h2>
@@ -102,7 +104,4 @@ const Login: React.FC = () => {
   )
 }
 
-;(Login as PageWithLayoutType).layout = AuthLayout
-
-export default Login
-// export default withoutAuth(Login)
+export default withoutAuth(Login)

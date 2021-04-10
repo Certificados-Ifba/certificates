@@ -1,9 +1,12 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 interface Props {
   hidden?: boolean
   marginBottom?: string
-  error?: any
+  isDisabled: boolean
+  isFocused: boolean
+  isFilled: boolean
+  isErrored: boolean
 }
 
 export const Container = styled.div<Props>`
@@ -22,13 +25,29 @@ fieldset {
     display: flex;
     align-self: center;
     border-radius: 5px;
-    border: 2px solid
+    border: 2px solid ${props => props.theme.colors.mediumTint};
+    color: ${props => props.theme.colors.mediumShade};
+
+    ${props =>
+      props.isErrored &&
+      css`
+        border-color: ${props => props.theme.colors.danger};
+        color: ${props => props.theme.colors.danger};
+      `}
+
+    ${props =>
+      props.isFilled &&
+      css`
+        border-color: ${props => props.theme.colors.primary};
+        color: ${props => props.theme.colors.primary};
+      `}
+
       ${props =>
-        props.error
-          ? props.theme.colors.danger
-          : props.theme.colors.mediumTint};
-    color: ${props =>
-      props.error ? props.theme.colors.danger : props.theme.colors.mediumShade};
+      props.isFocused &&
+      css`
+        border-color: ${props => props.theme.colors.secondary};
+        color: ${props => props.theme.colors.secondary};
+      `}
     ${props => props.hidden && 'display: none;'}
     div {
       display: inline-flex;
@@ -43,6 +62,10 @@ fieldset {
       ::placeholder {
         color: ${props => props.theme.colors.mediumShade};
       }
+    }
+    input,
+    textarea {
+      flex: 1;
     }
   }
 `
@@ -67,4 +90,13 @@ export const Error = styled.div`
     margin-bottom: auto;
     margin-right: 3px;
   }
+`
+export const SecureToggle = styled.button.attrs({
+  type: 'button'
+})`
+  color: ${props => props.theme.colors.mediumShade};
+  height: 20px;
+  width: 20px !important;
+  background-color: transparent;
+  border: none;
 `

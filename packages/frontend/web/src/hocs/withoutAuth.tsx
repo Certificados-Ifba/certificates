@@ -1,24 +1,29 @@
-import { NextPage } from 'next'
+import Cookie from 'js-cookie'
+import { useRouter } from 'next/router'
+import { ElementType, useEffect } from 'react'
 
-import { useIsAuthenticated } from '../providers/auth'
-import withConditionalRedirect from './withConditionalRedirect'
+import AuthLayout from '../layouts/authLayout'
 
-/**
- * Require the user to be unauthenticated in order to render the component.
- * If the user is authenticated, forward to the given URL.
- */
-export default function withoutAuth<P>(
-  WrappedComponent: NextPage<P>,
-  location = '/'
-): NextPage<P> {
-  return withConditionalRedirect({
-    WrappedComponent,
-    location,
-    clientCondition: function withoutAuthClientCondition() {
-      return useIsAuthenticated()
-    },
-    serverCondition: function withoutAuthServerCondition(ctx) {
-      return !!ctx.req?.cookies.session
-    }
-  })
+const withoutAuth = (
+  WrappedComponent: ElementType
+): ((props: unknown) => JSX.Element) => {
+  const Wrapper = (props: unknown) => {
+    const router = useRouter()
+    useEffect(() => {
+      const token = Cookie.get('certificates.session')
+
+      if (token) {
+        router.replace('/')
+      }
+    }, [])
+
+    return (
+      <AuthLayout>
+        <WrappedComponent {...props} />
+      </AuthLayout>
+    )
+  }
+  return Wrapper
 }
+
+export default withoutAuth

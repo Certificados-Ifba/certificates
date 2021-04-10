@@ -1,4 +1,4 @@
-import { createContext, useCallback, useState } from 'react'
+import { createContext, useCallback, useContext, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import ToastContainer from '../components/toastContainer'
@@ -48,6 +48,16 @@ const ToastProvider: React.FC = ({ children }) => {
       <ToastContainer messages={messages} />
     </ToastContext.Provider>
   )
+}
+
+export const useToast = (): ToastContextData => {
+  const context = useContext(ToastContext)
+
+  if (!context) {
+    throw new Error('useToat must be used within a ToastProvider')
+  }
+
+  return context
 }
 
 export default ToastProvider

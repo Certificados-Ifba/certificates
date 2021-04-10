@@ -1,41 +1,76 @@
-import {
-  ReactNode,
-  ReactElement,
-  createContext,
-  useState,
-  useContext
-} from 'react'
+import { decode } from 'jsonwebtoken'
+import { createContext, useCallback, useContext, useState } from 'react'
 
-type AuthContext = {
-  isAuthenticated: boolean
-  setAuthenticated: React.Dispatch<React.SetStateAction<boolean>>
+import useStickyState from '../hooks/useStickyState'
+import api from '../services/axios'
+
+interface User {
+  id?: string
+  name: string
+  email: string
+  role: string
+  is_confirmed: boolean
 }
 
-const AuthContext = createContext<AuthContext>({
-  isAuthenticated: false,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setAuthenticated: () => {}
-})
+interface AuthState {
+  user: User
+  token: string
+}
 
-/**
- * The initial value of `isAuthenticated` comes from the `authenticated`
- * prop which gets set by _app. We store that value in state and ignore
- * the prop from then on. The value can be changed by calling the
- * `setAuthenticated()` method in the context.
- */
-export const AuthProvider = ({
-  children,
-  authenticated
-}: {
-  children: ReactNode
-  authenticated: boolean
-}): ReactElement => {
-  const [isAuthenticated, setAuthenticated] = useState<boolean>(authenticated)
+interface SignInCredentials {
+  login: string
+  password: string
+}
+
+export interface AuthContextData {
+  user: User
+  signIn(credentials: SignInCredentials): Promise<void>
+  signOut(): Promise<void>
+}
+
+export const AuthContext = createContext<AuthContextData>({} as AuthContextData)
+
+const AuthProvider: React.FC = ({ children }) => {
+  const [token, setToken] = useStickyState('', 'certificates.session')
+  const [data, setData] = useState<AuthState>(() => {
+    const payload: any = decode(token || '', { json: false })
+
+    if (token) {
+      return {
+        token,
+        user: payload?.user
+      }
+    }
+
+    return {} as AuthState
+  })
+
+  const signIn = useCallback(async ({ login, password }) => {
+    const response = await api.post('/users/login', {
+      email: login,
+      password
+    })
+
+    const { token } = response.data?.data
+    const payload: any = decode(token || '')
+
+    setToken(token)
+    setData({ token, user: payload?.user })
+  }, [])
+
+  const signOut = useCallback(async () => {
+    // await api.put('/users/logout')
+    setToken(null)
+
+    setData({} as AuthState)
+  }, [])
+
   return (
     <AuthContext.Provider
       value={{
-        isAuthenticated,
-        setAuthenticated
+        user: data.user,
+        signIn,
+        signOut
       }}
     >
       {children}
@@ -43,15 +78,14 @@ export const AuthProvider = ({
   )
 }
 
-export function useAuth(): AuthContext {
+export const useAuth = (): AuthContextData => {
   const context = useContext(AuthContext)
-  if (context === undefined) {
+
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
+
   return context
 }
 
-export function useIsAuthenticated(): boolean {
-  const context = useAuth()
-  return context.isAuthenticated
-}
+export default AuthProvider

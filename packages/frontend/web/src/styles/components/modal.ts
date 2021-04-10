@@ -26,6 +26,7 @@ export const Container = styled.div<ModalProps>`
   header {
     h2 {
       display: flex;
+      margin: 0;
       svg {
         margin-top: auto;
         margin-bottom: auto;

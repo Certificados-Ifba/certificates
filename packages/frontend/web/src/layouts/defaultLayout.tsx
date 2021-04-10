@@ -5,7 +5,7 @@ import styled from 'styled-components'
 
 import Appbar from '../components/appbar'
 import Sidebar from '../components/sidebar'
-import { SidebarContext } from '../contexts/sidebarContext'
+import { SidebarContext } from '../providers/sidebar'
 
 import 'simplebar/dist/simplebar.min.css'
 

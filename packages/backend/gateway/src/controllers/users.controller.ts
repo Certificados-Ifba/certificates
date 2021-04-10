@@ -150,6 +150,7 @@ export class UsersController {
   public async logoutUser(
     @Req() request: IAuthorizedRequest
   ): Promise<LogoutUserResponseDto> {
+    console.log(request)
     const userInfo = request.user
 
     const destroyTokenResponse: IServiceTokenDestroyResponse = await this.tokenServiceClient

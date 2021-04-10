@@ -1,17 +1,16 @@
 import axios from 'axios'
+import Cookie from 'js-cookie'
 import { useRouter } from 'next/router'
 
 const api = axios.create({
   baseURL: process.env.baseURL || 'http://localhost:3001'
 })
 
-// api.interceptors.request.use(config => {
-//   config.headers.authorization = `Bearer ${localStorage.getItem(
-//     '@Certificados:token'
-//   )}`
+api.interceptors.request.use(config => {
+  config.headers.authorization = `Bearer ${Cookie.get('certificates.session')}`
 
-//   return config
-// })
+  return config
+})
 
 api.interceptors.response.use(
   config => config,
@@ -20,9 +19,8 @@ api.interceptors.response.use(
     const { data } = error.response
 
     if (data?.code === 'token.expired') {
-      // localStorage.clear()
-
-      router.push('/login')
+      Cookie.remove('certificates.session')
+      router.replace('/login')
     }
   }
 )

@@ -6,18 +6,9 @@ import Document, {
   Main,
   NextScript
 } from 'next/document'
-import { Router } from 'next/router'
-import NProgress from 'nprogress'
 import { ServerStyleSheet } from 'styled-components'
 
 import theme from '../styles/theme'
-
-Router.events.on('routeChangeStart', url => {
-  console.log(`Loading: ${url}`)
-  NProgress.start()
-})
-Router.events.on('routeChangeComplete', () => NProgress.done())
-Router.events.on('routeChangeError', () => NProgress.done())
 
 export default class MyDocument extends Document {
   static async getInitialProps(
@@ -82,7 +73,6 @@ export default class MyDocument extends Document {
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
             rel="stylesheet"
           />
-          <link rel="stylesheet" type="text/css" href="/nprogress.css" />
         </Head>
         <body>
           <Main />
