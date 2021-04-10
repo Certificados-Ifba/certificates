@@ -47,18 +47,4 @@ export default createGlobalStyle`
     color: inherit;
     text-decoration: none;
   }
-
-  #app {
-    display: flex;
-    align-items: stretch;
-  }
-
-  #auth {
-    background-color: ${props => props.theme.colors.primary};
-    color: ${props => props.theme.colors.light};
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
 `

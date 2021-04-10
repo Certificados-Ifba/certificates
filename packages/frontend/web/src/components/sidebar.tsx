@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { useContext } from 'react'
 import {
   FiCalendar,
   FiHome,
@@ -9,18 +9,18 @@ import {
 
 import LogoFull from '../assets/logo-full.svg'
 import LogoSimple from '../assets/logo.svg'
+import { SidebarContext } from '../providers/sidebar'
 import {
   Container,
   LogoArea,
   ScrollBar,
   Buttons
 } from '../styles/components/sidebar'
+import ActiveLink from './activeLink'
 
-interface SidebarProps {
-  isActive: boolean
-}
+const Sidebar: React.FC = () => {
+  const { isActive, hideSidebar } = useContext(SidebarContext)
 
-const Sidebar: React.FC<SidebarProps> = ({ isActive }) => {
   const itens = [
     {
       name: 'Dashboard',
@@ -50,6 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isActive }) => {
   ]
   const active = isActive ? 'active' : ''
   const Logo = isActive ? LogoFull : LogoSimple
+
   return (
     <Container className={active}>
       <LogoArea>
@@ -58,13 +59,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isActive }) => {
       <Buttons>
         <ScrollBar>
           {itens.map(({ name, link, icon: Icon }, key) => (
-            <li key={key}>
-              <Link href={link}>
+            <li key={key} onClick={hideSidebar}>
+              <ActiveLink href={link}>
                 <a>
                   <Icon size={24} />
                   <span>{name}</span>
                 </a>
-              </Link>
+              </ActiveLink>
             </li>
           ))}
         </ScrollBar>

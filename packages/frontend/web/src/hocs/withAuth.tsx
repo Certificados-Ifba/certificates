@@ -2,7 +2,7 @@ import Cookie from 'js-cookie'
 import { useRouter } from 'next/router'
 import { ElementType, useEffect } from 'react'
 
-import DefaultLayout from '../layouts/defaultLayout'
+import DefaultLayout from '../layouts/default'
 
 const withAuth = (
   WrappedComponent: ElementType

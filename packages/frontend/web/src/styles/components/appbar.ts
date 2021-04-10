@@ -9,7 +9,9 @@ export const Container = styled.header`
   justify-content: space-between;
   align-items: center;
 
-  z-index: 1;
+  @media (max-width: 768px) {
+    z-index: 2;
+  }
 `
 
 export const Button = styled.button`

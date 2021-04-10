@@ -17,7 +17,7 @@ export const Container = styled.aside`
 
   @media (max-width: 768px) {
     position: absolute;
-    z-index: 1;
+    z-index: 2;
     top: 100px;
     height: calc(100vh - 100px);
     transform: translateX(-100%);
@@ -88,16 +88,14 @@ export const Buttons = styled.ul`
         margin-left: 20px;
       }
     }
+    a[data-active='true'],
+    :hover a {
+      background-color: ${props => props.theme.colors.light};
+      box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.05);
+      color: ${props => props.theme.colors.primaryTint};
 
-    :hover {
-      a {
-        background-color: ${props => props.theme.colors.light};
-        box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.05);
-        color: ${props => props.theme.colors.primaryTint};
-
-        svg {
-          fill: ${props => props.theme.colors.primaryTint};
-        }
+      svg {
+        fill: ${props => props.theme.colors.primaryTint};
       }
     }
   }
