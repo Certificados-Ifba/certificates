@@ -2,16 +2,18 @@ import { FormHandles } from '@unform/core'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useRef, useState } from 'react'
-import { FiLock, FiUser } from 'react-icons/fi'
+import { FiLock, FiUser, FiLogIn } from 'react-icons/fi'
 import * as Yup from 'yup'
 
 import Logo from '../assets/logo-full.svg'
 import Button from '../components/button'
 import Input from '../components/input'
+import Card from '../components/card'
 import withoutAuth from '../hocs/withoutAuth'
 import { useAuth } from '../providers/auth'
 import { useToast } from '../providers/toast'
-import { Container, FormArea, LogoArea } from '../styles/pages/login'
+import { Container, FormArea, LogoArea, Title, FormContainer } from '../styles/pages/login'
+import Row from '../styles/components/row'
 import getValidationErrors from '../utils/getValidationErrors'
 
 interface LoginFormData {
@@ -71,34 +73,37 @@ const Login: React.FC = () => {
 
   return (
     <Container>
-      <Head>
-        <title>Login | Certificados</title>
-      </Head>
       <LogoArea>
         <Logo />
-        <h2>Faça seu login na plataforma</h2>
+        <h2>Organizando eventos e ajudando participantes</h2>
       </LogoArea>
       <FormArea ref={formRef} onSubmit={handleSingIn}>
-        <h2>Entre com seus dados</h2>
-        <Input
-          label="Login"
-          name="login"
-          icon={FiUser}
-          placeholder="Digite seu login"
-          autoComplete="username"
-        />
-        <Input
-          label="Senha"
-          name="password"
-          type="password"
-          icon={FiLock}
-          placeholder="Digite sua senha"
-          autoComplete="current-password"
-          aria-describedby="password-constraints"
-        />
-        <Button size="big" color="secondary" type="submit" loading={loading}>
-          Entrar
-        </Button>
+        <Card>
+          <header><Title>Faça o login para continuar</Title></header>
+          <FormContainer>
+            <Input
+              label="Login"
+              name="login"
+              icon={FiUser}
+              placeholder="Digite seu login"
+              autoComplete="username"
+              marginBottom="sm"
+            />
+            <Input
+              label="Senha"
+              name="password"
+              type="password"
+              icon={FiLock}
+              placeholder="Digite sua senha"
+              autoComplete="current-password"
+              aria-describedby="password-constraints"
+              marginBottom="md"
+            />
+            <Row>
+              <Button size="default" color="primary" type="submit" loading={loading}><FiLogIn></FiLogIn> <span>Entrar</span></Button>
+            </Row>
+          </FormContainer>
+        </Card>
       </FormArea>
     </Container>
   )
