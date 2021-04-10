@@ -1,22 +1,26 @@
+import Cookie from 'js-cookie'
 import { useEffect, useState } from 'react'
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-function useStickyState(defaultValue: any, key: string): any {
-  const [value, setValue] = useState(defaultValue)
+function useStickyState(defaultValue: string, key: string): any {
+  const [value, setValue] = useState(() => {
+    const stickyValue = Cookie.get(key)
+
+    return stickyValue || defaultValue
+  })
 
   useEffect(() => {
-    const stickyValue = window.localStorage.getItem(key)
+    const stickyValue = Cookie.get(key)
 
-    if (stickyValue !== null) {
-      setValue(JSON.parse(stickyValue))
+    if (stickyValue) {
+      setValue(stickyValue)
     }
   }, [key])
 
   useEffect(() => {
     if (!value) {
-      window.localStorage.removeItem(key)
+      Cookie.remove(key)
     } else {
-      window.localStorage.setItem(key, JSON.stringify(value))
+      Cookie.set(key, value)
     }
   }, [key, value])
 

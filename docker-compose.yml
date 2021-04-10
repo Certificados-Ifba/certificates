@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile.web
     hostname: web
+    env_file:
+      - .env
     ports:
       - '${WEB_PORT}:${WEB_PORT}'
     networks:
@@ -17,7 +19,7 @@ services:
     env_file:
       - .env
     ports:
-      - ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
+      - '${API_GATEWAY_PORT}:${API_GATEWAY_PORT}'
     networks:
       - backend
       - frontend
@@ -75,37 +77,38 @@ services:
   fix-db-permissions:
     image: 'bitnami/mongodb:latest'
     user: root
-    command: chown -R 1001:1001 /bitnami/mongodb
+    command: 'chown -R 1001:1001 /bitnami/mongodb'
     volumes:
-      - ./docker/db:/bitnami/mongodb
+      - './docker/db:/bitnami/mongodb'
   db:
-    image: "bitnami/mongodb:latest"
+    image: 'bitnami/mongodb:latest'
     environment:
-      - MONGODB_USERNAME=${MONGO_USER}
-      - MONGODB_PASSWORD=${MONGO_PASSWORD}
-      - MONGODB_DATABASE=${MONGO_DATABASE}
+      - 'MONGODB_USERNAME=${MONGO_USER}'
+      - 'MONGODB_PASSWORD=${MONGO_PASSWORD}'
+      - 'MONGODB_DATABASE=${MONGO_DATABASE}'
     volumes:
-      - ./docker/db:/bitnami/mongodb
+      - './docker/db:/bitnami/mongodb'
     ports:
-      - ${MONGO_PORT}:27017
+      - '${MONGO_PORT}:27017'
     depends_on:
       - fix-db-permissions
     networks:
       - backend
+    restart: always
   gui-db:
-    image: "mongo-express"
+    image: mongo-express
     restart: always
     ports:
-      - ${MONGO_GUI_PORT}:8081
+      - '${MONGO_GUI_PORT}:8081'
     environment:
-      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_GUI_USER}
-      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_GUI_PASSWORD}
+      - 'ME_CONFIG_BASICAUTH_USERNAME=${MONGO_GUI_USER}'
+      - 'ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_GUI_PASSWORD}'
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
-      - ME_CONFIG_MONGODB_SERVER=${MONGO_HOST}
-      - ME_CONFIG_MONGODB_PORT=${MONGO_PORT}
-      - ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGO_DATABASE}
-      - ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_USER}
-      - ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_PASSWORD}
+      - 'ME_CONFIG_MONGODB_SERVER=${MONGO_HOST}'
+      - 'ME_CONFIG_MONGODB_PORT=${MONGO_PORT}'
+      - 'ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGO_DATABASE}'
+      - 'ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_USER}'
+      - 'ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_PASSWORD}'
     links:
       - db
     networks:

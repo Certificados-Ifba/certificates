@@ -17,17 +17,18 @@ import {
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import Alert from '../components/Alert'
-import Button from '../components/Button'
-import Input from '../components/Input'
-import Modal from '../components/Modal'
-import PaginatedTable from '../components/PaginatedTable'
-import Tab from '../components/Tab'
+import Alert from '../components/alert'
+import Button from '../components/button'
+import Input from '../components/input'
+import Modal from '../components/modal'
+import PaginatedTable from '../components/paginatedTable'
+import Tab from '../components/tab'
+import withAuth from '../hocs/withAuth'
 import usePaginatedRequest from '../services/usePaginatedRequest'
-import Row from '../styles/components/Row'
-import { Container } from '../styles/pages/Home'
+import Row from '../styles/components/row'
+import { Container } from '../styles/pages/home'
 
-const settings: React.FC = () => {
+const Settings: React.FC = () => {
   const request = usePaginatedRequest<any>({
     url: 'test/functions'
   })
@@ -341,4 +342,4 @@ const settings: React.FC = () => {
   )
 }
 
-export default settings
+export default withAuth(Settings)

@@ -4,11 +4,10 @@
   "version": "1.0.0",
   "license": "SEE LICENSE IN ../../../LICENSE",
   "scripts": {
-    "build": "rimraf dist && nest build && yarn copy:templates",
+    "build": "rimraf dist && nest build",
     "dev": "nest start --watch",
     "prod": "yarn build && node dist/main",
-    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
-    "copy:templates": "cpx './src/templates/**' 'dist/templates'"
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix"
   },
   "dependencies": {
     "@nestjs/cli": "^7.6.0",
@@ -26,7 +25,6 @@
     "@types/express": "4.17.8",
     "@types/mongoose": "5.10.2",
     "@types/node": "14.0.27",
-    "dotenv": "8.2.0",
     "ts-node": "9.0.0",
     "tsconfig-paths": "3.9.0"
   }

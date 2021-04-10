@@ -12,15 +12,16 @@ import {
   FiUserPlus
 } from 'react-icons/fi'
 
-import Button from '../components/Button'
-import Card from '../components/Card'
-import Input from '../components/Input'
-import PaginatedTable from '../components/PaginatedTable'
-import useAuth from '../hooks/useAuth'
+import Button from '../components/button'
+import Card from '../components/card'
+import Input from '../components/input'
+import PaginatedTable from '../components/paginatedTable'
+import withAuth from '../hocs/withAuth'
+import { useAuth } from '../providers/auth'
 import usePaginatedRequest from '../services/usePaginatedRequest'
-import { Container } from '../styles/pages/Home'
+import { Container } from '../styles/pages/home'
 
-const participants: React.FC = () => {
+const Participants: React.FC = () => {
   const { user } = useAuth()
 
   const request = usePaginatedRequest<any>({
@@ -112,4 +113,4 @@ const participants: React.FC = () => {
   )
 }
 
-export default participants
+export default withAuth(Participants)

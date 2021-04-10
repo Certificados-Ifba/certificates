@@ -10,7 +10,7 @@ async function bootstrap() {
     .setDescription('API for certificate system information')
     .addTag('users')
     .addTag('events')
-    .setVersion('1.0.2')
+    .setVersion('1.0.0')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'JWT'

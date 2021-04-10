@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Query } from 'mongoose'
+import { IUser } from 'src/interfaces/user.interface'
 
 import { IToken } from '../interfaces/token.interface'
 
@@ -12,10 +13,10 @@ export class TokenService {
     @InjectModel('Token') private readonly TokenModel: Model<IToken>
   ) {}
 
-  public createToken(userId: string): Promise<IToken> {
+  public createToken(user: IUser): Promise<IToken> {
     const token = this.jwtService.sign(
       {
-        userId
+        user
       },
       {
         expiresIn: 30 * 24 * 60 * 60
@@ -23,7 +24,7 @@ export class TokenService {
     )
 
     return new this.TokenModel({
-      user_id: userId,
+      user_id: user.id,
       token
     }).save()
   }
@@ -34,7 +35,7 @@ export class TokenService {
     })
   }
 
-  public async decodeToken(token: string): Promise<{ userId: string } | null> {
+  public async decodeToken(token: string): Promise<{ user: IUser } | null> {
     const TokenModel = await this.TokenModel.find({
       token
     })
@@ -44,13 +45,13 @@ export class TokenService {
       try {
         const tokenData = this.jwtService.decode(TokenModel[0].token) as {
           exp: number
-          userId: any
+          user: any
         }
         if (!tokenData || tokenData.exp <= Math.floor(+new Date() / 1000)) {
           result = null
         } else {
           result = {
-            userId: tokenData.userId
+            user: tokenData.user
           }
         }
       } catch (e) {

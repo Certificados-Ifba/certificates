@@ -1,5 +1,7 @@
+import { IUser } from './user.interface'
+
 export interface ITokenDataResponse {
   status: number
   message: string
-  data: { userId: string } | null
+  data: { user: IUser } | null
 }
