@@ -17,7 +17,6 @@ import {
   Container,
   FormArea,
   LogoArea,
-  Title,
   FormContainer
 } from '../styles/pages/login'
 import getValidationErrors from '../utils/getValidationErrors'
@@ -89,7 +88,7 @@ const Login: React.FC = () => {
       <FormArea ref={formRef} onSubmit={handleSingIn}>
         <Card>
           <header>
-            <Title>Faça o login para continuar</Title>
+            <h2>Faça o login para continuar</h2>
           </header>
           <FormContainer>
             <Input
