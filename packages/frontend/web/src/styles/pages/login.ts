@@ -20,6 +20,7 @@ export const Container = styled.div`
   header h2 {
     text-align: center;
     font-size: 1rem;
+    margin: 0;
     @media (min-width: ${props => props.theme.responsive.smDown}) {
       font-size: 1.5rem;
     }
