@@ -115,7 +115,7 @@ const Login: React.FC = () => {
                 size="big"
                 color="primary"
                 type="submit"
-                loading={!loading}
+                loading={loading}
               >
                 <FiLogIn size={20} /> <span>Entrar</span>
               </Button>
