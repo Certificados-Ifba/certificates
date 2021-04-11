@@ -29,22 +29,22 @@ fieldset {
     color: ${props => props.theme.colors.mediumShade};
 
     ${props =>
-    props.isErrored &&
-    css`
+      props.isErrored &&
+      css`
         border-color: ${props => props.theme.colors.danger};
         color: ${props => props.theme.colors.danger};
       `}
 
     ${props =>
-    props.isFilled &&
-    css`
+      props.isFilled &&
+      css`
         border-color: ${props => props.theme.colors.primary};
         color: ${props => props.theme.colors.primary};
       `}
 
       ${props =>
-    props.isFocused &&
-    css`
+      props.isFocused &&
+      css`
         border-color: ${props => props.theme.colors.secondary};
         color: ${props => props.theme.colors.secondary};
       `}

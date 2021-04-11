@@ -7,13 +7,19 @@ import * as Yup from 'yup'
 
 import Logo from '../assets/logo-full.svg'
 import Button from '../components/button'
-import Input from '../components/input'
 import Card from '../components/card'
+import Input from '../components/input'
 import withoutAuth from '../hocs/withoutAuth'
 import { useAuth } from '../providers/auth'
 import { useToast } from '../providers/toast'
-import { Container, FormArea, LogoArea, Title, FormContainer } from '../styles/pages/login'
 import Row from '../styles/components/row'
+import {
+  Container,
+  FormArea,
+  LogoArea,
+  Title,
+  FormContainer
+} from '../styles/pages/login'
 import getValidationErrors from '../utils/getValidationErrors'
 
 interface LoginFormData {
@@ -73,13 +79,18 @@ const Login: React.FC = () => {
 
   return (
     <Container>
+      <Head>
+        <title>Login | Certificados</title>
+      </Head>
       <LogoArea>
         <Logo />
         <h2>Organizando eventos e ajudando participantes</h2>
       </LogoArea>
       <FormArea ref={formRef} onSubmit={handleSingIn}>
         <Card>
-          <header><Title>Faça o login para continuar</Title></header>
+          <header>
+            <Title>Faça o login para continuar</Title>
+          </header>
           <FormContainer>
             <Input
               label="Login"
@@ -100,7 +111,14 @@ const Login: React.FC = () => {
               marginBottom="md"
             />
             <Row>
-              <Button size="default" color="primary" type="submit" loading={loading}><FiLogIn></FiLogIn> <span>Entrar</span></Button>
+              <Button
+                size="big"
+                color="primary"
+                type="submit"
+                loading={!loading}
+              >
+                <FiLogIn size={20} /> <span>Entrar</span>
+              </Button>
             </Row>
           </FormContainer>
         </Card>

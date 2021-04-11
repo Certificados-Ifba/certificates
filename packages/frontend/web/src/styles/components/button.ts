@@ -24,7 +24,7 @@ const sizes = {
   small: css`
     padding: 0.5rem ${(props: any) => (props.square ? '0.5rem' : '0.75rem')};
     font-size: 0.75rem;
-    svg + span {
+    * + span {
       margin-left: 0.625rem;
     }
   `,
@@ -32,14 +32,14 @@ const sizes = {
     padding: 0.8125rem
       ${(props: any) => (props.square ? '0.8125rem' : '1.125rem')};
     font-size: 0.875rem;
-    svg + span {
+    * + span {
       margin-left: 0.875rem;
     }
   `,
   big: css`
     padding: 1.125rem ${(props: any) => (props.square ? '1.125rem' : '1.25rem')};
     font-size: 1rem;
-    svg + span {
+    * + span {
       margin-left: 1rem;
     }
   `
@@ -255,6 +255,15 @@ ${props =>
   border: 2px solid;
   border-radius: 5px;
   font-weight: 600;
+
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  i {
+    margin: 0;
+  }
 
   ${props => (props.size ? sizes[props.size] : sizes.default)}
   ${props => (props.color ? colors[props.color] : colors.primary)}

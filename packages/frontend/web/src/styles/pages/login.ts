@@ -1,5 +1,4 @@
 import { Form } from '@unform/web'
-import { tint } from 'polished'
 import styled from 'styled-components'
 
 export const Container = styled.div`
@@ -22,13 +21,14 @@ export const Container = styled.div`
 
 export const Title = styled.h2`
   text-align: center;
+  font-size: 1.5rem;
 `
 
 export const LogoArea = styled.div`
   display: flex;
   grid-area: logo;
   flex-direction: column;
-  align-items: center;  
+  align-items: center;
   div {
     display: flex;
     flex-direction: row;
@@ -45,10 +45,10 @@ export const LogoArea = styled.div`
   }
   h2 {
     font: 600 20px Poppins, sans-serif;
-    text-align: center;  
-    margin: 12px 0 30px;  
+    text-align: center;
+    margin: 12px 0 30px;
     color: ${props => props.theme.colors.light};
-  }  
+  }
   @media (min-width: ${props => props.theme.responsive.smDown}) {
     margin-bottom: 24px;
     div {
@@ -84,7 +84,7 @@ export const FormArea = styled(Form)`
   grid-area: form;
 `
 
-export const FormContainer = styled.div`  
+export const FormContainer = styled.div`
   @media (max-width: ${props => props.theme.responsive.smDown}) {
     padding: 20px;
   }
