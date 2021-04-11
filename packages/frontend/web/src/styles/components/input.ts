@@ -71,6 +71,7 @@ fieldset {
 `
 
 export const Label = styled.label`
+  display: block;
   font-weight: bold;
   font-size: 1rem;
   line-height: 20px;

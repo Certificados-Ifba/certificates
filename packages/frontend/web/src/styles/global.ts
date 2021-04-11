@@ -47,4 +47,12 @@ export default createGlobalStyle`
     color: inherit;
     text-decoration: none;
   }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    box-shadow: 0 0 0 30px ${props =>
+      props.theme.colors.lightTint}  inset !important;
+  }
 `

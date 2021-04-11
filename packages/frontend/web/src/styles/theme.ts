@@ -36,7 +36,9 @@ const theme = {
     }
   },
   responsive: {
-    mdDown: '768px'
+    lgDown: '1095px',
+    mdDown: '768px',
+    smDown: '426px'
   }
 }
 
