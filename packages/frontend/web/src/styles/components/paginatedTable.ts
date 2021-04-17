@@ -116,16 +116,19 @@ export const Pagination = styled.footer`
   align-items: center;
   padding: 20px 30px;
 
-  > div {
+  > div > span,
+  > nav > span {
     color: ${props => props.theme.colors.darkShade};
     font-size: 12px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    > span {
-      margin-right: 20px;
-    }
+    margin-right: 20px;
+  }
 
+  > div {
+    align-items: center;
+    display: inline-flex;
     > div {
       width: 80px;
       font-size: 12px;
@@ -140,4 +143,52 @@ export const Pagination = styled.footer`
       margin-left: 5px;
     }
   }
+`
+
+export const NoDataContainer = styled.div`
+  height: 264px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  span {
+    color: ${props => props.theme.colors.dark};
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+  }
+`
+
+export const PaginateList = styled.div`
+  display: flex;
+  margin: 0 5px;
+  button {
+    span {
+      font-size: 12px;
+      width: 18px;
+      font-weight: 400;
+      text-align: center;
+      display: block;
+      color: ${props => props.theme.colors.darkTint};
+    }
+    &[disabled] {
+      opacity: 1;
+      span {
+        font-weight: 600;
+        color: ${props => props.theme.colors.dark};
+      }
+    }
+  }
+  /* a {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    &.active {
+      color: ${props => props.theme.colors.primary};
+      font-weight: 500;
+    }
+  } */
 `

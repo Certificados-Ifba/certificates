@@ -12,7 +12,7 @@ const Select: React.FC<Props> = ({ name, ...rest }) => {
     ref: selectRef,
     classNamePrefix: 'react-select',
     placeholder: 'Selecione',
-    menuPlacement: 'auto',
+    menuPosition: 'fixed',
     defaultValue: '',
     ...rest
   }

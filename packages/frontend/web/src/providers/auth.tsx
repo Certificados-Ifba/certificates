@@ -45,25 +45,28 @@ const AuthProvider: React.FC = ({ children }) => {
     return {} as AuthState
   })
 
-  const signIn = useCallback(async ({ login, password }) => {
-    const response = await api.post('/users/login', {
-      email: login,
-      password
-    })
+  const signIn = useCallback(
+    async ({ login, password }) => {
+      const response = await api.post('/users/login', {
+        email: login,
+        password
+      })
 
-    const { token } = response.data?.data
-    const payload: any = decode(token || '')
+      const { token } = response.data?.data
+      const payload: any = decode(token || '')
 
-    setToken(token)
-    setData({ token, user: payload?.user })
-  }, [])
+      setToken(token)
+      setData({ token, user: payload?.user })
+    },
+    [setToken]
+  )
 
   const signOut = useCallback(async () => {
-    // await api.put('/users/logout')
+    await api.put('/users/logout')
     setToken(null)
 
     setData({} as AuthState)
-  }, [])
+  }, [setToken])
 
   return (
     <AuthContext.Provider
