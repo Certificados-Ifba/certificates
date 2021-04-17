@@ -31,9 +31,12 @@ module.exports = {
   '@typescript-eslint',
   'prettier',
   'import-helpers',
-  'react'
+  'react',
+  'react-hooks'
   ],
   rules: {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
     'import/no-extraneous-dependencies': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
