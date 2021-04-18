@@ -12,6 +12,10 @@ services:
     command: yarn workspace @certificates/event dev
     volumes:
       - ./packages/backend/event:/usr/src/app/packages/backend/event
+  generic:
+    command: yarn workspace @certificates/generic dev
+    volumes:
+      - ./packages/backend/generic:/usr/src/app/packages/backend/generic
   token:
     command: yarn workspace @certificates/token dev
     volumes:

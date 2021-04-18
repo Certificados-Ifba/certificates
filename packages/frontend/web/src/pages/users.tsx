@@ -30,6 +30,7 @@ import {
 import Modal from '../components/modal'
 import Button from '../components/button'
 import Card from '../components/card'
+import Column from '../components/column'
 import Input from '../components/input'
 import Select from '../components/select'
 import PaginatedTable from '../components/paginatedTable'
@@ -43,6 +44,8 @@ const Users: React.FC = () => {
   const [typeModal, setTypeModal] = useState('update-user')
   const [openEditModal, setOpenEditModal] = useState(false)
 
+  const [column, setColumn] = useState('type')
+  const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const request = usePaginatedRequest<any>({
     url: 'test/users'
   })
@@ -50,6 +53,20 @@ const Users: React.FC = () => {
   const handleFilter = useCallback(data => {
     console.log(data)
   }, [])
+
+  const handleOrder = useCallback(
+    columnSelected => {
+      if (column !== columnSelected) {
+        setColumn(columnSelected)
+        setOrder('ASC')
+      } else {
+        setOrder(value =>
+          value === '' ? 'ASC' : value === 'ASC' ? 'DESC' : ''
+        )
+      }
+    },
+    [column]
+  )
 
   return (
     <Container>
@@ -86,9 +103,21 @@ const Users: React.FC = () => {
         <PaginatedTable request={request}>
           <thead>
             <tr>
-              <th>Nome</th>
-              <th>E-mail</th>
-              <th>Tipo</th>
+              <th onClick={() => handleOrder('name')}>
+                <Column order={order} selected={column === 'name'}>
+                  Nome
+                </Column>
+              </th>
+              <th onClick={() => handleOrder('email')}>
+                <Column order={order} selected={column === 'email'}>
+                  E-mail
+                </Column>
+              </th>
+              <th onClick={() => handleOrder('role')}>
+                <Column order={order} selected={column === 'role'}>
+                  Tipo
+                </Column>
+              </th>
               <th style={{ width: 32 }} />
             </tr>
           </thead>

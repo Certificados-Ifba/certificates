@@ -1,11 +1,6 @@
-import {
-  Controller,
-  Inject,
-  Get} from '@nestjs/common'
+import { Controller, Inject, Get } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
-import {
-  ApiTags,
-  ApiOkResponse} from '@nestjs/swagger'
+import { ApiTags, ApiOkResponse } from '@nestjs/swagger'
 
 import { GetEventsResponseDto } from '../interfaces/event/dto/get-events-response.dto'
 
@@ -16,7 +11,7 @@ export class TestEventsController {
     @Inject('EVENT_SERVICE') private readonly eventServiceClient: ClientProxy
   ) {}
 
-  @Get("events")
+  @Get('events')
   @ApiOkResponse({
     type: GetEventsResponseDto,
     description: 'List of events'
@@ -52,14 +47,14 @@ export class TestEventsController {
             end_date: new Date(),
             description: 'Projeto de Extensão do NAPNEE 	Curso TEA',
             edition: ''
-          },
+          }
         ]
       },
       errors: null
     }
   }
 
-  @Get("participants")
+  @Get('participants')
   @ApiOkResponse({
     type: GetEventsResponseDto,
     description: 'List of participants'
@@ -99,8 +94,7 @@ export class TestEventsController {
     }
   }
 
-
-  @Get("users")
+  @Get('users')
   @ApiOkResponse({
     type: GetEventsResponseDto,
     description: 'List of participants'
@@ -118,12 +112,12 @@ export class TestEventsController {
           {
             name: 'Danilo Gentilli',
             email: 'danilo@gmail.com',
-            type: "Administrador"
+            type: 'Administrador'
           },
           {
             name: 'Murilo Couto',
             email: 'murilo@gmail.com',
-            type: "Coordenador"
+            type: 'Coordenador'
           }
         ]
       },
@@ -131,7 +125,7 @@ export class TestEventsController {
     }
   }
 
-  @Get("functions")
+  @Get('functions')
   @ApiOkResponse({
     type: GetEventsResponseDto,
     description: 'List of functions'

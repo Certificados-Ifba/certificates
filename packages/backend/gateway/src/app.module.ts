@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common'
 import { APP_GUARD } from '@nestjs/core'
 import { ClientProxyFactory } from '@nestjs/microservices'
 
+import { ActivitiesController } from './controllers/activities.controller'
 import { EventsController } from './controllers/events.controller'
+import { FunctionsController } from './controllers/functions.controller'
 import { TestEventsController } from './controllers/test.controller'
 import { UsersController } from './controllers/users.controller'
 import { ConfigService } from './services/config/config.service'
@@ -11,7 +13,13 @@ import { PermissionGuard } from './services/guards/permission.guard'
 
 @Module({
   imports: [],
-  controllers: [UsersController, EventsController, TestEventsController],
+  controllers: [
+    ActivitiesController,
+    EventsController,
+    FunctionsController,
+    TestEventsController,
+    UsersController
+  ],
   providers: [
     ConfigService,
     {
@@ -41,6 +49,13 @@ import { PermissionGuard } from './services/guards/permission.guard'
       provide: 'PERMISSION_SERVICE',
       useFactory: (configService: ConfigService) => {
         return ClientProxyFactory.create(configService.get('permissionService'))
+      },
+      inject: [ConfigService]
+    },
+    {
+      provide: 'GENERIC_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create(configService.get('genericService'))
       },
       inject: [ConfigService]
     },

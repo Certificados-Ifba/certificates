@@ -34,6 +34,13 @@ export class ConfigService {
       },
       transport: Transport.TCP
     }
+    this.envConfig.genericService = {
+      options: {
+        port: process.env.GENERIC_SERVICE_PORT,
+        host: process.env.GENERIC_SERVICE_HOST
+      },
+      transport: Transport.TCP
+    }
   }
 
   get(key: string): any {

@@ -1,17 +1,26 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
-const Row = styled.div`
+interface RowProps {
+  reverse?: boolean
+}
+
+const Row = styled.div<RowProps>`
   display: flex;
   justify-content: space-between;
+  ${props =>
+    props.reverse &&
+    css`
+      flex-direction: row-reverse;
+    `}
   > * {
     flex: 1;
     margin-left: 8px;
     margin-right: 8px;
     &:first-child {
-      margin-left: 0;
+      ${props => (props.reverse ? 'margin-right' : 'margin-left:') + '0;'}
     }
     &:last-child {
-      margin-right: 0;
+      ${props => (props.reverse ? 'margin-left' : 'margin-right:') + '0;'}
     }
   }
 `

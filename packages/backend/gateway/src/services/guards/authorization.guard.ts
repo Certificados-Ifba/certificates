@@ -61,7 +61,7 @@ export class AuthGuard implements CanActivate {
     }
 
     const userInfo = await this.userServiceClient
-      .send('user_get_by_id', userTokenInfo.data.userId)
+      .send('user_get_by_id', userTokenInfo.data.user.id)
       .toPromise()
 
     request.user = userInfo.user
