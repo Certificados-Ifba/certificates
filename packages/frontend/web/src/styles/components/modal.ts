@@ -2,7 +2,7 @@ import { transparentize } from 'polished'
 import styled from 'styled-components'
 
 interface ModalProps {
-  size?: string
+  size?: 'sm'
 }
 
 export const Container = styled.div<ModalProps>`
@@ -19,6 +19,7 @@ export const Container = styled.div<ModalProps>`
   bottom: 0;
   align-items: center;
   justify-content: center;
+  margin: 0 30px;
   &.show {
     display: flex !important;
   }

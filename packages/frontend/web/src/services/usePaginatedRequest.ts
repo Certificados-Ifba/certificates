@@ -31,19 +31,14 @@ export default function usePaginatedRequest<Data = any, Error = any>(
 
   const { response, requestKey, ...rest } = useRequest<any, Error>({
     ...request,
-    params: { page, perPage: perPage.value, ...request.params }
+    params: { page, per_page: perPage.value, ...request.params }
   })
 
   const hasPreviousPage = useMemo(() => page > 1, [page])
-  const hasNextPage = useMemo(
-    () =>
-      page <
-      Math.ceil(
-        response?.data?.data?.movie_count / response?.data?.data?.limit
-      ),
-    [page, response]
-  )
-
+  const hasNextPage = useMemo(() => page < response?.headers['x-total-page'], [
+    page,
+    response
+  ])
   const resetPage = useCallback(() => {
     setPage(1)
   }, [])
@@ -59,10 +54,7 @@ export default function usePaginatedRequest<Data = any, Error = any>(
   const goToPage = useCallback(
     (newPage: number) => {
       setPage(current =>
-        newPage <=
-          Math.ceil(
-            response?.data?.data?.movie_count / response?.data?.data?.limit
-          ) && newPage > 0
+        newPage <= response?.headers['x-total-page'] && newPage > 0
           ? newPage
           : current
       )

@@ -34,6 +34,17 @@ services:
       - db
     networks:
       - backend
+  generic:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.generic
+    hostname: generic
+    env_file:
+      - .env
+    links:
+      - db
+    networks:
+      - backend
   token:
     build:
       context: .

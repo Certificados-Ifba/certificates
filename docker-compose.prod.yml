@@ -9,6 +9,9 @@ services:
   event:
     command: yarn workspace @certificates/event prod
     restart: always
+  generic:
+    command: yarn workspace @certificates/generic prod
+    restart: always
   token:
     command: yarn workspace @certificates/token prod
     restart: always

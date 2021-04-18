@@ -6,8 +6,13 @@ import {
   FiChevronsRight
 } from 'react-icons/fi'
 
-import { PaginatedRequest, OptionType } from '../services/usePaginatedRequest'
-import { DataTable, Pagination } from '../styles/components/paginatedTable'
+import { PaginatedRequest } from '../services/usePaginatedRequest'
+import {
+  DataTable,
+  Pagination,
+  NoDataContainer,
+  PaginateList
+} from '../styles/components/paginatedTable'
 import theme from '../styles/theme'
 import Button from './button'
 import Select from './select'
@@ -21,6 +26,7 @@ interface Props {
 const PaginatedTable: React.FC<Props> = ({ request, children }) => {
   const {
     data,
+    error,
     response,
     page,
     perPage,
@@ -33,124 +39,164 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
     hasNextPage
   } = request
 
-  // const numberOfRegisters = useMemo(() => response?.headers['x-total-count'], [
-  //   response
-  // ])
-
-  // const numberOfPages = useMemo(() => response?.headers['x-total-page'], [
-  //   response
-  // ])
-
-  const numberOfRegisters = useMemo(() => response?.data?.data?.movie_count, [
+  const numberOfRegisters = useMemo(() => response?.headers['x-total-count'], [
     response
   ])
 
-  const numberOfPages = useMemo(
-    () =>
-      Math.ceil(
-        response?.data?.data?.movie_count / response?.data?.data?.limit
-      ),
-    [response]
-  )
+  const numberOfPages = useMemo(() => response?.headers['x-total-page'], [
+    response
+  ])
 
   const loadLast = useCallback(() => {
-    goToPage(numberOfPages)
+    goToPage(Number(numberOfPages))
   }, [])
+
+  const pages = useMemo(() => {
+    const pages = []
+    for (let index = 1; index <= numberOfPages; index++) {
+      const upper = page + (page < 5 ? 7 - page : 3)
+      const lower =
+        page - (page + 3 > numberOfPages ? page + 6 - numberOfPages : 3)
+      if (
+        (index > lower && index < upper) ||
+        index === 1 ||
+        index === Number(numberOfPages)
+      ) {
+        pages.push({
+          value:
+            (index - 1 > lower && index + 1 < upper) ||
+            index < 3 ||
+            index > numberOfPages - 2
+              ? index
+              : 0,
+          label:
+            (index - 1 > lower && index + 1 < upper) ||
+            index < 3 ||
+            index > numberOfPages - 2
+              ? String(index)
+              : '...'
+        })
+      }
+    }
+    return pages
+  }, [page, numberOfPages])
 
   return (
     <>
-      {data ? (
-        <div style={{ overflowY: 'auto' }}>
-          <DataTable>{children}</DataTable>
+      <div style={{ overflowY: 'auto' }}>
+        <DataTable>{children}</DataTable>
+      </div>
+      {/* {(JSON.stringify(data), data.data.length)} */}
+      {(!data || data?.data?.length === 0) && (
+        <NoDataContainer>
+          {data?.data?.length === 0 ? (
+            <span>Não há registros a serem exibidos</span>
+          ) : error ? (
+            <span>Ocorreu um erro, entre em contato com o adminstrador</span>
+          ) : (
+            <Spinner size={50} color={theme.colors.secondary} />
+          )}
+        </NoDataContainer>
+      )}
+      <Pagination>
+        <div>
+          <span className="hide-md-down">Linhas por página</span>
+          <Select
+            isSearchable={false}
+            pageSize={2}
+            onChange={handlePerPage}
+            defaultValue={perPage}
+            value={perPage}
+            options={[
+              {
+                value: 10,
+                label: '10'
+              },
+              {
+                value: 25,
+                label: '25'
+              },
+              {
+                value: 50,
+                label: '50'
+              },
+              {
+                value: 100,
+                label: '100'
+              }
+            ]}
+          />
         </div>
-      ) : (
-        <Spinner size={50} color={theme.colors.secondary} />
-      )}
-      {data && (
-        <Pagination>
-          <div>
-            <span className="hide-md-down">Linhas por página</span>
-            <Select
-              isSearchable={false}
-              pageSize={2}
-              onChange={handlePerPage}
-              defaultValue={perPage}
-              value={perPage}
-              options={[
-                {
-                  value: 10,
-                  label: '10'
-                },
-                {
-                  value: 25,
-                  label: '25'
-                },
-                {
-                  value: 50,
-                  label: '50'
-                },
-                {
-                  value: 100,
-                  label: '100'
-                }
-              ]}
-            />
-          </div>
-          {/* <p>
-            <span>
-              {numberOfRegisters}
-              &nbsp;registro(s)
-            </span>
-            <span>
-              {numberOfPages}
-              &nbsp;página(s)
-            </span>
-          </p> */}
 
-          <nav>
-            <Button
-              ghost
-              square
-              size="small"
-              color="dark"
-              disabled={!hasPreviousPage}
-              onClick={resetPage}
-            >
-              <FiChevronsLeft size={18} />
-            </Button>
-            <Button
-              ghost
-              square
-              size="small"
-              color="dark"
-              disabled={!hasPreviousPage}
-              onClick={loadPrevious}
-            >
-              <FiChevronLeft size={18} />
-            </Button>
-            <Button
-              ghost
-              square
-              size="small"
-              color="dark"
-              disabled={!hasNextPage}
-              onClick={loadNext}
-            >
-              <FiChevronRight size={18} />
-            </Button>
-            <Button
-              ghost
-              square
-              size="small"
-              color="dark"
-              disabled={!hasNextPage}
-              onClick={loadLast}
-            >
-              <FiChevronsRight size={18} />
-            </Button>
-          </nav>
-        </Pagination>
-      )}
+        <nav>
+          <span className="hide-md-down">
+            {!data || data?.length === 0 ? 0 : 1 + (page - 1) * perPage.value}
+            {' - '}
+            {!data
+              ? 0
+              : !hasNextPage
+              ? numberOfRegisters
+              : page * perPage.value}
+            {' de '}
+            {!data ? 0 : numberOfRegisters}
+          </span>
+          <Button
+            ghost
+            square
+            size="small"
+            color="dark"
+            disabled={!hasPreviousPage}
+            onClick={resetPage}
+          >
+            <FiChevronsLeft size={18} />
+          </Button>
+          <Button
+            ghost
+            square
+            size="small"
+            color="dark"
+            disabled={!hasPreviousPage}
+            onClick={loadPrevious}
+          >
+            <FiChevronLeft size={18} />
+          </Button>
+          <PaginateList className="hide-md-down">
+            {pages.map(({ value, label }, key) => (
+              <Button
+                key={key}
+                ghost
+                square
+                size="small"
+                color="dark"
+                disabled={value === page}
+                onClick={() => goToPage(value)}
+              >
+                <span>{label}</span>
+              </Button>
+            ))}
+          </PaginateList>
+          <Button
+            ghost
+            square
+            size="small"
+            color="dark"
+            disabled={!hasNextPage}
+            onClick={loadNext}
+          >
+            <FiChevronRight size={18} />
+          </Button>
+          <Button
+            ghost
+            square
+            size="small"
+            color="dark"
+            disabled={!hasNextPage}
+            onClick={loadLast}
+          >
+            <FiChevronsRight size={18} />
+          </Button>
+        </nav>
+      </Pagination>
     </>
   )
 }

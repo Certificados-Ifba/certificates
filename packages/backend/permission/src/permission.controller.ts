@@ -1,14 +1,17 @@
 import { Controller, HttpStatus } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
 
-import { permissions } from './constants/permissions'
 import { IPermissionCheckResponse } from './interfaces/permission-check-response.interface'
 import { IUser } from './interfaces/user.interface'
 import { ConfirmedStrategyService } from './services/confirmed-strategy.service'
+import { RoleStrategyService } from './services/role-strategy.service'
 
 @Controller()
 export class PermissionController {
-  constructor(private confirmedStrategy: ConfirmedStrategyService) {}
+  constructor(
+    private roleStrategy: RoleStrategyService,
+    private confirmedStrategy: ConfirmedStrategyService
+  ) {}
 
   @MessagePattern('permission_check')
   public permissionCheck(permissionParams: {
@@ -24,6 +27,10 @@ export class PermissionController {
         errors: null
       }
     } else {
+      const permissions = this.roleStrategy.getUserPermissions(
+        permissionParams.user
+      )
+
       const allowedPermissions = this.confirmedStrategy.getAllowedPermissions(
         permissionParams.user,
         permissions

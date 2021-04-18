@@ -7,6 +7,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     | 'primary'
     | 'secondary'
     | 'danger'
+    | 'info'
+    | 'success'
     | 'warning'
     | 'dark'
     | 'medium'
@@ -22,7 +24,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const sizes = {
   small: css`
-    padding: 0.5rem ${(props: any) => (props.square ? '0.5rem' : '0.75rem')};
+    padding: 0.4375rem
+      ${(props: any) => (props.square ? '0.4375rem' : '0.75rem')};
     font-size: 0.75rem;
     * + span {
       margin-left: 0.625rem;
@@ -126,6 +129,60 @@ const colors = {
           : props.theme.colors.dangerTint};
       border-color: ${(props: any) =>
         props.ghost ? 'transparent' : props.theme.colors.dangerTint};
+    }
+  `,
+  info: css`
+    background: ${(props: any) =>
+      props.outline || props.ghost ? 'transparent' : props.theme.colors.info};
+    border-color: ${(props: any) =>
+      props.ghost ? 'transparent' : props.theme.colors.info};
+    color: ${(props: any) =>
+      props.outline || props.ghost
+        ? props.theme.colors.info
+        : props.theme.colors.light};
+    &:hover {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.8, props.theme.colors.info)
+          : props.theme.colors.infoShade};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.infoShade};
+    }
+    &:active {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.9, props.theme.colors.info)
+          : props.theme.colors.infoTint};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.infoTint};
+    }
+  `,
+  success: css`
+    background: ${(props: any) =>
+      props.outline || props.ghost
+        ? 'transparent'
+        : props.theme.colors.success};
+    border-color: ${(props: any) =>
+      props.ghost ? 'transparent' : props.theme.colors.success};
+    color: ${(props: any) =>
+      props.outline || props.ghost
+        ? props.theme.colors.success
+        : props.theme.colors.light};
+    &:hover {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.8, props.theme.colors.success)
+          : props.theme.colors.successShade};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.successShade};
+    }
+    &:active {
+      background: ${(props: any) =>
+        props.outline || props.ghost
+          ? transparentize(0.9, props.theme.colors.success)
+          : props.theme.colors.successTint};
+      border-color: ${(props: any) =>
+        props.ghost ? 'transparent' : props.theme.colors.successTint};
     }
   `,
   warning: css`

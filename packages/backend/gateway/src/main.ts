@@ -18,7 +18,7 @@ async function bootstrap() {
     .build()
   const document = SwaggerModule.createDocument(app, options)
   SwaggerModule.setup('api', app, document)
-  app.enableCors()
+  app.enableCors({ exposedHeaders: ['x-total-count', 'x-total-page'] })
   await app.listen(3001)
 }
 bootstrap()

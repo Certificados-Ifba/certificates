@@ -3,18 +3,21 @@ const theme = {
     primary: '#379936',
     primaryShade: '#2E802D',
     primaryTint: '#3CA63A',
-    secondary: '#3E7BFA',
-    secondaryShade: '#3568D4',
-    secondaryTint: '#6698FF',
-    success: '#379936',
-    successShade: '#2E802D',
-    successTint: '#3CA63A',
-    danger: '#FF3B3B',
-    dangerShade: '#c53030',
+    secondary: '#2978b5',
+    secondaryShade: '#0061a8',
+    secondaryTint: '#8ab6d6',
+    info: '#33b5e5',
+    infoShade: '#0099CC',
+    infoTint: '#64B5F6',
+    success: '#00C851',
+    successShade: '#007E33',
+    successTint: '#81C784',
+    danger: '#ff4444',
+    dangerShade: '#CC0000',
     dangerTint: '#FF5C5C',
-    warning: '#FFCC00',
-    warningShade: '#E5B800',
-    warningTint: '#FDDD48',
+    warning: '#ffbb33',
+    warningShade: '#FF8800',
+    warningTint: '#FFE226',
     dark: '#28293D',
     darkShade: '#1C1C28',
     darkTint: '#555770',
@@ -32,7 +35,7 @@ const theme = {
   },
   modal: {
     size: {
-      sm: '334px'
+      sm: '400px'
     }
   },
   responsive: {

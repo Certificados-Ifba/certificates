@@ -109,7 +109,7 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
 
   return (
     <>
-      {label && <Label htmlFor={fieldName}>{label}</Label>}
+      {label && !restaux.hidden && <Label htmlFor={fieldName}>{label}</Label>}
       <Container
         hidden={restaux.hidden}
         marginBottom={marginBottom}
@@ -131,7 +131,7 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
             </SecureToggle>
           )}
         </fieldset>
-        {error && (
+        {error && restaux.hidden && (
           <Error>
             <span>
               <FiAlertCircle />

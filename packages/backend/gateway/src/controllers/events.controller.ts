@@ -67,7 +67,6 @@ export class EventsController {
     }
   }
 
-  
   @Post()
   @Authorization(true)
   @Permission('event_create')
