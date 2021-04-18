@@ -39,8 +39,8 @@ const Login: React.FC = () => {
         setLoading(true)
         formRef.current?.setErrors({})
         const schema = Yup.object().shape({
-          login: Yup.string().required('Login é obrigatório'),
-          password: Yup.string().required('Senha é obrigatória')
+          login: Yup.string().required('Por favor, digite o seu login'),
+          password: Yup.string().required('Por favor, digite a sua senha')
         })
 
         await schema.validate(data, {
@@ -68,8 +68,8 @@ const Login: React.FC = () => {
 
         addToast({
           type: 'error',
-          title: 'Erro na autenticação',
-          description: 'Ocorreu um erro ao fazer login, cheque as credenciais.'
+          title: 'Não foi possível entrar',
+          description: 'Por favor, verifique seu usuário e sua senha.'
         })
       }
     },
