@@ -302,11 +302,13 @@ export const Container = styled.button.attrs<ButtonProps>(props => ({
   ${props =>
     props.marginBottom === 'md' &&
     'margin-bottom:' + props.theme.margins.md + ';'}
-${props =>
+  ${props =>
     props.marginBottom === 'lg' &&
-    'margin-bottom:' + props.theme.margins.ld + ';'}
+    'margin-bottom:' + props.theme.margins.lg + ';'}
+    
+  ${props => props.hidden && 'display: none;'}
+  ${props => !props.hidden && 'display: flex;'}
 
-  display: flex;
   justify-content: center;
   align-items: center;
   border: 2px solid;

@@ -11,21 +11,16 @@ import {
   useState
 } from 'react'
 import {
-  FiAward,
   FiEdit,
-  FiInfo,
   FiPlus,
   FiSearch,
   FiTrash2,
-  FiUserPlus,
   FiUsers,
   FiUser,
-  FiSettings,
-  FiBriefcase,
-  FiFileText,
   FiPlusCircle,
   FiRefreshCw,
-  FiX
+  FiX,
+  FiMail
 } from 'react-icons/fi'
 import Modal from '../components/modal'
 import Button from '../components/button'
@@ -38,17 +33,22 @@ import withAuth from '../hocs/withAuth'
 import { useToast } from '../providers/toast'
 import usePaginatedRequest from '../services/usePaginatedRequest'
 import { Container } from '../styles/pages/home'
+import Row from '../styles/components/row'
+import Alert from '../components/alert'
 
 const Users: React.FC = () => {
-  const [selectedName, setSelectedName] = useState('')
-  const [typeModal, setTypeModal] = useState('update-user')
-  const [openEditModal, setOpenEditModal] = useState(false)
-
+  const [selectedId, setSelectedId] = useState(null)
+  const [typeModal, setTypeModal] = useState<
+    'update-user' | 'add-user' | 'update-email'
+  >(null)
+  const [openUserModal, setOpenUserModal] = useState(false)
+  const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [column, setColumn] = useState('type')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const request = usePaginatedRequest<any>({
     url: 'test/users'
   })
+  const [user, setUser] = useState<{ name: string; email: string }>(null)
 
   const handleFilter = useCallback(data => {
     console.log(data)
@@ -83,9 +83,9 @@ const Users: React.FC = () => {
         <nav>
           <Button
             onClick={() => {
-              setTypeModal('save-user')
-              setSelectedName('')
-              setOpenEditModal(true)
+              setSelectedId(null)
+              setTypeModal('add-user')
+              setOpenUserModal(true)
             }}
           >
             <FiPlus size={20} />
@@ -133,12 +133,26 @@ const Users: React.FC = () => {
                       inline
                       ghost
                       square
+                      color="warning"
+                      size="small"
+                      onClick={() => {
+                        setSelectedId(1)
+                        setTypeModal('update-email')
+                        setOpenUserModal(true)
+                      }}
+                    >
+                      <FiMail size={20} />
+                    </Button>
+                    <Button
+                      inline
+                      ghost
+                      square
                       color="secondary"
                       size="small"
                       onClick={() => {
+                        setSelectedId(1)
                         setTypeModal('update-user')
-                        setSelectedName(user.name)
-                        setOpenEditModal(true)
+                        setOpenUserModal(true)
                       }}
                     >
                       <FiEdit size={20} />
@@ -149,7 +163,13 @@ const Users: React.FC = () => {
                       square
                       color="danger"
                       size="small"
-                      onClick={() => {}}
+                      onClick={() => {
+                        setUser({
+                          email: 'lucasn.bertoldi@gmail.com',
+                          name: 'Lucas Nascimento Bertoldi'
+                        })
+                        setOpenDeleteModal(true)
+                      }}
                     >
                       <FiTrash2 size={20} />
                     </Button>
@@ -160,45 +180,122 @@ const Users: React.FC = () => {
           </tbody>
         </PaginatedTable>
       </Card>
-      <SaveUserModal
-        openModal={openEditModal}
-        setOpenModal={setOpenEditModal}
+      <UserModal
+        openModal={openUserModal}
+        setOpenModal={setOpenUserModal}
         type={typeModal}
-        selectedName={selectedName}
-        setSelectedName={setSelectedName}
+        selectId={selectedId}
+      />
+      <DeleteModal
+        user={user}
+        openModal={openDeleteModal}
+        setOpenModal={setOpenDeleteModal}
       />
     </Container>
   )
 }
 
-const SaveUserModal: React.FC<{
-  type: string
-  selectedName: string
-  setSelectedName: Dispatch<SetStateAction<string>>
+const DeleteModal: React.FC<{
   openModal: boolean
   setOpenModal: Dispatch<SetStateAction<boolean>>
-}> = ({ type, selectedName, setSelectedName, openModal, setOpenModal }) => {
-  const { addToast } = useToast()
-
+  user: { name: string; email: string }
+}> = ({ openModal, setOpenModal, user }) => {
+  const handleSubmit = useCallback(() => {}, [])
   const handleCloseSaveModal = useCallback(() => {
     setOpenModal(false)
   }, [])
+  return (
+    <Modal open={openModal} onClose={handleCloseSaveModal}>
+      <header>
+        <h2>
+          <FiTrash2 size={20} />
+          <span>Excluir Usuário</span>
+        </h2>
+      </header>
+      <Form onSubmit={handleSubmit}>
+        <Alert marginBottom="sm">
+          Tem certeza que você deseja excluir o usuário de <b>{user?.name}</b>?
+        </Alert>
+        <Alert size="sm" icon={FiMail} marginBottom="sm">
+          <b>{user?.email}</b>
+        </Alert>
+        <Row>
+          <Button outline color="danger" type="submit">
+            <FiTrash2 size={20} /> <span>Excluir</span>
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenModal(false)
+            }}
+            color="secondary"
+            type="button"
+          >
+            <FiX size={20} />
+            <span>Cancelar</span>
+          </Button>
+        </Row>
+      </Form>
+    </Modal>
+  )
+}
+
+const UserModal: React.FC<{
+  type: 'add-user' | 'update-user' | 'update-email'
+  openModal: boolean
+  setOpenModal: Dispatch<SetStateAction<boolean>>
+  selectId?: boolean
+}> = ({ type, openModal, setOpenModal, selectId }) => {
+  const { addToast } = useToast()
 
   const formRef = useRef<FormHandles>(null)
 
-  useEffect(() => {
+  const [user, setUser] = useState<{ name: string; email: string }>(null)
+
+  const handleCloseSaveModal = useCallback(() => {
     formRef.current.setErrors({})
-  }, [openModal])
+    formRef.current.reset()
+    setOpenModal(false)
+  }, [])
+
+  useEffect(() => {
+    if (
+      openModal &&
+      selectId &&
+      (type === 'update-user' || type === 'update-email')
+    ) {
+      if (type === 'update-user')
+        formRef.current.setData({
+          name: 'Lucas Nascimento',
+          email: 'lucasn.bertoldi@gmail.com',
+          role: 'ADMIN'
+        })
+      if (type === 'update-email' || type === 'update-user')
+        setUser({
+          email: 'lucasn.bertoldi@gmail.com',
+          name: 'Lucas Nascimento Bertoldi'
+        })
+    }
+  }, [type, selectId, openModal])
 
   const handleSubmit = useCallback(data => {
     const schema = Yup.object().shape({
-      name: Yup.string().required(`O usuário precisa ter um nome`)
+      name: Yup.string().required(`O usuário precisa ter um nome`),
+      email: Yup.string()
+        .email('Por favor, digite um e-mail válido')
+        .required(`O usuário precisa ter um e-mail`),
+      repeatEmail: Yup.string()
+        .email('Por favor, digite um e-mail válido')
+        .required('Você precisa repetir o e-mail')
+        .oneOf([data.email], 'Os e-mails devem ser iguais.'),
+      role: Yup.string().required(`Você precisa selecionar um privilégio`)
     })
     schema
       .validate(data, {
         abortEarly: false
       })
       .then(data => {
+        console.log(data)
+
         // enviar req
       })
       .catch(err => {
@@ -209,15 +306,19 @@ const SaveUserModal: React.FC<{
           })
           formRef.current?.setErrors(validationErrors)
         } else {
-          console.error(err)
+          let message: string = 'Erro ao '
+          if (type === 'update-email') {
+            message += 'atualizar o e-mail'
+          } else if (type === 'update-user') {
+            message += 'atualizar o usuário'
+          } else {
+            message += 'adicionar o usuário'
+          }
+          message += '.'
           addToast({
             title: `Erro desconhecido`,
             type: 'error',
-            description: `Aconteceu um erro ao ${
-              type === 'update-user' || type === 'update-password'
-                ? 'atualizar'
-                : 'cadastrar'
-            } o usuário`
+            description: message
           })
         }
       })
@@ -227,10 +328,15 @@ const SaveUserModal: React.FC<{
     <Modal open={openModal} onClose={handleCloseSaveModal}>
       <header>
         <h2>
-          {type === 'update-user' || type === 'update-password' ? (
+          {type === 'update-user' ? (
             <>
               <FiEdit size={20}></FiEdit>
               <span>Editar o Usuário</span>
+            </>
+          ) : type === 'update-email' ? (
+            <>
+              <FiMail size={20}></FiMail>
+              <span>Atualizar E-mail</span>
             </>
           ) : (
             <>
@@ -241,78 +347,114 @@ const SaveUserModal: React.FC<{
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
+        {type === 'update-email' && (
+          <>
+            <Alert size="sm" marginBottom="xs">
+              Você irá alterar o e-mail de:
+            </Alert>
+            <Alert size="sm" icon={FiUser} marginBottom="sm">
+              <b>{user?.name}</b>
+            </Alert>
+            <Alert size="sm" marginBottom="xs">
+              O antigo e-mail dele(a) é:
+            </Alert>
+            <Alert size="sm" icon={FiMail} marginBottom="sm">
+              <b>{user?.email}</b>
+            </Alert>
+          </>
+        )}
         <Input
-          setValue={setSelectedName}
-          value={selectedName}
           formRef={formRef}
           marginBottom="sm"
           name="name"
           label="Nome"
-          placeholder="Nome Completo"
+          placeholder="Nome"
           icon={FiUser}
+          hidden={type === 'update-email'}
+        />
+        <Select
+          hidden={type === 'update-email'}
+          formRef={formRef}
+          label="Privilégio"
+          name="role"
+          isSearchable={false}
+          marginBottom="sm"
+          options={[
+            {
+              value: 'ADMIN',
+              label: 'Administrador'
+            },
+            {
+              value: 'EVENT_MANAGER',
+              label: 'Coordenador de Eventos'
+            }
+          ]}
         />
         <Input
+          hidden={type === 'update-user'}
           formRef={formRef}
           marginBottom="sm"
           name="email"
-          label="E-mail"
+          label={type === 'update-email' ? 'Novo E-mail' : 'E-mail'}
           placeholder="email@exemplo.com"
-          icon={FiUser}
-          type="email"
+          icon={FiMail}
+          type="text"
         />
-        <Select
-              isSearchable={false}
-              options={[
-                {
-                  value: 'ADMIN',
-                  label: 'Administrador'
-                },
-                {
-                  value: 'EVENT_MANAGER',
-                  label: 'Coordenador de Eventos'
-                }
-              ]}
-            />
-        {(type === 'update-password' || type === 'save-user') && (
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="password"
-            label="Senha"
-            placeholder="Digite a senha"
-            icon={FiUser}
-            type="password"
-          />
-        )}
-        {(type === 'update-password' || type === 'save-user') && (
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="passwordAgain"
-            label="Repita a Senha"
-            placeholder="Digite a mesma senha"
-            icon={FiUser}
-            type="password"
-          />
-        )}
-        <Button
-          color={
-            type === 'update-user' || type === 'update-password'
-              ? 'secondary'
-              : 'primary'
+        <Input
+          hidden={type === 'update-user'}
+          formRef={formRef}
+          marginBottom="sm"
+          name="repeatEmail"
+          label={
+            type === 'update-email' ? 'Repetir o Novo E-mail' : 'Repetir o E-mail'
           }
-          type="submit"
-        >
-          {type === 'update-user' || type === 'update-password' ? (
-            <>
-              <FiRefreshCw size={20}></FiRefreshCw> <span>Atualizar</span>
-            </>
-          ) : (
-            <>
-              <FiPlus size={20}></FiPlus> <span>Adicionar</span>
-            </>
-          )}
-        </Button>
+          placeholder="email@exemplo.com"
+          icon={FiMail}
+          type="text"
+        />
+        {type === 'update-user' && (
+          <>
+            <Alert size="sm" marginBottom="xs">
+              O e-mail de {user?.name} é:
+            </Alert>
+            <Alert size="sm" icon={FiMail} marginBottom="md">
+              <b>{user?.email}</b>
+            </Alert>
+          </>
+        )}
+        <Row>
+          <Button
+            onClick={() => {
+              handleCloseSaveModal()
+            }}
+            color="secondary"
+            type="button"
+            outline
+          >
+            <FiX size={20} />
+            <span>Cancelar</span>
+          </Button>
+          <Button
+            color={
+              type === 'update-user'
+                ? 'secondary'
+                : type === 'update-email'
+                ? 'warning'
+                : 'primary'
+            }
+            type="submit"
+          >
+            {type === 'update-user' || type === 'update-email' ? (
+              <>
+                <FiRefreshCw size={20}></FiRefreshCw> <span>Atualizar</span>
+              </>
+            ) : (
+              <>
+                <FiPlus size={20}></FiPlus> <span>Adicionar</span>
+              </>
+            )}
+          </Button>
+        </Row>
       </Form>
     </Modal>
   )

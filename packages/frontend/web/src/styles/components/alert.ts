@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 interface Props {
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   type: 'info' | 'warning' | 'danger'
   fontSize: string
 }
@@ -13,9 +13,12 @@ export const Container = styled.div<Props>`
   ${props =>
     props.marginBottom === 'md' &&
     'margin-bottom:' + props.theme.margins.md + ';'}
-    ${props =>
+  ${props =>
     props.marginBottom === 'lg' &&
-    'margin-bottom:' + props.theme.margins.ld + ';'}
+    'margin-bottom:' + props.theme.margins.lg + ';'}
+  ${props =>
+    props.marginBottom === 'xs' &&
+    'margin-bottom:' + props.theme.margins.xs + ';'}
 
     display: flex;
   .alert-icon {

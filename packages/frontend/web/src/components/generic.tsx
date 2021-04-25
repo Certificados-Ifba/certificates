@@ -49,6 +49,9 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const formRef = useRef<FormHandles>(null)
+  const searchFormRef = useRef<FormHandles>()
+  const [selectedName, setSelectedName] = useState<string>('')
+
   const { addToast } = useToast()
   const request = usePaginatedRequest<any>({
     url,
@@ -61,27 +64,30 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
   })
 
   useEffect(() => {
-    async function loadData() {
-      const response = await api.get<IResponse>(`${url}/${idSelected}`)
-      formRef.current?.setData(response?.data?.data)
-    }
-    console.log(idSelected)
-    if (idSelected) {
-      formRef.current.reset()
+    setFilters({ search: '' })
+    searchFormRef.current.reset()
+  }, [name, plural, url])
+
+  useEffect(() => {
+    if (idSelected && openModal) {
+      async function loadData() {
+        const response = await api.get<IResponse>(`${url}/${idSelected}`)
+        formRef.current?.setData(response?.data?.data)
+        setSelectedName(response?.data?.data?.name)
+      }
       setLoading(true)
       loadData()
       setLoading(false)
-    } else {
-      formRef.current.reset()
     }
-  }, [idSelected, url])
+  }, [idSelected, url, openModal])
 
   const handleOpenModal = useCallback(() => {
-    formRef.current.setErrors({})
     setOpenModal(true)
   }, [])
 
   const handleCloseModal = useCallback(() => {
+    formRef.current.setErrors({})
+    formRef.current.reset()
     setOpenModal(false)
   }, [])
 
@@ -167,7 +173,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
     <>
       <header>
         <h2>{plural} disponíveis</h2>
-        <Form onSubmit={handleFilter}>
+        <Form ref={searchFormRef} onSubmit={handleFilter}>
           <Input
             name="search"
             placeholder={`Buscar ${name.toLowerCase()}`}
@@ -207,7 +213,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
                     inline
                     ghost
                     square
-                    color="warning"
+                    color="secondary"
                     size="small"
                     onClick={() => {
                       setIdSelected(func.id)
@@ -270,24 +276,17 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
             hidden={isDeleted}
           />
           {isDeleted && (
-            <Alert
-              hideIcon={true}
-              marginBottom="md"
-              message={
-                <>
-                  Tem certeza que você deseja excluir a{' '}
-                  {`${name.toLowerCase()} `}
-                  <b>{formRef.current.getFieldValue('name')}</b>?
-                </>
-              }
-              type="info"
-            />
+            <Alert marginBottom="md">
+              Tem certeza que você deseja excluir a {`${name.toLowerCase()} `}
+              <b>{selectedName}</b>?
+            </Alert>
           )}
           <Row reverse={isDeleted}>
             <Button
               onClick={() => {
                 handleCloseModal()
               }}
+              outline={isDeleted ? false : true}
               color="secondary"
               type="button"
             >
@@ -295,7 +294,10 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
               <span>Cancelar</span>
             </Button>
             <Button
-              color={isDeleted ? 'danger' : idSelected ? 'warning' : 'primary'}
+              color={
+                isDeleted ? 'danger' : idSelected ? 'secondary' : 'primary'
+              }
+              outline={isDeleted ? true : false}
               type="submit"
               loading={loading}
             >
