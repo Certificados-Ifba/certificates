@@ -1,5 +1,4 @@
 import { FormHandles } from '@unform/core'
-import * as Yup from 'yup'
 import { Form } from '@unform/web'
 import Head from 'next/head'
 import {
@@ -20,21 +19,25 @@ import {
   FiPlusCircle,
   FiRefreshCw,
   FiX,
-  FiMail
+  FiMail,
+  FiCheck,
+  FiUserPlus
 } from 'react-icons/fi'
-import Modal from '../components/modal'
+import * as Yup from 'yup'
+
+import Alert from '../components/alert'
 import Button from '../components/button'
 import Card from '../components/card'
 import Column from '../components/column'
 import Input from '../components/input'
-import Select from '../components/select'
+import Modal from '../components/modal'
 import PaginatedTable from '../components/paginatedTable'
+import Select from '../components/select'
 import withAuth from '../hocs/withAuth'
 import { useToast } from '../providers/toast'
 import usePaginatedRequest from '../services/usePaginatedRequest'
-import { Container } from '../styles/pages/home'
 import Row from '../styles/components/row'
-import Alert from '../components/alert'
+import { Container } from '../styles/pages/home'
 
 const Users: React.FC = () => {
   const [selectedId, setSelectedId] = useState(null)
@@ -43,7 +46,7 @@ const Users: React.FC = () => {
   >(null)
   const [openUserModal, setOpenUserModal] = useState(false)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
-  const [column, setColumn] = useState('type')
+  const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const request = usePaginatedRequest<any>({
     url: 'test/users'
@@ -200,10 +203,12 @@ const DeleteModal: React.FC<{
   setOpenModal: Dispatch<SetStateAction<boolean>>
   user: { name: string; email: string }
 }> = ({ openModal, setOpenModal, user }) => {
-  const handleSubmit = useCallback(() => {}, [])
+  const handleSubmit = useCallback(data => {
+    console.log(data)
+  }, [])
   const handleCloseSaveModal = useCallback(() => {
     setOpenModal(false)
-  }, [])
+  }, [setOpenModal])
   return (
     <Modal open={openModal} onClose={handleCloseSaveModal}>
       <header>
@@ -216,13 +221,10 @@ const DeleteModal: React.FC<{
         <Alert marginBottom="sm">
           Tem certeza que você deseja excluir o usuário de <b>{user?.name}</b>?
         </Alert>
-        <Alert size="sm" icon={FiMail} marginBottom="sm">
+        <Alert size="sm" icon={FiMail} marginBottom="md">
           <b>{user?.email}</b>
         </Alert>
         <Row>
-          <Button outline color="danger" type="submit">
-            <FiTrash2 size={20} /> <span>Excluir</span>
-          </Button>
           <Button
             onClick={() => {
               setOpenModal(false)
@@ -232,6 +234,9 @@ const DeleteModal: React.FC<{
           >
             <FiX size={20} />
             <span>Cancelar</span>
+          </Button>
+          <Button color="danger" type="submit" outline>
+            <FiTrash2 size={20} /> <span>Excluir</span>
           </Button>
         </Row>
       </Form>
@@ -255,7 +260,7 @@ const UserModal: React.FC<{
     formRef.current.setErrors({})
     formRef.current.reset()
     setOpenModal(false)
-  }, [])
+  }, [setOpenModal])
 
   useEffect(() => {
     if (
@@ -277,52 +282,55 @@ const UserModal: React.FC<{
     }
   }, [type, selectId, openModal])
 
-  const handleSubmit = useCallback(data => {
-    const schema = Yup.object().shape({
-      name: Yup.string().required(`O usuário precisa ter um nome`),
-      email: Yup.string()
-        .email('Por favor, digite um e-mail válido')
-        .required(`O usuário precisa ter um e-mail`),
-      repeatEmail: Yup.string()
-        .email('Por favor, digite um e-mail válido')
-        .required('Você precisa repetir o e-mail')
-        .oneOf([data.email], 'Os e-mails devem ser iguais.'),
-      role: Yup.string().required(`Você precisa selecionar um privilégio`)
-    })
-    schema
-      .validate(data, {
-        abortEarly: false
+  const handleSubmit = useCallback(
+    data => {
+      const schema = Yup.object().shape({
+        name: Yup.string().required(`O usuário precisa ter um nome`),
+        email: Yup.string()
+          .email('Por favor, digite um e-mail válido')
+          .required(`O usuário precisa ter um e-mail`),
+        repeatEmail: Yup.string()
+          .email('Por favor, digite um e-mail válido')
+          .required('Você precisa repetir o e-mail')
+          .oneOf([data.email], 'Os e-mails devem ser iguais.'),
+        role: Yup.string().required(`Você precisa selecionar um privilégio`)
       })
-      .then(data => {
-        console.log(data)
+      schema
+        .validate(data, {
+          abortEarly: false
+        })
+        .then(data => {
+          console.log(data)
 
-        // enviar req
-      })
-      .catch(err => {
-        const validationErrors: { [key: string]: string } = {}
-        if (err instanceof Yup.ValidationError) {
-          err.inner.forEach((error: Yup.ValidationError) => {
-            validationErrors[error.path] = error.message
-          })
-          formRef.current?.setErrors(validationErrors)
-        } else {
-          let message: string = 'Erro ao '
-          if (type === 'update-email') {
-            message += 'atualizar o e-mail'
-          } else if (type === 'update-user') {
-            message += 'atualizar o usuário'
+          // enviar req
+        })
+        .catch(err => {
+          const validationErrors: { [key: string]: string } = {}
+          if (err instanceof Yup.ValidationError) {
+            err.inner.forEach((error: Yup.ValidationError) => {
+              validationErrors[error.path] = error.message
+            })
+            formRef.current?.setErrors(validationErrors)
           } else {
-            message += 'adicionar o usuário'
+            let message = 'Erro ao '
+            if (type === 'update-email') {
+              message += 'atualizar o e-mail'
+            } else if (type === 'update-user') {
+              message += 'atualizar o usuário'
+            } else {
+              message += 'adicionar o usuário'
+            }
+            message += '.'
+            addToast({
+              title: `Erro desconhecido`,
+              type: 'error',
+              description: message
+            })
           }
-          message += '.'
-          addToast({
-            title: `Erro desconhecido`,
-            type: 'error',
-            description: message
-          })
-        }
-      })
-  }, [])
+        })
+    },
+    [type, addToast]
+  )
 
   return (
     <Modal open={openModal} onClose={handleCloseSaveModal}>
@@ -330,18 +338,18 @@ const UserModal: React.FC<{
         <h2>
           {type === 'update-user' ? (
             <>
-              <FiEdit size={20}></FiEdit>
-              <span>Editar o Usuário</span>
+              <FiEdit size={20} />
+              <span>Editar Usuário</span>
             </>
           ) : type === 'update-email' ? (
             <>
-              <FiMail size={20}></FiMail>
+              <FiMail size={20} />
               <span>Atualizar E-mail</span>
             </>
           ) : (
             <>
-              <FiPlusCircle size={20}></FiPlusCircle>
-              <span>Adicionar o Usuário</span>
+              <FiUserPlus size={20} />
+              <span>Adicionar Usuário</span>
             </>
           )}
         </h2>
@@ -358,7 +366,17 @@ const UserModal: React.FC<{
             <Alert size="sm" marginBottom="xs">
               O antigo e-mail dele(a) é:
             </Alert>
-            <Alert size="sm" icon={FiMail} marginBottom="sm">
+            <Alert size="sm" icon={FiMail} marginBottom="md">
+              <b>{user?.email}</b>
+            </Alert>
+          </>
+        )}
+        {type === 'update-user' && (
+          <>
+            <Alert size="sm" marginBottom="sm">
+              O e-mail de {user?.name} é:
+            </Alert>
+            <Alert size="sm" icon={FiMail} marginBottom="md">
               <b>{user?.email}</b>
             </Alert>
           </>
@@ -378,7 +396,7 @@ const UserModal: React.FC<{
           label="Privilégio"
           name="role"
           isSearchable={false}
-          marginBottom="sm"
+          marginBottom={type === 'add-user' ? 'sm' : 'md'}
           options={[
             {
               value: 'ADMIN',
@@ -403,25 +421,17 @@ const UserModal: React.FC<{
         <Input
           hidden={type === 'update-user'}
           formRef={formRef}
-          marginBottom="sm"
+          marginBottom="md"
           name="repeatEmail"
           label={
-            type === 'update-email' ? 'Repetir o Novo E-mail' : 'Repetir o E-mail'
+            type === 'update-email'
+              ? 'Repetir o Novo E-mail'
+              : 'Repetir o E-mail'
           }
           placeholder="email@exemplo.com"
           icon={FiMail}
           type="text"
         />
-        {type === 'update-user' && (
-          <>
-            <Alert size="sm" marginBottom="xs">
-              O e-mail de {user?.name} é:
-            </Alert>
-            <Alert size="sm" icon={FiMail} marginBottom="md">
-              <b>{user?.email}</b>
-            </Alert>
-          </>
-        )}
         <Row>
           <Button
             onClick={() => {
@@ -435,22 +445,16 @@ const UserModal: React.FC<{
             <span>Cancelar</span>
           </Button>
           <Button
-            color={
-              type === 'update-user'
-                ? 'secondary'
-                : type === 'update-email'
-                ? 'warning'
-                : 'primary'
-            }
+            color={type === 'add-user' ? 'primary' : 'secondary'}
             type="submit"
           >
             {type === 'update-user' || type === 'update-email' ? (
               <>
-                <FiRefreshCw size={20}></FiRefreshCw> <span>Atualizar</span>
+                <FiCheck size={20} /> <span>Atualizar</span>
               </>
             ) : (
               <>
-                <FiPlus size={20}></FiPlus> <span>Adicionar</span>
+                <FiPlus size={20} /> <span>Adicionar</span>
               </>
             )}
           </Button>

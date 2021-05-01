@@ -49,7 +49,7 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
 
   const loadLast = useCallback(() => {
     goToPage(Number(numberOfPages))
-  }, [])
+  }, [goToPage, numberOfPages])
 
   const pages = useMemo(() => {
     const pages = []
@@ -127,18 +127,19 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
             ]}
           />
         </div>
-
         <nav>
           <span className="hide-md-down">
-            {!data || data?.length === 0 ? 0 : 1 + (page - 1) * perPage.value}
-            {' - '}
-            {!data
-              ? 0
-              : !hasNextPage
-              ? numberOfRegisters
-              : page * perPage.value}
-            {' de '}
-            {!data ? 0 : numberOfRegisters}
+            {`${
+              !data || data?.data?.length === 0
+                ? 0
+                : 1 + (page - 1) * perPage.value
+            } - ${
+              !data
+                ? 0
+                : !hasNextPage
+                ? numberOfRegisters
+                : page * perPage.value
+            } de ${!data ? 0 : numberOfRegisters}`}
           </span>
           <Button
             ghost

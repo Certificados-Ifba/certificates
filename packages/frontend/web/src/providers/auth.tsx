@@ -62,7 +62,7 @@ const AuthProvider: React.FC = ({ children }) => {
   )
 
   const signOut = useCallback(async () => {
-    await api.put('/users/logout')
+    api.put('/users/logout')
     setToken(null)
 
     setData({} as AuthState)

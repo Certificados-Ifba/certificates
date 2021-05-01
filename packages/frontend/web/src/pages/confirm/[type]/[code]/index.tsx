@@ -6,10 +6,12 @@ import { FiLock, FiUserCheck, FiRefreshCw } from 'react-icons/fi'
 import * as Yup from 'yup'
 
 import Logo from '../../../../assets/logo-full.svg'
+import Alert from '../../../../components/alert'
 import Button from '../../../../components/button'
 import Card from '../../../../components/card'
 import Input from '../../../../components/input'
 import withoutAuth from '../../../../hocs/withoutAuth'
+import ConfirmLayout from '../../../../layouts/confirm'
 import { useToast } from '../../../../providers/toast'
 import Row from '../../../../styles/components/row'
 import {
@@ -19,14 +21,13 @@ import {
   FormContainer
 } from '../../../../styles/pages/confirm'
 import getValidationErrors from '../../../../utils/getValidationErrors'
-import Alert from '../../../../components/alert'
-import ConfirmLayout from '../../../../layouts/confirm'
 
-const index: React.FC = () => {
-  const router = useRouter()
-  const { code, type } = router.query
+const Confirm: React.FC = () => {
+  const [loading, setLoading] = useState(false)
+  const { query } = useRouter()
   const { addToast } = useToast()
   const formRef = useRef<FormHandles>(null)
+  const { code, type } = query
   const handleForgotPassword = useCallback(
     async data => {
       try {
@@ -43,7 +44,7 @@ const index: React.FC = () => {
         await schema.validate(data, {
           abortEarly: false
         })
-        
+
         setLoading(false)
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -66,13 +67,12 @@ const index: React.FC = () => {
     },
     [addToast]
   )
-  const [loading, setLoading] = useState(false)
   return (
     <Container>
       <Head>
         <title>
-          {type === 'reset-password' ? 'Reiniciar Senha' : 'Confirmar Cadastro'}{' '}
-          | Certificados
+          {type === 'reset' ? 'Reiniciar Senha' : 'Confirmar Cadastro'} |
+          Certificados
         </title>
       </Head>
       <LogoArea>
@@ -82,13 +82,13 @@ const index: React.FC = () => {
         <Card>
           <header>
             <h2>
-              {type === 'reset-password'
+              {type === 'reset'
                 ? 'Defina uma nova senha'
                 : 'Confirme seu cadastro'}
             </h2>
           </header>
           <FormContainer>
-            {type === 'reset-password' && (
+            {type === 'reset' && (
               <>
                 <Alert size="md" marginBottom="xs">
                   Você solicitou para redefinir a sua senha.
@@ -138,7 +138,7 @@ const index: React.FC = () => {
                     <FiUserCheck size={20} /> <span>Confirmar</span>
                   </>
                 )}
-                {type === 'reset-password' && (
+                {type === 'reset' && (
                   <>
                     <FiRefreshCw size={20} /> <span>Redefinir</span>
                   </>
@@ -152,4 +152,4 @@ const index: React.FC = () => {
   )
 }
 
-export default withoutAuth(index, ConfirmLayout)
+export default withoutAuth(Confirm, ConfirmLayout)

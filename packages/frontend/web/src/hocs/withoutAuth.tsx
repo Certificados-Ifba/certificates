@@ -1,6 +1,6 @@
 import Cookie from 'js-cookie'
 import { useRouter } from 'next/router'
-import { ElementType, FC, useEffect } from 'react'
+import { ElementType, useEffect } from 'react'
 
 import AuthLayout from '../layouts/auth'
 
@@ -16,7 +16,7 @@ const withoutAuth = (
       if (token) {
         router.replace('/')
       }
-    }, [])
+    }, [router])
 
     return (
       <Layout>

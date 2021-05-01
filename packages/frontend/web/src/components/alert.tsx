@@ -1,5 +1,4 @@
-import { IconBaseProps, IconType } from 'react-icons'
-import { FiInfo, FiAlertCircle } from 'react-icons/fi'
+import { IconBaseProps } from 'react-icons'
 
 import { Container } from '../styles/components/alert'
 
@@ -11,7 +10,7 @@ export interface AlertProps {
 }
 
 const Alert: React.FC<AlertProps> = ({
-  type = 'info',
+  type,
   marginBottom,
   size,
   children,

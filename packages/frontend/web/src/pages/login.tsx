@@ -1,17 +1,12 @@
 import { FormHandles } from '@unform/core'
 import Head from 'next/head'
-import { NextRouter, useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
-import {
-  FiLock,
-  FiUser,
-  FiLogIn,
-  FiArrowLeft,
-  FiRefreshCw
-} from 'react-icons/fi'
+import { FiLock, FiLogIn, FiArrowLeft, FiSend, FiMail } from 'react-icons/fi'
 import * as Yup from 'yup'
 
 import Logo from '../assets/logo-full.svg'
+import Alert from '../components/alert'
 import Button from '../components/button'
 import Card from '../components/card'
 import Input from '../components/input'
@@ -26,7 +21,6 @@ import {
   FormContainer
 } from '../styles/pages/login'
 import getValidationErrors from '../utils/getValidationErrors'
-import Alert from '../components/alert'
 
 interface LoginFormData {
   login: string
@@ -103,41 +97,42 @@ const FormForgotPassword: React.FC<{
     <FormArea ref={formRef} onSubmit={handleForgotPassword}>
       <Card>
         <header>
-          <h2>Redefinir a senha</h2>
+          <Button
+            onClick={() => {
+              setForgotPassword(false)
+            }}
+            color="dark"
+            type="button"
+            size="small"
+            ghost
+            square
+            inline
+            style={{ margin: 0 }}
+          >
+            <FiArrowLeft size={20} />
+          </Button>
+          <h2 style={{ marginRight: 38 }}>Redefinir sua senha</h2>
         </header>
         <FormContainer>
           <Alert marginBottom="sm">
-            Para conseguir fazer o login,{' '}
-            <b>você tem que redefinir a sua senha</b>.
+            Esqueceu sua senha? <b>Não se preocupe.</b>
           </Alert>
-          <Alert marginBottom="sm" size="sm">
-            <b>Digite o seu e-mail</b> que você usa pra entrar no sistema, que
-            <b> nós vamos mandar uma mensagem</b> para ele com um link que vai{' '}
-            <b>possibilitar você escolher uma nova senha</b>.
+          <Alert marginBottom="md">
+            É só nos dizer seu email que enviaremos um link para você cadastrar
+            uma <b>nova senha</b>.
           </Alert>
           <Input
             formRef={formRef}
             label="E-mail"
             name="login"
-            icon={FiUser}
+            icon={FiMail}
             placeholder="email@exemplo.com"
             autoComplete="username"
-            marginBottom="sm"
+            marginBottom="md"
           />
           <Row>
-            <Button
-              onClick={() => {
-                setForgotPassword(false)
-              }}
-              color="secondary"
-              type="button"
-              outline
-            >
-              <FiArrowLeft size={20} />
-              <span>Voltar</span>
-            </Button>
-            <Button loading={loading} color="primary" type="submit">
-              <FiRefreshCw size={20}></FiRefreshCw> <span>Redefinir</span>
+            <Button size="big" loading={loading} color="primary" type="submit">
+              <FiSend size={20} /> <span>Enviar email</span>
             </Button>
           </Row>
         </FormContainer>
@@ -208,10 +203,11 @@ const FormLogin: React.FC<{
         <FormContainer>
           <Input
             formRef={formRef}
-            label="Login"
+            label="Email"
             name="login"
-            icon={FiUser}
-            placeholder="Digite seu login"
+            icon={FiMail}
+            type="email"
+            placeholder="Digite seu email"
             autoComplete="username"
             marginBottom="sm"
           />
@@ -224,21 +220,29 @@ const FormLogin: React.FC<{
             placeholder="Digite sua senha"
             autoComplete="current-password"
             aria-describedby="password-constraints"
-          />
-          <Button
-            onClick={() => {
-              setForgotPassword(true)
-            }}
-            type="button"
-            size="small"
-            ghost={true}
             marginBottom="md"
-          >
-            Esqueci a minha senha
-          </Button>
+          />
           <Row>
-            <Button size="big" color="primary" type="submit" loading={loading}>
+            <Button
+              size="big"
+              color="primary"
+              type="submit"
+              marginBottom="sm"
+              loading={loading}
+            >
               <FiLogIn size={20} /> <span>Entrar</span>
+            </Button>
+          </Row>
+          <Row>
+            <Button
+              onClick={() => {
+                setForgotPassword(true)
+              }}
+              size="big"
+              type="button"
+              ghost
+            >
+              Esqueci a minha senha
             </Button>
           </Row>
         </FormContainer>

@@ -2,10 +2,10 @@ import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  FiCheck,
   FiEdit,
   FiPlus,
   FiPlusCircle,
-  FiRefreshCw,
   FiSearch,
   FiTrash2,
   FiUser,
@@ -182,6 +182,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
         </Form>
         <Button
           size="small"
+          inline
           onClick={() => {
             setIdSelected(null)
             setIsDeleted(false)
@@ -267,7 +268,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
         <Form ref={formRef} onSubmit={handleSubmit}>
           <Input
             formRef={formRef}
-            marginBottom="sm"
+            marginBottom="md"
             name="name"
             label="Nome"
             placeholder="Nome"
@@ -281,14 +282,14 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
               <b>{selectedName}</b>?
             </Alert>
           )}
-          <Row reverse={isDeleted}>
+          <Row>
             <Button
               onClick={() => {
                 handleCloseModal()
               }}
-              outline={isDeleted ? false : true}
               color="secondary"
               type="button"
+              outline={!isDeleted}
             >
               <FiX size={20} />
               <span>Cancelar</span>
@@ -297,9 +298,9 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
               color={
                 isDeleted ? 'danger' : idSelected ? 'secondary' : 'primary'
               }
-              outline={isDeleted ? true : false}
               type="submit"
               loading={loading}
+              outline={isDeleted}
             >
               {isDeleted ? (
                 <>
@@ -307,7 +308,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
                 </>
               ) : idSelected ? (
                 <>
-                  <FiRefreshCw size={20} /> <span>Atualizar</span>
+                  <FiCheck size={20} /> <span>Atualizar</span>
                 </>
               ) : (
                 <>

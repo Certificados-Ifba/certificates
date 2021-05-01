@@ -7,20 +7,8 @@ interface Props {
 }
 
 export const Container = styled.div<Props>`
-  ${props =>
-    props.marginBottom === 'sm' &&
-    'margin-bottom:' + props.theme.margins.sm + ';'}
-  ${props =>
-    props.marginBottom === 'md' &&
-    'margin-bottom:' + props.theme.margins.md + ';'}
-  ${props =>
-    props.marginBottom === 'lg' &&
-    'margin-bottom:' + props.theme.margins.lg + ';'}
-  ${props =>
-    props.marginBottom === 'xs' &&
-    'margin-bottom:' + props.theme.margins.xs + ';'}
-
-    display: flex;
+  display: flex;
+  margin-bottom: ${props => props.theme.margins[props.marginBottom] || 0};
   .alert-icon {
     display: flex;
     svg {
@@ -28,10 +16,7 @@ export const Container = styled.div<Props>`
       margin-bottom: auto;
       margin-left: 10px;
       margin-right: 10px;
-      ${props =>
-        props.type === 'danger' && 'color:' + props.theme.colors.danger + ';'}
-      ${props =>
-        props.type === 'warning' && 'color:' + props.theme.colors.warning + ';'}
+      color: ${props => props.theme.colors[props.type]};
     }
   }
   .message {

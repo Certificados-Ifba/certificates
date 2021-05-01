@@ -6,11 +6,13 @@ import {
   MutableRefObject,
   useCallback
 } from 'react'
-import theme from '../styles/theme'
+import { FiAlertCircle } from 'react-icons/fi'
 import ReactSelect, { OptionTypeBase, Props as SelectProps } from 'react-select'
+
 import { Label, Error } from '../styles/components/input'
 import { Container } from '../styles/components/select'
-import { FiAlertCircle } from 'react-icons/fi'
+import theme from '../styles/theme'
+
 interface Props extends SelectProps<OptionTypeBase> {
   name?: string
   label?: string
@@ -65,7 +67,7 @@ const Select: React.FC<Props> = ({
         formRef.current.setErrors(err)
       } catch (err) {}
     }
-  }, [])
+  }, [formRef, name])
 
   const handleOnBlurSelect = useCallback(() => {
     setIsFilled(!!selectRef.current?.state.value)
@@ -91,14 +93,16 @@ const Select: React.FC<Props> = ({
   let error: string
 
   if (name) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const field = useField(name)
-
     fieldName = field.fieldName
     defaultValue = field.defaultValue
     registerField = field.registerField
     error = field.error
+  }
 
-    useEffect(() => {
+  useEffect(() => {
+    if (name) {
       if (isFilled) {
         setSelectStyle(filledStyle)
       } else if (error) {
@@ -106,11 +110,13 @@ const Select: React.FC<Props> = ({
       } else {
         setSelectStyle(normalStyle)
       }
-    }, [error, isFilled])
+    }
+  }, [name, error, isFilled])
 
-    props.defaultValue = defaultValue
+  props.defaultValue = defaultValue
 
-    useEffect(() => {
+  useEffect(() => {
+    if (name) {
       registerField({
         name: fieldName,
         ref: selectRef.current,
@@ -119,7 +125,7 @@ const Select: React.FC<Props> = ({
             (option: any) => option.value === value
           )
           ref.select.setValue(selected[0] || null)
-          setIsFilled(selected[0] ? true : false)
+          setIsFilled(!!selected[0])
         },
         getValue: (ref: any) => {
           if (rest.isMulti) {
@@ -138,8 +144,8 @@ const Select: React.FC<Props> = ({
           setIsFilled(false)
         }
       })
-    }, [fieldName, registerField, rest.isMulti])
-  }
+    }
+  }, [name, fieldName, registerField, rest.isMulti])
 
   return (
     <Container hidden={hidden} marginBottom={marginBottom}>

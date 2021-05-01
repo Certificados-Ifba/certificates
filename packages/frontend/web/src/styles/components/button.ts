@@ -19,7 +19,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   inline?: boolean
   loading?: boolean
   square?: boolean
-  marginBottom?: string
+  marginBottom?: 'xs' | 'sm' | 'md' | 'lg'
 }
 
 const sizes = {
@@ -296,24 +296,15 @@ const colors = {
 export const Container = styled.button.attrs<ButtonProps>(props => ({
   disabled: props.disabled || !!props.loading
 }))<ButtonProps>`
-  ${props =>
-    props.marginBottom === 'sm' &&
-    'margin-bottom:' + props.theme.margins.sm + ';'}
-  ${props =>
-    props.marginBottom === 'md' &&
-    'margin-bottom:' + props.theme.margins.md + ';'}
-  ${props =>
-    props.marginBottom === 'lg' &&
-    'margin-bottom:' + props.theme.margins.lg + ';'}
-    
-  ${props => props.hidden && 'display: none;'}
-  ${props => !props.hidden && 'display: flex;'}
-
+  margin-bottom: ${props => props.theme.margins[props.marginBottom] || 0};
+  display: ${props => (props.hidden ? 'none' : 'flex')};
   justify-content: center;
   align-items: center;
   border: 2px solid;
   border-radius: 5px;
   font-weight: 600;
+
+  ${props => !props.inline && 'width: 100%;'}
 
   &[disabled] {
     opacity: 0.5;

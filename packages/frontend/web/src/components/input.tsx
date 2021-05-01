@@ -44,7 +44,7 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
   formRef,
   ...rest
 }) => {
-  const { type, ...restaux } = rest
+  const { type, ...restAux } = rest
 
   const secure = type === 'password'
 
@@ -61,22 +61,21 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
     if (error) setInputState('hasError')
     if (!error && inputState === 'hasError')
       setInputState(inputRef?.current?.value ? 'isFilled' : 'isDefault')
-  }, [error])
+  }, [error, inputState])
 
   useEffect(() => {
+    const clearFormError: () => void = () => {
+      if (formRef)
+        try {
+          const err = formRef.current.getErrors()
+          delete err[name]
+          formRef.current.setErrors(err)
+        } catch (err) {}
+    }
     if (inputState !== 'hasError' && !error) clearFormError()
     if (inputState === 'isFilled' && rest.disabled) setInputState('isDisabled')
     if (inputState === 'isFocused') clearFormError()
-  }, [inputState, rest.disabled])
-
-  const clearFormError: () => void = () => {
-    if (formRef)
-      try {
-        const err = formRef.current.getErrors()
-        delete err[name]
-        formRef.current.setErrors(err)
-      } catch (err) {}
-  }
+  }, [inputState, error, rest.disabled, formRef, name])
 
   useEffect(() => {
     registerField<string>({
@@ -84,7 +83,7 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
       ref: inputRef.current,
       path: 'value',
       setValue(ref: any, value) {
-        ref.value = value ? value : ''
+        ref.value = value || ''
         setInputState(value ? 'isFilled' : 'isDefault')
       },
       clearValue: ref => {
@@ -103,11 +102,11 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
   }, [isShowPass])
 
   const handleInputBlur = useCallback(() => {
-    setInputState(!!inputRef.current?.value ? 'isFilled' : 'isDefault')
+    setInputState(inputRef.current?.value ? 'isFilled' : 'isDefault')
   }, [])
 
   const props: any = {
-    ...restaux,
+    ...restAux,
     onFocus: handleInputFocus,
     onBlur: handleInputBlur,
     ref: inputRef,
@@ -119,9 +118,9 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
 
   return (
     <>
-      {label && !restaux.hidden && <Label htmlFor={fieldName}>{label}</Label>}
+      {label && !restAux.hidden && <Label htmlFor={fieldName}>{label}</Label>}
       <Container
-        hidden={restaux.hidden}
+        hidden={restAux.hidden}
         marginBottom={marginBottom}
         isErrored={inputState === 'hasError'}
         isFilled={inputState === 'isFilled'}
@@ -141,7 +140,7 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
             </SecureToggle>
           )}
         </fieldset>
-        {error && !restaux.hidden && (
+        {error && !restAux.hidden && (
           <Error>
             <span>
               <FiAlertCircle />

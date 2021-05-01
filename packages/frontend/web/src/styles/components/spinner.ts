@@ -18,7 +18,7 @@ const skbounce = keyframes`
   50% { -webkit-transform: scale(1.0) }
 `
 
-export const Bouce1 = styled.i`
+export const Bounce1 = styled.i`
   width: 100%;
   height: 100%;
   border-radius: 50%;
@@ -33,7 +33,7 @@ export const Bouce1 = styled.i`
   `}
 `
 
-export const Bouce2 = styled.i`
+export const Bounce2 = styled.i`
   width: 100%;
   height: 100%;
   border-radius: 50%;
