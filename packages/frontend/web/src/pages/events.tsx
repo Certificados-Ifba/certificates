@@ -57,7 +57,6 @@ const Events: React.FC = () => {
             <Input name="search" placeholder="Buscar função" icon={FiSearch} />
           </Form>
         </header>
-        {/* <Table columns={columns} data={data} /> */}
         <PaginatedTable request={request}>
           <thead>
             <tr>

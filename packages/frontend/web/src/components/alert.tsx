@@ -1,21 +1,20 @@
-import { FiInfo, FiAlertCircle } from 'react-icons/fi'
+import { IconBaseProps } from 'react-icons'
 
 import { Container } from '../styles/components/alert'
 
 export interface AlertProps {
-  type: 'info' | 'warning' | 'danger'
-  message: any
-  marginBottom?: string
-  size?: string
-  hideIcon?: boolean
+  type?: 'info' | 'warning' | 'danger'
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
+  size?: 'sm' | 'lg' | 'md'
+  icon?: React.ComponentType<IconBaseProps>
 }
 
 const Alert: React.FC<AlertProps> = ({
   type,
-  message,
   marginBottom,
   size,
-  hideIcon
+  children,
+  icon: Icon
 }) => {
   let iconSize: number
   let fontSize: string
@@ -38,14 +37,12 @@ const Alert: React.FC<AlertProps> = ({
   }
   return (
     <Container fontSize={fontSize} type={type} marginBottom={marginBottom}>
-      {!hideIcon && (
+      {Icon && (
         <span className="alert-icon">
-          {type === 'info' && <FiInfo size={iconSize} />}
-          {type === 'warning' && <FiAlertCircle size={iconSize} />}
-          {type === 'danger' && <FiAlertCircle size={iconSize} />}
+          <Icon size={iconSize} />
         </span>
       )}
-      <span className="message">{message}</span>
+      <span className="message">{children}</span>
     </Container>
   )
 }

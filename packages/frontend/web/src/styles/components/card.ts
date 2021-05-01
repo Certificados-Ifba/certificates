@@ -5,6 +5,7 @@ export const Container = styled.div`
   border-radius: 10px;
   box-shadow: 0px 4px 0px 0px rgb(237 237 246);
   header {
+    min-height: 90px;
     border-bottom: 2px solid ${props => props.theme.colors.lightShade};
     padding: 25px 30px;
     display: flex;

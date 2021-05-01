@@ -29,9 +29,10 @@ const theme = {
     lightTint: '#ffffff'
   },
   margins: {
+    xs: '0.5rem',
     sm: '1rem',
     md: '2rem',
-    ld: '4rem'
+    lg: '4rem'
   },
   modal: {
     size: {
