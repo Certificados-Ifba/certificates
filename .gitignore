@@ -21,4 +21,4 @@ coverage
 docker/db/*
 !*.gitkeep
 
-/.vscode/
+.vscode
