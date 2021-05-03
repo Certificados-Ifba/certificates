@@ -29,6 +29,7 @@ import Alert from '../components/alert'
 import Button from '../components/button'
 import Card from '../components/card'
 import Column from '../components/column'
+import DeleteModal from '../components/deleteModal'
 import Input from '../components/input'
 import Modal from '../components/modal'
 import PaginatedTable from '../components/paginatedTable'
@@ -51,6 +52,10 @@ const Users: React.FC = () => {
   const request = usePaginatedRequest<any>({
     url: 'test/users'
   })
+  const handleSubmitDelete = useCallback(() => {
+    console.log('')
+  }, [])
+
   const [user, setUser] = useState<{ name: string; email: string }>(null)
 
   const handleFilter = useCallback(data => {
@@ -190,57 +195,22 @@ const Users: React.FC = () => {
         selectId={selectedId}
       />
       <DeleteModal
-        user={user}
+        name="Usuário"
         openModal={openDeleteModal}
         setOpenModal={setOpenDeleteModal}
-      />
+        handleSubmit={handleSubmitDelete}
+      >
+        <>
+          <Alert marginBottom="sm">
+            Tem certeza que você deseja excluir o usuário de <b>{user?.name}</b>
+            ?
+          </Alert>
+          <Alert size="sm" icon={FiMail} marginBottom="md">
+            <b>{user?.email}</b>
+          </Alert>
+        </>
+      </DeleteModal>
     </Container>
-  )
-}
-
-const DeleteModal: React.FC<{
-  openModal: boolean
-  setOpenModal: Dispatch<SetStateAction<boolean>>
-  user: { name: string; email: string }
-}> = ({ openModal, setOpenModal, user }) => {
-  const handleSubmit = useCallback(data => {
-    console.log(data)
-  }, [])
-  const handleCloseSaveModal = useCallback(() => {
-    setOpenModal(false)
-  }, [setOpenModal])
-  return (
-    <Modal open={openModal} onClose={handleCloseSaveModal}>
-      <header>
-        <h2>
-          <FiTrash2 size={20} />
-          <span>Excluir Usuário</span>
-        </h2>
-      </header>
-      <Form onSubmit={handleSubmit}>
-        <Alert marginBottom="sm">
-          Tem certeza que você deseja excluir o usuário de <b>{user?.name}</b>?
-        </Alert>
-        <Alert size="sm" icon={FiMail} marginBottom="md">
-          <b>{user?.email}</b>
-        </Alert>
-        <Row>
-          <Button
-            onClick={() => {
-              setOpenModal(false)
-            }}
-            color="secondary"
-            type="button"
-          >
-            <FiX size={20} />
-            <span>Cancelar</span>
-          </Button>
-          <Button color="danger" type="submit" outline>
-            <FiTrash2 size={20} /> <span>Excluir</span>
-          </Button>
-        </Row>
-      </Form>
-    </Modal>
   )
 }
 
@@ -257,8 +227,8 @@ const UserModal: React.FC<{
   const [user, setUser] = useState<{ name: string; email: string }>(null)
 
   const handleCloseSaveModal = useCallback(() => {
-    formRef.current.setErrors({})
     formRef.current.reset()
+    formRef.current.setErrors({})
     setOpenModal(false)
   }, [setOpenModal])
 

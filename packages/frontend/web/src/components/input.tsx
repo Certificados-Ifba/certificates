@@ -75,7 +75,7 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
     if (inputState !== 'hasError' && !error) clearFormError()
     if (inputState === 'isFilled' && rest.disabled) setInputState('isDisabled')
     if (inputState === 'isFocused') clearFormError()
-  }, [inputState, error, rest.disabled, formRef, name])
+  }, [error, formRef, inputState, name, rest.disabled])
 
   useEffect(() => {
     registerField<string>({
@@ -105,10 +105,29 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
     setInputState(inputRef.current?.value ? 'isFilled' : 'isDefault')
   }, [])
 
+  const handleKeyup = useCallback(() => {
+    if (type === 'cpf') {
+      if (inputRef.current.value)
+        inputRef.current.value = inputRef.current.value
+          .replace(/\D/g, '')
+          .replace(/(\d{3})(\d)/, '$1.$2')
+          .replace(/(\d{3})(\d)/, '$1.$2')
+          .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+          .replace(/(-\d{2})\d+?$/, '$1')
+    }
+  }, [type])
+
+  const handleOnChange = useCallback(() => {
+    if (inputState !== 'isFocused')
+      setInputState(inputRef.current?.value ? 'isFilled' : 'isDefault')
+  }, [inputState])
+
   const props: any = {
     ...restAux,
     onFocus: handleInputFocus,
     onBlur: handleInputBlur,
+    onKeyUp: handleKeyup,
+    onChange: handleOnChange,
     ref: inputRef,
     id: fieldName,
     'aria-label': fieldName,

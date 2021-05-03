@@ -1,23 +1,35 @@
+import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import Head from 'next/head'
-import { useCallback } from 'react'
+import { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
 import {
+  FiArrowLeft,
+  FiArrowRight,
   FiAward,
+  FiBookmark,
   FiCalendar,
+  FiCheck,
   FiEdit,
   FiInfo,
   FiPlus,
   FiSearch,
+  FiTag,
   FiTrash2,
-  FiUserPlus
+  FiUserPlus,
+  FiX
 } from 'react-icons/fi'
+import * as Yup from 'yup'
 
 import Button from '../components/button'
 import Card from '../components/card'
 import Input from '../components/input'
+import Modal from '../components/modal'
 import PaginatedTable from '../components/paginatedTable'
+import Select from '../components/select'
 import withAuth from '../hocs/withAuth'
+import { useToast } from '../providers/toast'
 import usePaginatedRequest from '../services/usePaginatedRequest'
+import Row from '../styles/components/row'
 import { Container } from '../styles/pages/home'
 
 const Events: React.FC = () => {
@@ -28,6 +40,8 @@ const Events: React.FC = () => {
   const handleFilter = useCallback(data => {
     console.log(data)
   }, [])
+
+  const [openEventModal, setOpenEventModal] = useState(false)
 
   return (
     <Container>
@@ -44,7 +58,7 @@ const Events: React.FC = () => {
           </h2>
         </div>
         <nav>
-          <Button>
+          <Button onClick={() => setOpenEventModal(true)}>
             <FiPlus size={20} />
             <span className="hide-md-down">Adicionar Evento</span>
           </Button>
@@ -54,7 +68,7 @@ const Events: React.FC = () => {
         <header>
           <h2>Últimos Eventos</h2>
           <Form onSubmit={handleFilter}>
-            <Input name="search" placeholder="Buscar função" icon={FiSearch} />
+            <Input name="search" placeholder="Buscar evento" icon={FiSearch} />
           </Form>
         </header>
         <PaginatedTable request={request}>
@@ -84,83 +98,203 @@ const Events: React.FC = () => {
                       square
                       color="secondary"
                       size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
+                      // onClick={() => {}}
                     >
                       <FiInfo size={20} />
                     </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="secondary"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
-                      <FiUserPlus size={20} />
-                    </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="primary"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
-                      <FiAward size={20} />
-                    </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="warning"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
-                      <FiEdit size={20} />
-                    </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="danger"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
-                      <FiTrash2 size={20} />
-                    </Button>
                   </div>
-                  {/*
-                </Button>
-                <Button inline size="small" color="danger">
-                  Deletar
-                </Button> */}
                 </td>
               </tr>
             ))}
           </tbody>
         </PaginatedTable>
       </Card>
+      <EventModal openModal={openEventModal} setOpenModal={setOpenEventModal} />
     </Container>
+  )
+}
+
+const EventModal: React.FC<{
+  openModal: boolean
+  setOpenModal: Dispatch<SetStateAction<boolean>>
+}> = ({ openModal, setOpenModal }) => {
+  const { addToast } = useToast()
+
+  const formRef = useRef<FormHandles>(null)
+
+  const [step, setStep] = useState<'step-1' | 'step-2'>('step-1')
+
+  const handleCloseSaveModal = useCallback(() => {
+    setStep('step-1')
+    formRef.current.reset()
+    formRef.current.setErrors({})
+    setOpenModal(false)
+  }, [setOpenModal])
+
+  const handleSubmit = useCallback(
+    data => {
+      if (step === 'step-1') {
+        const schema = Yup.object().shape({
+          name: Yup.string().required(`O evento precisa ter um nome`),
+          initials: Yup.string().required(
+            `Por favor, digite a sigla do projeto`
+          ),
+          coordinator: Yup.string().required(
+            `Você precisa selecionar um coordenador para o evento`
+          )
+        })
+        schema
+          .validate(data, {
+            abortEarly: false
+          })
+          .then(data => {
+            setStep('step-2')
+          })
+          .catch(err => {
+            const validationErrors: { [key: string]: string } = {}
+            if (err instanceof Yup.ValidationError) {
+              err.inner.forEach((error: Yup.ValidationError) => {
+                validationErrors[error.path] = error.message
+              })
+              formRef.current?.setErrors(validationErrors)
+            } else {
+              const message = 'Erro ao adicionar o evento.'
+              addToast({
+                title: `Erro desconhecido`,
+                type: 'error',
+                description: message
+              })
+            }
+          })
+      } else if (step === 'step-2') {
+        const schema = Yup.object().shape({
+          name: Yup.string().required(`O evento precisa ter um nome`),
+          initials: Yup.string().required(
+            `Por favor, digite a sigla do projeto`
+          ),
+          coordinator: Yup.string().required(
+            `Você precisa selecionar um coordenador para o evento`
+          )
+        })
+        schema
+          .validate(data, {
+            abortEarly: false
+          })
+          .then(data => {
+            setStep('step-2')
+          })
+          .catch(err => {
+            const validationErrors: { [key: string]: string } = {}
+            if (err instanceof Yup.ValidationError) {
+              err.inner.forEach((error: Yup.ValidationError) => {
+                validationErrors[error.path] = error.message
+              })
+              formRef.current?.setErrors(validationErrors)
+            } else {
+              const message = 'Erro ao adicionar o evento.'
+              addToast({
+                title: `Erro desconhecido`,
+                type: 'error',
+                description: message
+              })
+            }
+          })
+      }
+    },
+    [addToast, step]
+  )
+
+  return (
+    <Modal open={openModal} onClose={handleCloseSaveModal}>
+      <header>
+        <h2>
+          <FiCalendar size={20} />
+          <span>Adicionar Evento</span>
+        </h2>
+      </header>
+      <Form ref={formRef} onSubmit={handleSubmit}>
+        <Input
+          formRef={formRef}
+          marginBottom="sm"
+          name="name"
+          label="Nome"
+          placeholder="Nome do Evento"
+          icon={FiBookmark}
+          hidden={step === 'step-2'}
+        />
+        <Input
+          formRef={formRef}
+          marginBottom="sm"
+          name="initials"
+          label="Sigla"
+          placeholder="Sigla"
+          icon={FiTag}
+          hidden={step === 'step-2'}
+        />
+        <Select
+          hidden={step === 'step-2'}
+          formRef={formRef}
+          label="Coordenador"
+          name="coordinator"
+          isSearchable={true}
+          marginBottom="md"
+          options={[
+            {
+              value: '1',
+              label: 'Lucas Nascimento Bertoldi'
+            },
+            {
+              value: '2',
+              label: 'Pablo F Matos'
+            },
+            {
+              value: '3',
+              label: 'Matheus Coqueiro'
+            }
+          ]}
+        />
+        <Row>
+          <Button
+            onClick={() => {
+              if (step === 'step-2') {
+                setStep('step-1')
+              } else {
+                handleCloseSaveModal()
+              }
+            }}
+            color="secondary"
+            type="button"
+            outline
+          >
+            {step === 'step-2' ? (
+              <>
+                <FiArrowLeft size={20} />
+                <span>Voltar</span>
+              </>
+            ) : (
+              <>
+                <FiX size={20} />
+                <span>Cancelar</span>
+              </>
+            )}
+          </Button>
+          <Button
+            color={step === 'step-2' ? 'primary' : 'secondary'}
+            type="submit"
+          >
+            {step === 'step-1' ? (
+              <>
+                <FiArrowRight size={20} /> <span>Próximo</span>
+              </>
+            ) : (
+              <>
+                <FiPlus size={20} /> <span>Adicionar</span>
+              </>
+            )}
+          </Button>
+        </Row>
+      </Form>
+    </Modal>
   )
 }
 
