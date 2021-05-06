@@ -2,21 +2,17 @@ import { ApiProperty } from '@nestjs/swagger'
 
 import { IGeneric } from '../../generic/generic.interface'
 
-export class CreateActivityResponseDto {
-  @ApiProperty({ example: 'generic_create_success' })
+export class GetActivityByIdResponseDto {
+  @ApiProperty({ example: 'generic_get_by_id_success' })
   message: string
 
   @ApiProperty({
     example: {
+      type: 'activity',
       name: 'artigo',
-      created_at: new Date(),
-      updated_at: new Date(),
       id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
     },
     nullable: true
   })
   data: IGeneric
-
-  @ApiProperty({ example: null, nullable: true })
-  errors: { [key: string]: any }
 }

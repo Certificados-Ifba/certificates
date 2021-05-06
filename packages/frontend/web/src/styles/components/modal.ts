@@ -31,7 +31,7 @@ export const Container = styled.div<ModalProps>`
       svg {
         margin-top: auto;
         margin-bottom: auto;
-        margin-right: 0.5rem;
+        margin-right: 1rem;
       }
     }
   }

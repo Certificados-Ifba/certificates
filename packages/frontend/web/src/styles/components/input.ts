@@ -18,7 +18,7 @@ export const Container = styled.div<Props>`
     'margin-bottom:' + props.theme.margins.md + ';'}
 ${props =>
     props.marginBottom === 'lg' &&
-    'margin-bottom:' + props.theme.margins.ld + ';'}
+    'margin-bottom:' + props.theme.margins.lg + ';'}
 
 fieldset {
     padding: 8px 12px;

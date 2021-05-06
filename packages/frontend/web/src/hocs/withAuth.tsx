@@ -15,7 +15,7 @@ const withAuth = (
       if (!token) {
         router.replace('/login')
       }
-    }, [])
+    }, [router])
 
     return (
       <DefaultLayout>

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
 export class CreateActivityDto {
-  @ApiProperty({ example: 'Artigo' })
+  @ApiProperty({ example: 'artigo' })
   name: string
 }

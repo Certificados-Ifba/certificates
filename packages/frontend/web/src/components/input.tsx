@@ -28,7 +28,6 @@ interface BaseProps<Multiline = false>
   multiline?: Multiline
   marginBottom?: string
   formRef?: MutableRefObject<FormHandles>
-  setValue?: React.Dispatch<React.SetStateAction<string>>
 }
 
 type InputProps = JSX.IntrinsicElements['input'] & BaseProps<false>
@@ -43,15 +42,15 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
   multiline,
   marginBottom,
   formRef,
-  setValue,
   ...rest
 }) => {
-  const { type, ...restaux } = rest
+  const { type, ...restAux } = rest
 
   const secure = type === 'password'
 
-  const [isFocused, setIsFocused] = useState(false)
-  const [isFilled, setIsFilled] = useState(false)
+  const [inputState, setInputState] = useState<
+    'isFilled' | 'isFocused' | 'hasError' | 'isDefault' | 'isDisabled'
+  >('isDefault')
   const [isShowPass, setIsShowPass] = useState(false)
 
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
@@ -59,20 +58,43 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
   const { fieldName, defaultValue, registerField, error } = useField(name)
 
   useEffect(() => {
+    if (error) setInputState('hasError')
+    if (!error && inputState === 'hasError')
+      setInputState(inputRef?.current?.value ? 'isFilled' : 'isDefault')
+  }, [error, inputState])
+
+  useEffect(() => {
+    const clearFormError: () => void = () => {
+      if (formRef)
+        try {
+          const err = formRef.current.getErrors()
+          delete err[name]
+          formRef.current.setErrors(err)
+        } catch (err) {}
+    }
+    if (inputState !== 'hasError' && !error) clearFormError()
+    if (inputState === 'isFilled' && rest.disabled) setInputState('isDisabled')
+    if (inputState === 'isFocused') clearFormError()
+  }, [inputState, error, rest.disabled, formRef, name])
+
+  useEffect(() => {
     registerField<string>({
       name: fieldName,
       ref: inputRef.current,
       path: 'value',
       setValue(ref: any, value) {
-        ref.value = value
-        ref.focus()
-        ref.blur()
+        ref.value = value || ''
+        setInputState(value ? 'isFilled' : 'isDefault')
+      },
+      clearValue: ref => {
+        ref.value = ''
+        setInputState('isDefault')
       }
     })
   }, [fieldName, registerField])
 
   const handleInputFocus = useCallback(() => {
-    setIsFocused(true)
+    setInputState('isFocused')
   }, [])
 
   const handleShowPass = useCallback(() => {
@@ -80,42 +102,29 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
   }, [isShowPass])
 
   const handleInputBlur = useCallback(() => {
-    setIsFocused(false)
-
-    setIsFilled(!!inputRef.current?.value)
-  }, [])
-
-  const handleOnChangeInput = useCallback(data => {
-    if (formRef)
-      try {
-        const err = formRef.current.getErrors()
-        delete err[name]
-        formRef.current.setErrors(err)
-      } catch (err) {}
-    if (setValue) setValue(data.target.value)
+    setInputState(inputRef.current?.value ? 'isFilled' : 'isDefault')
   }, [])
 
   const props: any = {
-    ...restaux,
+    ...restAux,
     onFocus: handleInputFocus,
     onBlur: handleInputBlur,
     ref: inputRef,
     id: fieldName,
     'aria-label': fieldName,
     type: isShowPass ? 'text' : type,
-    defaultValue,
-    onChange: handleOnChangeInput
+    defaultValue
   }
 
   return (
     <>
-      {label && !restaux.hidden && <Label htmlFor={fieldName}>{label}</Label>}
+      {label && !restAux.hidden && <Label htmlFor={fieldName}>{label}</Label>}
       <Container
-        hidden={restaux.hidden}
+        hidden={restAux.hidden}
         marginBottom={marginBottom}
-        isErrored={!!error}
-        isFilled={isFilled}
-        isFocused={isFocused}
+        isErrored={inputState === 'hasError'}
+        isFilled={inputState === 'isFilled'}
+        isFocused={inputState === 'isFocused'}
         isDisabled={!!props?.disabled}
       >
         <fieldset>
@@ -131,7 +140,7 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
             </SecureToggle>
           )}
         </fieldset>
-        {error && restaux.hidden && (
+        {error && !restAux.hidden && (
           <Error>
             <span>
               <FiAlertCircle />

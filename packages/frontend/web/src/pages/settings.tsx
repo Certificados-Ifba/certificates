@@ -18,7 +18,8 @@ const Settings: React.FC = () => {
             <FiSettings size={24} /> Configurações
           </h1>
           <h2>
-            Defina as funções dos participantes, atividades de um evento e etc.
+            Defina as funções dos participantes, tipo de atividade de um evento
+            e etc.
           </h2>
         </div>
       </header>
@@ -32,10 +33,14 @@ const Settings: React.FC = () => {
             )
           },
           {
-            name: 'Atividades',
+            name: 'Tipo de Atividades',
             icon: FiFileText,
             children: (
-              <Generic name="Atividade" plural="Atividades" url="/activities" />
+              <Generic
+                name="Tipo de Atividade"
+                plural="Tipo de Atividades"
+                url="/activities"
+              />
             )
           }
         ]}
