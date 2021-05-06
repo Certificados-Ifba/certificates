@@ -1,5 +1,7 @@
 import * as bcrypt from 'bcrypt'
+import { timeStamp } from 'console'
 import * as mongoose from 'mongoose'
+import { v4 as uuidv4 } from 'uuid'
 
 import { IUser } from '../interfaces/user.interface'
 
@@ -12,6 +14,10 @@ function transformValue(doc, ret: { [key: string]: any }) {
 
 export const UserSchema = new mongoose.Schema(
   {
+    _id: {
+      type: String,
+      default: uuidv4
+    },
     name: {
       type: String,
       required: [true, 'Name can not be empty']
@@ -31,15 +37,22 @@ export const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['ADMIN', 'USER'],
-      default: 'USER'
+      enum: ['ADMIN', 'COORDINATOR', 'PARTICIPANT'],
+      required: [true, 'Role can not be empty']
     },
     is_confirmed: {
       type: Boolean,
       required: [true, 'Confirmed can not be empty']
+    },
+    last_login: {
+      type: Date
     }
   },
   {
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at'
+    },
     toObject: {
       virtuals: true,
       versionKey: false,

@@ -90,6 +90,7 @@ export class UserController {
 
   @MessagePattern('user_confirm')
   public async confirmUser(confirmParams: {
+    password: string
     link: string
   }): Promise<IUserConfirmResponse> {
     let result: IUserConfirmResponse
@@ -97,12 +98,13 @@ export class UserController {
     if (confirmParams) {
       const userLink = await this.userService.getUserLink(confirmParams.link)
 
-      if (userLink && userLink[0]) {
-        const userId = userLink[0].user_id
+      if (userLink) {
+        const userId = userLink.user_id
         await this.userService.updateUserById(userId, {
+          password: confirmParams.password,
           is_confirmed: true
         })
-        await this.userService.updateUserLinkById(userLink[0].id, {
+        await this.userService.updateUserLinkById(userLink.id, {
           is_used: true
         })
         result = {
@@ -152,6 +154,10 @@ export class UserController {
       } else {
         try {
           userParams.is_confirmed = false
+          userParams.password = Math.random()
+            .toString(36)
+            .replace(/[^a-z]+/g, '')
+
           const createdUser = await this.userService.createUser(userParams)
           const userLink = await this.userService.createUserLink(createdUser.id)
           delete createdUser.password

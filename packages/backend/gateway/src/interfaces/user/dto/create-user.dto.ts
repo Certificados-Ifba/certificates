@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 
 export enum UserRole {
   Admin = 'ADMIN',
-  User = 'USER'
+  Coordinator = 'COORDINATOR'
 }
 
 export class CreateUserDto {
@@ -17,12 +17,6 @@ export class CreateUserDto {
   })
   email: string
 
-  @ApiProperty({
-    minLength: 6,
-    example: 'test11'
-  })
-  password: string
-
-  @ApiProperty({ enum: ['ADMIN', 'USER'] })
+  @ApiProperty({ enum: ['ADMIN', 'COORDINATOR'] })
   role: UserRole
 }

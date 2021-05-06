@@ -24,9 +24,12 @@ export class UserService {
 
   public async updateUserById(
     id: string,
-    userParams: { is_confirmed: boolean }
+    userParams: { password: string; is_confirmed: boolean }
   ): Promise<IUser> {
-    return this.UserModel.updateOne({ _id: id }, userParams).exec()
+    const UserModel = await this.UserModel.findById(id)
+    UserModel.password = userParams.password
+    UserModel.is_confirmed = userParams.is_confirmed
+    return UserModel.save()
   }
 
   public async createUser(user: IUser): Promise<IUser> {
@@ -41,8 +44,8 @@ export class UserService {
     return await UserLinkModel.save()
   }
 
-  public async getUserLink(link: string): Promise<IUserLink[]> {
-    return this.UserLinkModel.find({ link, is_used: false }).exec()
+  public async getUserLink(link: string): Promise<IUserLink> {
+    return this.UserLinkModel.findOne({ link, is_used: false }).exec()
   }
 
   public async updateUserLinkById(

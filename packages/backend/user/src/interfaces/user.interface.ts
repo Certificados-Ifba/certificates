@@ -7,6 +7,7 @@ export interface IUser extends Document {
   password: string
   role: string
   is_confirmed: boolean
+  last_login: Date
   compareEncryptedPassword: (password: string) => boolean
   getEncryptedPassword: (password: string) => string
 }
