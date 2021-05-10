@@ -12,11 +12,21 @@ import {
   Query,
   Res
 } from '@nestjs/common'
-import { Response } from 'express'
 import { ClientProxy } from '@nestjs/microservices'
-import { ApiTags, ApiCreatedResponse, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger'
+import {
+  ApiTags,
+  ApiCreatedResponse,
+  ApiBearerAuth,
+  ApiOkResponse
+} from '@nestjs/swagger'
+import { Response } from 'express'
 import { Authorization } from 'src/decorators/authorization.decorator'
 import { Permission } from 'src/decorators/permission.decorator'
+import { CreateActivityResponseDto } from 'src/interfaces/activity/dto/create-activity-response.dto'
+import { CreateActivityDto } from 'src/interfaces/activity/dto/create-activity.dto'
+import { GetActivityByIdResponseDto } from 'src/interfaces/activity/dto/get-activity-by-id-response.dto'
+import { GetActivitysResponseDto } from 'src/interfaces/activity/dto/get-activity-response.dto'
+import { UpdateGenericResponseDto } from 'src/interfaces/function/dto/update-function-response.dto'
 import { DeleteGenericResponseDto } from 'src/interfaces/generic/dto/delete-generic-response.dto'
 import { GenericIdDto } from 'src/interfaces/generic/dto/generic-id.dto'
 import { ListGenericDto } from 'src/interfaces/generic/dto/list-generic.dto'
@@ -28,11 +38,6 @@ import { IServiceGenericUpdateByIdResponse } from 'src/interfaces/generic/servic
 import capitalize from 'src/utils/capitalize'
 
 import { IServiceGenericCreateResponse } from '../interfaces/generic/service-generic-create-response.interface'
-import { UpdateGenericResponseDto } from 'src/interfaces/function/dto/update-function-response.dto'
-import { GetActivityByIdResponseDto } from 'src/interfaces/activity/dto/get-activity-by-id-response.dto'
-import { CreateActivityResponseDto } from 'src/interfaces/activity/dto/create-activity-response.dto'
-import { CreateActivityDto } from 'src/interfaces/activity/dto/create-activity.dto'
-import { GetActivitysResponseDto } from 'src/interfaces/activity/dto/get-activity-response.dto'
 
 @Controller('activities')
 @ApiBearerAuth('JWT')

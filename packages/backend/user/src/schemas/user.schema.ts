@@ -46,6 +46,22 @@ export const UserSchema = new mongoose.Schema(
     },
     last_login: {
       type: Date
+    },
+    personal_data: {
+      cpf: {
+        type: String,
+        minlength: [11, 'CPF must be 11 characters'],
+        maxlength: [11, 'CPF must be 11 characters']
+      },
+      dob: {
+        type: Date
+      },
+      phone: {
+        type: String
+      },
+      is_student: {
+        type: Boolean
+      }
     }
   },
   {
