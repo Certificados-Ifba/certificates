@@ -31,12 +31,15 @@ export class UserController {
         email: searchParams.email
       })
 
-      if (user && user[0]) {
-        if (await user[0].compareEncryptedPassword(searchParams.password)) {
+      if (user) {
+        if (await user.compareEncryptedPassword(searchParams.password)) {
+          const userUpdeted = await this.userService.updateUserById(user.id, {
+            last_login: new Date()
+          })
           result = {
             status: HttpStatus.OK,
             message: 'user_search_by_credentials_success',
-            data: { user: user[0] }
+            data: { user: userUpdeted }
           }
         } else {
           result = {
@@ -164,7 +167,7 @@ export class UserController {
         email: userParams.email
       })
 
-      if (usersWithEmail && usersWithEmail.length > 0) {
+      if (usersWithEmail) {
         result = {
           status: HttpStatus.CONFLICT,
           message: 'user_create_conflict',

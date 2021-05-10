@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { IUserListParams } from 'src/interfaces/user-list-params.interface'
 import { DataResponse } from 'src/interfaces/user-list-response.interface'
+import { IUserUpdateParams } from 'src/interfaces/user-update-params.interface'
 
 import { IUserLink } from '../interfaces/user-link.interface'
 import { IUser } from '../interfaces/user.interface'
@@ -16,8 +17,8 @@ export class UserService {
     private readonly configService: ConfigService
   ) {}
 
-  public async searchUser(params: { email: string }): Promise<IUser[]> {
-    return this.UserModel.find(params).exec()
+  public async searchUser(params: { email: string }): Promise<IUser> {
+    return this.UserModel.findOne(params).exec()
   }
 
   public async searchUserById(id: string): Promise<IUser> {
@@ -55,11 +56,21 @@ export class UserService {
 
   public async updateUserById(
     id: string,
-    userParams: { password: string; is_confirmed: boolean }
+    userParams: IUserUpdateParams
   ): Promise<IUser> {
     const UserModel = await this.UserModel.findById(id)
-    UserModel.password = userParams.password
-    UserModel.is_confirmed = userParams.is_confirmed
+    if (userParams.name) UserModel.name = userParams.name
+    if (userParams.password) UserModel.password = userParams.password
+    if (userParams.is_confirmed)
+      UserModel.is_confirmed = userParams.is_confirmed
+    if (userParams.last_login) UserModel.last_login = userParams.last_login
+    if (userParams?.personal_data?.cpf)
+      UserModel.personal_data.cpf = userParams.personal_data.cpf
+    if (userParams?.personal_data?.dob)
+      UserModel.personal_data.dob = userParams.personal_data.dob
+    if (userParams?.personal_data?.is_student)
+      UserModel.personal_data.is_student = userParams.personal_data.is_student
+
     return UserModel.save()
   }
 
