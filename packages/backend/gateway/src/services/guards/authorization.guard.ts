@@ -64,7 +64,7 @@ export class AuthGuard implements CanActivate {
       .send('user_get_by_id', userTokenInfo.data.user.id)
       .toPromise()
 
-    request.user = userInfo.user
+    request.user = userInfo.data.user
     return true
   }
 }
