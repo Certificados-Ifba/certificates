@@ -5,6 +5,7 @@ import { ClientProxyFactory } from '@nestjs/microservices'
 import { ActivitiesController } from './controllers/activities.controller'
 import { EventsController } from './controllers/events.controller'
 import { FunctionsController } from './controllers/functions.controller'
+import { ParticipantsController } from './controllers/participant.controller'
 import { TestEventsController } from './controllers/test.controller'
 import { UsersController } from './controllers/users.controller'
 import { ConfigService } from './services/config/config.service'
@@ -17,6 +18,7 @@ import { PermissionGuard } from './services/guards/permission.guard'
     ActivitiesController,
     EventsController,
     FunctionsController,
+    ParticipantsController,
     TestEventsController,
     UsersController
   ],

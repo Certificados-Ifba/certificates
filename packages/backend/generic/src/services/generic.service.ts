@@ -22,7 +22,7 @@ export class GenericService {
     sortBy = 'created_at',
     orderBy = 'ASC'
   }: IGenericListParams): Promise<DataResponse> {
-    const pattern = name ? '^' + name + '' : '.*'
+    const pattern = name ? '.*' + name + '.*' : '.*'
     const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
 
     const generics = await this.GenericModel.find({

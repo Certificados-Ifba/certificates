@@ -1,0 +1,98 @@
+version: '3.9'
+
+services:
+
+  web:
+    image: 127.0.0.1:5000/certificates-web
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.web
+    command: yarn workspace @certificates/web prod
+    deploy:
+      labels:
+        - traefik.http.services.certificates-web.loadbalancer.server.port=3000
+        - traefik.http.routers.certificates-web.rule=Host(`certificados.${DOMAIN-localhost}`)
+        - traefik.http.routers.certificates-web.service=certificates-web
+        - traefik.http.routers.certificates-web.entrypoints=web
+        - traefik.docker.network=public
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        delay: 10s
+        order: start-first
+        parallelism: 1
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+    logging:
+      driver: json-file
+      options:
+        'max-size': '10m'
+        'max-file': '5'
+    networks:
+      - public
+
+  # db:
+  #   image: 'bitnami/mongodb:latest'
+  #   environment:
+  #     - 'MONGODB_DATABASE=${MONGO_DATABASE:-certificates}'
+  #     - 'MONGODB_USERNAME=${MONGO_USER:-mongo}'
+  #     - 'MONGODB_PASSWORD=${MONGO_PASSWORD:-pass}'
+  #   volumes:
+  #     - mongo_data:/bitnami/mongodb
+  #   ports:
+  #     - '${MONGO_PORT:-27017}:27017'
+  #   networks:
+  #     - backend
+
+  # gui-db:
+  #   image: mongo-express
+  #   environment:
+  #     - 'ME_CONFIG_BASICAUTH_USERNAME=${MONGO_GUI_USER:-admin}'
+  #     - 'ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_GUI_PASSWORD:-admin}'
+  #     - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
+  #     - 'ME_CONFIG_MONGODB_SERVER=${MONGO_HOST:-db}'
+  #     - 'ME_CONFIG_MONGODB_PORT=${MONGO_PORT:-27017}'
+  #     - 'ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGO_DATABASE:-certificates}'
+  #     - 'ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_USER:-mongo}'
+  #     - 'ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_PASSWORD:-pass}'
+  #   deploy:
+  #     labels:
+  #       - traefik.http.services.mongo-gui.loadbalancer.server.port=8081
+  #       - traefik.http.routers.mongo-gui.rule=Host(`mongo.${DOMAIN-localhost}`)
+  #       - traefik.http.routers.mongo-gui.service=mongo-gui
+  #       - traefik.http.routers.mongo-gui.entrypoints=web
+  #       - traefik.docker.network=public
+  #     restart_policy:
+  #       condition: any
+  #       delay: 5s
+  #       max_attempts: 3
+  #       window: 120s
+  #     update_config:
+  #       delay: 10s
+  #       order: start-first
+  #       parallelism: 1
+  #     rollback_config:
+  #       parallelism: 0
+  #       order: stop-first
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       'max-size': '10m'
+  #       'max-file': '5'
+  #   networks:
+  #     - backend
+  #     - public
+
+# volumes:
+#   mongo_data: {}
+
+networks:
+  # backend:
+  #   name: backend
+  #   driver: overlay
+  public:
+    external: true

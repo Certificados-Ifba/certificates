@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import getErrorMessage from '../utils/getErrorMessage'
 
 const api = axios.create({
-  baseURL: process.env.baseURL || 'http://localhost:3001'
+  baseURL: process.env.baseURL
 })
 
 api.interceptors.request.use(config => {

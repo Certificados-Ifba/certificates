@@ -7,6 +7,12 @@ export interface IUser extends Document {
   password: string
   role: string
   is_confirmed: boolean
+  last_login?: Date
+  personal_data?: {
+    cpf: String
+    dob: Date
+    is_student: Boolean
+  }
   compareEncryptedPassword: (password: string) => boolean
   getEncryptedPassword: (password: string) => string
 }

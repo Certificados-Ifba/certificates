@@ -23,4 +23,7 @@ export class CreateEventDto {
 
   @ApiProperty({ example: new Date('2019-10-11') })
   end_date: Date
+
+  @ApiProperty({ example: '5d987c3bfb881ec86b476bcc' })
+  user_id: string
 }
