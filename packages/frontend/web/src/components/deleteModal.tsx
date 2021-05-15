@@ -24,8 +24,8 @@ const DeleteModal: React.FC<{
         </h2>
       </header>
       <Form onSubmit={handleSubmit}>
-        {children}
-        <Row>
+        <div className="modal-body">{children}</div>
+        <div className="modal-footer">
           <Button
             onClick={() => {
               setOpenModal(false)
@@ -39,7 +39,7 @@ const DeleteModal: React.FC<{
           <Button color="danger" type="submit" outline>
             <FiTrash2 size={20} /> <span>Excluir</span>
           </Button>
-        </Row>
+        </div>
       </Form>
     </Modal>
   )

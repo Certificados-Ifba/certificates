@@ -122,10 +122,7 @@ const EventModal: React.FC<{
 
   const formRef = useRef<FormHandles>(null)
 
-  const [step, setStep] = useState<'step-1' | 'step-2'>('step-1')
-
   const handleCloseSaveModal = useCallback(() => {
-    setStep('step-1')
     formRef.current.reset()
     formRef.current.setErrors({})
     setOpenModal(false)
@@ -133,75 +130,40 @@ const EventModal: React.FC<{
 
   const handleSubmit = useCallback(
     data => {
-      if (step === 'step-1') {
-        const schema = Yup.object().shape({
-          name: Yup.string().required(`O evento precisa ter um nome`),
-          initials: Yup.string().required(
-            `Por favor, digite a sigla do projeto`
-          ),
-          coordinator: Yup.string().required(
-            `Você precisa selecionar um coordenador para o evento`
-          )
+      const schema = Yup.object().shape({
+        name: Yup.string().required(`O evento precisa ter um nome`),
+        initials: Yup.string().required(`Por favor, digite a sigla do projeto`),
+        coordinator: Yup.string().required(
+          `Você precisa selecionar um coordenador para o evento`
+        ),
+        startDate: Yup.string().required(`Selecione a data de início`),
+        endDate: Yup.string().required(`Selecione a data do fim`)
+      })
+      schema
+        .validate(data, {
+          abortEarly: false
         })
-        schema
-          .validate(data, {
-            abortEarly: false
-          })
-          .then(data => {
-            setStep('step-2')
-          })
-          .catch(err => {
-            const validationErrors: { [key: string]: string } = {}
-            if (err instanceof Yup.ValidationError) {
-              err.inner.forEach((error: Yup.ValidationError) => {
-                validationErrors[error.path] = error.message
-              })
-              formRef.current?.setErrors(validationErrors)
-            } else {
-              const message = 'Erro ao adicionar o evento.'
-              addToast({
-                title: `Erro desconhecido`,
-                type: 'error',
-                description: message
-              })
-            }
-          })
-      } else if (step === 'step-2') {
-        const schema = Yup.object().shape({
-          name: Yup.string().required(`O evento precisa ter um nome`),
-          initials: Yup.string().required(
-            `Por favor, digite a sigla do projeto`
-          ),
-          coordinator: Yup.string().required(
-            `Você precisa selecionar um coordenador para o evento`
-          )
+        .then(data => {
+          console.log(data)
         })
-        schema
-          .validate(data, {
-            abortEarly: false
-          })
-          .then(data => {
-            setStep('step-2')
-          })
-          .catch(err => {
-            const validationErrors: { [key: string]: string } = {}
-            if (err instanceof Yup.ValidationError) {
-              err.inner.forEach((error: Yup.ValidationError) => {
-                validationErrors[error.path] = error.message
-              })
-              formRef.current?.setErrors(validationErrors)
-            } else {
-              const message = 'Erro ao adicionar o evento.'
-              addToast({
-                title: `Erro desconhecido`,
-                type: 'error',
-                description: message
-              })
-            }
-          })
-      }
+        .catch(err => {
+          const validationErrors: { [key: string]: string } = {}
+          if (err instanceof Yup.ValidationError) {
+            err.inner.forEach((error: Yup.ValidationError) => {
+              validationErrors[error.path] = error.message
+            })
+            formRef.current?.setErrors(validationErrors)
+          } else {
+            const message = 'Erro ao adicionar o evento.'
+            addToast({
+              title: `Erro desconhecido`,
+              type: 'error',
+              description: message
+            })
+          }
+        })
     },
-    [addToast, step]
+    [addToast]
   )
 
   return (
@@ -213,86 +175,87 @@ const EventModal: React.FC<{
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <Input
-          formRef={formRef}
-          marginBottom="sm"
-          name="name"
-          label="Nome"
-          placeholder="Nome do Evento"
-          icon={FiBookmark}
-          hidden={step === 'step-2'}
-        />
-        <Input
-          formRef={formRef}
-          marginBottom="sm"
-          name="initials"
-          label="Sigla"
-          placeholder="Sigla"
-          icon={FiTag}
-          hidden={step === 'step-2'}
-        />
-        <Select
-          hidden={step === 'step-2'}
-          formRef={formRef}
-          label="Coordenador"
-          name="coordinator"
-          isSearchable={true}
-          marginBottom="md"
-          options={[
-            {
-              value: '1',
-              label: 'Lucas Nascimento Bertoldi'
-            },
-            {
-              value: '2',
-              label: 'Pablo F Matos'
-            },
-            {
-              value: '3',
-              label: 'Matheus Coqueiro'
-            }
-          ]}
-        />
-        <Row>
+        <div className="modal-body">
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="name"
+            label="Nome"
+            placeholder="Nome do Evento"
+            icon={FiBookmark}
+          />
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="initials"
+            label="Sigla"
+            placeholder="Sigla"
+            icon={FiTag}
+          />
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="number"
+            label="Número"
+            placeholder="Número"
+            type="number"
+            icon={FiTag}
+          />
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="startDate"
+            label="Data Inicial"
+            placeholder="Data Inicial"
+            type="date"
+            icon={FiCalendar}
+          />
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="endDate"
+            label="Data Final"
+            placeholder="Data Final"
+            type="date"
+            icon={FiCalendar}
+          />
+          <Select
+            formRef={formRef}
+            label="Coordenador"
+            name="coordinator"
+            isSearchable={true}
+            options={[
+              {
+                value: '1',
+                label: 'Lucas Nascimento Bertoldi'
+              },
+              {
+                value: '2',
+                label: 'Pablo F Matos'
+              },
+              {
+                value: '3',
+                label: 'Matheus Coqueiro'
+              }
+            ]}
+          />
+        </div>
+        <div className="modal-footer">
           <Button
             onClick={() => {
-              if (step === 'step-2') {
-                setStep('step-1')
-              } else {
-                handleCloseSaveModal()
-              }
+              handleCloseSaveModal()
             }}
             color="secondary"
             type="button"
             outline
           >
-            {step === 'step-2' ? (
-              <>
-                <FiArrowLeft size={20} />
-                <span>Voltar</span>
-              </>
-            ) : (
-              <>
-                <FiX size={20} />
-                <span>Cancelar</span>
-              </>
-            )}
+            <FiX size={20} />
+            <span>Cancelar</span>
           </Button>
-          <Button
-            color={step === 'step-2' ? 'primary' : 'secondary'}
-            type="submit"
-          >
-            {step === 'step-1' ? (
-              <>
-                <FiArrowRight size={20} /> <span>Próximo</span>
-              </>
-            ) : (
-              <>
-                <FiPlus size={20} /> <span>Adicionar</span>
-              </>
-            )}
+          <Button color="primary" type="submit">
+            <FiPlus size={20} /> <span>Adicionar</span>
           </Button>
-        </Row>
+        </div>
       </Form>
     </Modal>
   )

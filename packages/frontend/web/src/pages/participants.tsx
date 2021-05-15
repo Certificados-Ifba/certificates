@@ -19,6 +19,7 @@ import {
   FiEdit,
   FiInfo,
   FiMail,
+  FiPhoneCall,
   FiPlus,
   FiSearch,
   FiTrash2,
@@ -192,7 +193,7 @@ const Participants: React.FC = () => {
             Tem certeza que você deseja excluir o usuário de{' '}
             <b>{participant?.name}</b>?
           </Alert>
-          <Alert size="sm" icon={FiMail} marginBottom="md">
+          <Alert size="sm" icon={FiMail}>
             <b>{participant?.email}</b>
           </Alert>
         </>
@@ -211,15 +212,12 @@ const ParticipantModal: React.FC<{
 
   const formRef = useRef<FormHandles>(null)
 
-  const [step, setStep] = useState<'step-1' | 'step-2'>('step-1')
-
   const [participant, setParticipant] = useState<{
     name: string
     email: string
   }>(null)
 
   const handleCloseSaveModal = useCallback(() => {
-    setStep('step-1')
     formRef.current.reset()
     formRef.current.setErrors({})
     setOpenModal(false)
@@ -249,88 +247,76 @@ const ParticipantModal: React.FC<{
 
   const handleSubmit = useCallback(
     data => {
-      if (
-        (type === 'add-participant' && step === 'step-1') ||
-        type === 'update-participant'
-      ) {
-        const schema = Yup.object().shape({
-          name: Yup.string().required(`O participante precisa ter um nome`),
-          birthday: Yup.string().required(`Selecione a data de nascimento`),
-          cpf: Yup.string()
-            .required(`Digite o CPF do participante`)
-            .min(14, 'Por favor, digite um CPF válido.')
-            .max(14, 'Por favor, digite um CPF válido.'),
-          institution: Yup.string().required(
-            `Selecione se o participante é da instituição.`
+      const schemaObj: any = {}
+      if (type === 'add-participant' || type === 'update-participant') {
+        schemaObj.name = Yup.string().required(
+          `O participante precisa ter um nome`
+        )
+        schemaObj.birthday = Yup.string().required(
+          `Selecione a data de nascimento`
+        )
+        schemaObj.institution = Yup.string().required(
+          `Selecione se o participante é da instituição.`
+        )
+        schemaObj.phone = Yup.string().matches(
+          /(^$|\((\d{2})\) (\d{4}|\d{5})-(\d{4}))/,
+          'Por favor, digite um telefone válido.'
+        )
+        schemaObj.cpf = Yup.string()
+          .matches(
+            /(\d{3}).(\d{3}).(\d{3})-(\d{2})/,
+            'Por favor, digite um CPF válido.'
           )
-        })
-        schema
-          .validate(data, {
-            abortEarly: false
-          })
-          .then(data => {
-            setStep('step-2')
-          })
-          .catch(err => {
-            const validationErrors: { [key: string]: string } = {}
-            if (err instanceof Yup.ValidationError) {
-              err.inner.forEach((error: Yup.ValidationError) => {
-                validationErrors[error.path] = error.message
-              })
-              formRef.current?.setErrors(validationErrors)
-            } else {
-              const message = 'Erro ao adicionar o participante.'
-              addToast({
-                title: `Erro desconhecido`,
-                type: 'error',
-                description: message
-              })
-            }
-          })
-      } else {
-        const schema = Yup.object().shape({
-          email: Yup.string()
-            .email('Por favor, digite um e-mail válido')
-            .required(`O participante precisa ter um e-mail`),
-          repeatEmail: Yup.string()
-            .email('Por favor, digite um e-mail válido')
-            .required('Você precisa repetir o e-mail')
-            .oneOf([data.email], 'Os e-mails devem ser iguais.')
-        })
-        schema
-          .validate(data, {
-            abortEarly: false
-          })
-          .then(data => {
-            console.log(data)
-
-            // enviar req
-          })
-          .catch(err => {
-            const validationErrors: { [key: string]: string } = {}
-            if (err instanceof Yup.ValidationError) {
-              err.inner.forEach((error: Yup.ValidationError) => {
-                validationErrors[error.path] = error.message
-              })
-              formRef.current?.setErrors(validationErrors)
-            } else {
-              let message = 'Erro ao '
-              if (type === 'update-email') {
-                message += 'atualizar o e-mail'
-              } else {
-                message += 'adicionar o participante'
-              }
-              message += '.'
-              addToast({
-                title: `Erro desconhecido`,
-                type: 'error',
-                description: message
-              })
-            }
-          })
+          .required(`Digite o CPF do participante`)
       }
+
+      if (type === 'add-participant' || type === 'update-email') {
+        schemaObj.email = Yup.string()
+          .email('Por favor, digite um e-mail válido')
+          .required(`O usuário precisa ter um e-mail`)
+      }
+
+      if (type === 'update-email') {
+        schemaObj.repeatEmail = Yup.string()
+          .email('Por favor, digite um e-mail válido')
+          .required('Você precisa repetir o e-mail')
+          .oneOf([data.email], 'Os e-mails devem ser iguais.')
+      }
+
+      const schema = Yup.object().shape(schemaObj)
+      schema
+        .validate(data, {
+          abortEarly: false
+        })
+        .then(data => {
+          console.log(data)
+
+          // enviar req
+        })
+        .catch(err => {
+          const validationErrors: { [key: string]: string } = {}
+          if (err instanceof Yup.ValidationError) {
+            err.inner.forEach((error: Yup.ValidationError) => {
+              validationErrors[error.path] = error.message
+            })
+            formRef.current?.setErrors(validationErrors)
+          } else {
+            let message = 'Erro ao '
+            if (type === 'update-email') {
+              message += 'atualizar o e-mail'
+            } else {
+              message += 'adicionar o participante'
+            }
+            message += '.'
+            addToast({
+              title: `Erro desconhecido`,
+              type: 'error',
+              description: message
+            })
+          }
+        })
     },
-    [type, addToast, step]
+    [type, addToast]
   )
 
   return (
@@ -356,138 +342,124 @@ const ParticipantModal: React.FC<{
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        {type === 'update-email' && (
-          <>
-            <Alert size="sm" marginBottom="xs">
-              Você irá alterar o e-mail de:
-            </Alert>
-            <Alert size="sm" icon={FiUser} marginBottom="sm">
-              <b>{participant?.name}</b>
-            </Alert>
-            <Alert size="sm" marginBottom="xs">
-              O antigo e-mail dele(a) é:
-            </Alert>
-            <Alert size="sm" icon={FiMail} marginBottom="md">
-              <b>{participant?.email}</b>
-            </Alert>
-          </>
-        )}
-        <Input
-          formRef={formRef}
-          marginBottom="sm"
-          name="name"
-          label="Nome"
-          placeholder="Nome"
-          icon={FiUser}
-          hidden={type === 'update-email' || step === 'step-2'}
-        />
-        <Input
-          formRef={formRef}
-          marginBottom="sm"
-          name="cpf"
-          label="CPF"
-          placeholder="CPF"
-          type="cpf"
-          icon={FiCreditCard}
-          hidden={type === 'update-email' || step === 'step-2'}
-        />
-        <Input
-          formRef={formRef}
-          marginBottom="sm"
-          name="birthday"
-          label="Data de Nascimento"
-          type="date"
-          icon={FiCalendar}
-          hidden={type === 'update-email' || step === 'step-2'}
-        />
-        <Select
-          hidden={type === 'update-email' || step === 'step-2'}
-          formRef={formRef}
-          label="É da Instituição?"
-          name="institution"
-          isSearchable={false}
-          marginBottom="md"
-          options={[
-            {
-              value: true,
-              label: 'Sim'
-            },
-            {
-              value: false,
-              label: 'Não'
+        <div className="modal-body">
+          {type === 'update-email' && (
+            <>
+              <Alert size="sm" marginBottom="xs">
+                Você irá alterar o e-mail de:
+              </Alert>
+              <Alert size="sm" icon={FiUser} marginBottom="sm">
+                <b>{participant?.name}</b>
+              </Alert>
+              <Alert size="sm" marginBottom="xs">
+                O antigo e-mail dele(a) é:
+              </Alert>
+              <Alert size="sm" icon={FiMail} marginBottom="md">
+                <b>{participant?.email}</b>
+              </Alert>
+            </>
+          )}
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="name"
+            label="Nome"
+            placeholder="Nome"
+            icon={FiUser}
+            hidden={type === 'update-email'}
+          />
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="cpf"
+            label="CPF"
+            placeholder="CPF"
+            type="cpf"
+            icon={FiCreditCard}
+            hidden={type === 'update-email'}
+          />
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="phone"
+            label="Telefone"
+            placeholder="Telefone"
+            type="phone"
+            icon={FiPhoneCall}
+            hidden={type === 'update-email'}
+          />
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="birthday"
+            label="Data de Nascimento"
+            type="date"
+            icon={FiCalendar}
+            hidden={type === 'update-email'}
+          />
+          <Select
+            hidden={type === 'update-email'}
+            formRef={formRef}
+            label="É da Instituição?"
+            name="institution"
+            isSearchable={false}
+            marginBottom={type === 'update-participant' ? '' : 'sm'}
+            options={[
+              {
+                value: true,
+                label: 'Sim'
+              },
+              {
+                value: false,
+                label: 'Não'
+              }
+            ]}
+          />
+          <Input
+            hidden={type === 'update-participant'}
+            formRef={formRef}
+            marginBottom={type === 'update-email' ? 'sm' : ''}
+            name="email"
+            label={type === 'update-email' ? 'Novo E-mail' : 'E-mail'}
+            placeholder="email@exemplo.com"
+            icon={FiMail}
+            type="text"
+          />
+          <Input
+            hidden={type !== 'update-email'}
+            formRef={formRef}
+            name="repeatEmail"
+            label={
+              type === 'update-email'
+                ? 'Repetir o Novo E-mail'
+                : 'Repetir o E-mail'
             }
-          ]}
-        />
-        <Input
-          hidden={
-            type === 'update-participant' ||
-            (type === 'add-participant' && step === 'step-1')
-          }
-          formRef={formRef}
-          marginBottom="sm"
-          name="email"
-          label={type === 'update-email' ? 'Novo E-mail' : 'E-mail'}
-          placeholder="email@exemplo.com"
-          icon={FiMail}
-          type="text"
-        />
-        <Input
-          hidden={
-            type === 'update-participant' ||
-            (type === 'add-participant' && step === 'step-1')
-          }
-          formRef={formRef}
-          marginBottom="md"
-          name="repeatEmail"
-          label={
-            type === 'update-email'
-              ? 'Repetir o Novo E-mail'
-              : 'Repetir o E-mail'
-          }
-          placeholder="email@exemplo.com"
-          icon={FiMail}
-          type="text"
-        />
-        <Row>
+            placeholder="email@exemplo.com"
+            icon={FiMail}
+            type="text"
+          />
+        </div>
+        <div className="modal-footer">
           <Button
             onClick={() => {
-              if (step === 'step-2') {
-                setStep('step-1')
-              } else {
-                handleCloseSaveModal()
-              }
+              handleCloseSaveModal()
             }}
             color="secondary"
             type="button"
             outline
           >
-            {type === 'add-participant' && step === 'step-2' ? (
-              <>
-                <FiArrowLeft size={20} />
-                <span>Voltar</span>
-              </>
-            ) : (
-              <>
-                <FiX size={20} />
-                <span>Cancelar</span>
-              </>
-            )}
+            <>
+              <FiX size={20} />
+              <span>Cancelar</span>
+            </>
           </Button>
           <Button
-            color={
-              type === 'add-participant' && step === 'step-2'
-                ? 'primary'
-                : 'secondary'
-            }
+            color={type === 'add-participant' ? 'primary' : 'secondary'}
             type="submit"
           >
             {type === 'update-participant' || type === 'update-email' ? (
               <>
                 <FiCheck size={20} /> <span>Atualizar</span>
-              </>
-            ) : type === 'add-participant' && step === 'step-1' ? (
-              <>
-                <FiArrowRight size={20} /> <span>Próximo</span>
               </>
             ) : (
               <>
@@ -495,7 +467,7 @@ const ParticipantModal: React.FC<{
               </>
             )}
           </Button>
-        </Row>
+        </div>
       </Form>
     </Modal>
   )

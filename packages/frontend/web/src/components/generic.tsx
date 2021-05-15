@@ -266,23 +266,24 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
           </h2>
         </header>
         <Form ref={formRef} onSubmit={handleSubmit}>
-          <Input
-            formRef={formRef}
-            marginBottom="md"
-            name="name"
-            label="Nome"
-            placeholder="Nome"
-            icon={FiUser}
-            disabled={loading}
-            hidden={isDeleted}
-          />
-          {isDeleted && (
-            <Alert marginBottom="md">
-              Tem certeza que você deseja excluir a {`${name.toLowerCase()} `}
-              <b>{selectedName}</b>?
-            </Alert>
-          )}
-          <Row>
+          <div className="modal-body">
+            <Input
+              formRef={formRef}
+              name="name"
+              label="Nome"
+              placeholder="Nome"
+              icon={FiUser}
+              disabled={loading}
+              hidden={isDeleted}
+            />
+            {isDeleted && (
+              <Alert>
+                Tem certeza que você deseja excluir a {`${name.toLowerCase()} `}
+                <b>{selectedName}</b>?
+              </Alert>
+            )}
+          </div>
+          <div className="modal-footer">
             <Button
               onClick={() => {
                 handleCloseModal()
@@ -316,7 +317,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
                 </>
               )}
             </Button>
-          </Row>
+          </div>
         </Form>
       </Modal>
     </>

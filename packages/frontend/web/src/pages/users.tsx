@@ -205,7 +205,7 @@ const Users: React.FC = () => {
             Tem certeza que você deseja excluir o usuário de <b>{user?.name}</b>
             ?
           </Alert>
-          <Alert size="sm" icon={FiMail} marginBottom="md">
+          <Alert size="sm" icon={FiMail}>
             <b>{user?.email}</b>
           </Alert>
         </>
@@ -254,17 +254,27 @@ const UserModal: React.FC<{
 
   const handleSubmit = useCallback(
     data => {
-      const schema = Yup.object().shape({
-        name: Yup.string().required(`O usuário precisa ter um nome`),
-        email: Yup.string()
-          .email('Por favor, digite um e-mail válido')
-          .required(`O usuário precisa ter um e-mail`),
-        repeatEmail: Yup.string()
+      const schemaObj: any = {}
+      if (type === 'add-user' || type === 'update-user') {
+        schemaObj.name = Yup.string().required(`O usuário precisa ter um nome`)
+        schemaObj.role = Yup.string().required(
+          `Você precisa selecionar um privilégio`
+        )
+      }
+
+      if (type === 'add-user' || type === 'update-email') {
+        schemaObj.repeatEmail = Yup.string()
           .email('Por favor, digite um e-mail válido')
           .required('Você precisa repetir o e-mail')
-          .oneOf([data.email], 'Os e-mails devem ser iguais.'),
-        role: Yup.string().required(`Você precisa selecionar um privilégio`)
-      })
+          .oneOf([data.email], 'Os e-mails devem ser iguais.')
+        schemaObj.email = Yup.string()
+          .email('Por favor, digite um e-mail válido')
+          .required(`O usuário precisa ter um e-mail`)
+      }
+
+      console.log(schemaObj)
+
+      const schema = Yup.object().shape(schemaObj)
       schema
         .validate(data, {
           abortEarly: false
@@ -325,84 +335,85 @@ const UserModal: React.FC<{
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        {type === 'update-email' && (
-          <>
-            <Alert size="sm" marginBottom="xs">
-              Você irá alterar o e-mail de:
-            </Alert>
-            <Alert size="sm" icon={FiUser} marginBottom="sm">
-              <b>{user?.name}</b>
-            </Alert>
-            <Alert size="sm" marginBottom="xs">
-              O antigo e-mail dele(a) é:
-            </Alert>
-            <Alert size="sm" icon={FiMail} marginBottom="md">
-              <b>{user?.email}</b>
-            </Alert>
-          </>
-        )}
-        {type === 'update-user' && (
-          <>
-            <Alert size="sm" marginBottom="sm">
-              O e-mail de {user?.name} é:
-            </Alert>
-            <Alert size="sm" icon={FiMail} marginBottom="md">
-              <b>{user?.email}</b>
-            </Alert>
-          </>
-        )}
-        <Input
-          formRef={formRef}
-          marginBottom="sm"
-          name="name"
-          label="Nome"
-          placeholder="Nome"
-          icon={FiUser}
-          hidden={type === 'update-email'}
-        />
-        <Select
-          hidden={type === 'update-email'}
-          formRef={formRef}
-          label="Privilégio"
-          name="role"
-          isSearchable={false}
-          marginBottom={type === 'add-user' ? 'sm' : 'md'}
-          options={[
-            {
-              value: 'ADMIN',
-              label: 'Administrador'
-            },
-            {
-              value: 'EVENT_MANAGER',
-              label: 'Coordenador de Eventos'
+        <div className="modal-body">
+          {type === 'update-email' && (
+            <>
+              <Alert size="sm" marginBottom="xs">
+                Você irá alterar o e-mail de:
+              </Alert>
+              <Alert size="sm" icon={FiUser} marginBottom="sm">
+                <b>{user?.name}</b>
+              </Alert>
+              <Alert size="sm" marginBottom="xs">
+                O antigo e-mail dele(a) é:
+              </Alert>
+              <Alert size="sm" icon={FiMail} marginBottom="md">
+                <b>{user?.email}</b>
+              </Alert>
+            </>
+          )}
+          {type === 'update-user' && (
+            <>
+              <Alert size="sm" marginBottom="sm">
+                O e-mail de {user?.name} é:
+              </Alert>
+              <Alert size="sm" icon={FiMail} marginBottom="md">
+                <b>{user?.email}</b>
+              </Alert>
+            </>
+          )}
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="name"
+            label="Nome"
+            placeholder="Nome"
+            icon={FiUser}
+            hidden={type === 'update-email'}
+          />
+          <Select
+            hidden={type === 'update-email'}
+            formRef={formRef}
+            label="Privilégio"
+            name="role"
+            isSearchable={false}
+            marginBottom={type === 'add-user' ? 'sm' : ''}
+            options={[
+              {
+                value: 'ADMIN',
+                label: 'Administrador'
+              },
+              {
+                value: 'EVENT_MANAGER',
+                label: 'Coordenador de Eventos'
+              }
+            ]}
+          />
+          <Input
+            hidden={type === 'update-user'}
+            formRef={formRef}
+            marginBottom={'sm'}
+            name="email"
+            label={type === 'update-email' ? 'Novo E-mail' : 'E-mail'}
+            placeholder="email@exemplo.com"
+            icon={FiMail}
+            type="text"
+          />
+          <Input
+            hidden={type === 'update-user'}
+            formRef={formRef}
+            name="repeatEmail"
+            label={
+              type === 'update-email'
+                ? 'Repetir o Novo E-mail'
+                : 'Repetir o E-mail'
             }
-          ]}
-        />
-        <Input
-          hidden={type === 'update-user'}
-          formRef={formRef}
-          marginBottom="sm"
-          name="email"
-          label={type === 'update-email' ? 'Novo E-mail' : 'E-mail'}
-          placeholder="email@exemplo.com"
-          icon={FiMail}
-          type="text"
-        />
-        <Input
-          hidden={type === 'update-user'}
-          formRef={formRef}
-          marginBottom="md"
-          name="repeatEmail"
-          label={
-            type === 'update-email'
-              ? 'Repetir o Novo E-mail'
-              : 'Repetir o E-mail'
-          }
-          placeholder="email@exemplo.com"
-          icon={FiMail}
-          type="text"
-        />
-        <Row>
+            placeholder="email@exemplo.com"
+            icon={FiMail}
+            type="text"
+          />
+        </div>
+        <div className="modal-footer">
           <Button
             onClick={() => {
               handleCloseSaveModal()
@@ -428,7 +439,7 @@ const UserModal: React.FC<{
               </>
             )}
           </Button>
-        </Row>
+        </div>
       </Form>
     </Modal>
   )
