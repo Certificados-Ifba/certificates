@@ -13,6 +13,7 @@ export class CreateUserResponseDto {
         email: 'test@ifba.edu.br',
         is_confirmed: false,
         role: 'USER',
+        last_login: null,
         id: '5d987c3bfb881ec86b476bcc'
       }
     },
@@ -20,7 +21,6 @@ export class CreateUserResponseDto {
   })
   data: {
     user: IUser
-    token: string
   }
 
   @ApiProperty({ example: null, nullable: true })

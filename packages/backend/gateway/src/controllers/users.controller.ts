@@ -61,7 +61,7 @@ export class UsersController {
     return {
       message: userResponse.message,
       data: {
-        user: userResponse.user
+        user: userResponse.data.user
       },
       errors: null
     }
@@ -88,17 +88,10 @@ export class UsersController {
       )
     }
 
-    const createTokenResponse: IServiveTokenCreateResponse = await this.tokenServiceClient
-      .send('token_create', {
-        user: createUserResponse.user
-      })
-      .toPromise()
-
     return {
       message: createUserResponse.message,
       data: {
-        user: createUserResponse.user,
-        token: createTokenResponse.token
+        user: createUserResponse.data.user
       },
       errors: null
     }
@@ -128,7 +121,7 @@ export class UsersController {
 
     const createTokenResponse: IServiveTokenCreateResponse = await this.tokenServiceClient
       .send('token_create', {
-        user: getUserResponse.user
+        user: getUserResponse.data.user
       })
       .toPromise()
 
@@ -150,7 +143,7 @@ export class UsersController {
   public async logoutUser(
     @Req() request: IAuthorizedRequest
   ): Promise<LogoutUserResponseDto> {
-    console.log(request)
+    console.log(request, 'Teste')
     const userInfo = request.user
 
     const destroyTokenResponse: IServiceTokenDestroyResponse = await this.tokenServiceClient
@@ -177,16 +170,17 @@ export class UsersController {
     }
   }
 
-  @Get('/confirm/:link')
+  @Post('/confirm')
   @ApiCreatedResponse({
     type: ConfirmUserResponseDto
   })
   public async confirmUser(
-    @Param() params: ConfirmUserDto
+    @Body() confirmRequest: ConfirmUserDto
   ): Promise<ConfirmUserResponseDto> {
     const confirmUserResponse: IServiceUserConfirmResponse = await this.userServiceClient
       .send('user_confirm', {
-        link: params.link
+        password: confirmRequest.password,
+        link: confirmRequest.link
       })
       .toPromise()
 
@@ -201,10 +195,18 @@ export class UsersController {
       )
     }
 
+    const createTokenResponse: IServiveTokenCreateResponse = await this.tokenServiceClient
+      .send('token_create', {
+        user: confirmUserResponse.user
+      })
+      .toPromise()
+
     return {
       message: confirmUserResponse.message,
       errors: null,
-      data: null
+      data: {
+        token: createTokenResponse.token
+      }
     }
   }
 }

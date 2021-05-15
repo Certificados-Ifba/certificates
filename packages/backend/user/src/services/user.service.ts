@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
+import { IUserListParams } from 'src/interfaces/user-list-params.interface'
+import { DataResponse } from 'src/interfaces/user-list-response.interface'
+import { IUserUpdateParams } from 'src/interfaces/user-update-params.interface'
 
 import { IUserLink } from '../interfaces/user-link.interface'
 import { IUser } from '../interfaces/user.interface'
@@ -14,24 +17,70 @@ export class UserService {
     private readonly configService: ConfigService
   ) {}
 
-  public async searchUser(params: { email: string }): Promise<IUser[]> {
-    return this.UserModel.find(params).exec()
+  public async searchUser(params: { email: string }): Promise<IUser> {
+    return this.UserModel.findOne(params).exec()
   }
 
   public async searchUserById(id: string): Promise<IUser> {
     return this.UserModel.findById(id).exec()
   }
 
+  public async listUsers({
+    name,
+    page,
+    perPage,
+    sortBy = 'created_at',
+    orderBy = 'ASC'
+  }: IUserListParams): Promise<DataResponse> {
+    const pattern = name ? '.*' + name + '.*' : '.*'
+    const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
+
+    const users = await this.UserModel.find({
+      name: new RegExp(pattern, 'i')
+    })
+      .skip(perPage * (page - 1))
+      .limit(perPage)
+      .sort(sort)
+      .exec()
+
+    const count = await this.UserModel.countDocuments({
+      name: new RegExp(pattern, 'i')
+    })
+
+    return {
+      users,
+      totalPages: Math.ceil(count / perPage),
+      totalCount: count
+    }
+  }
+
   public async updateUserById(
     id: string,
-    userParams: { is_confirmed: boolean }
+    userParams: IUserUpdateParams
   ): Promise<IUser> {
-    return this.UserModel.updateOne({ _id: id }, userParams).exec()
+    const UserModel = await this.UserModel.findById(id)
+    if (userParams.name) UserModel.name = userParams.name
+    if (userParams.password) UserModel.password = userParams.password
+    if (userParams.is_confirmed)
+      UserModel.is_confirmed = userParams.is_confirmed
+    if (userParams.last_login) UserModel.last_login = userParams.last_login
+    if (userParams?.personal_data?.cpf)
+      UserModel.personal_data.cpf = userParams.personal_data.cpf
+    if (userParams?.personal_data?.dob)
+      UserModel.personal_data.dob = userParams.personal_data.dob
+    if (userParams?.personal_data?.is_student)
+      UserModel.personal_data.is_student = userParams.personal_data.is_student
+
+    return UserModel.save()
   }
 
   public async createUser(user: IUser): Promise<IUser> {
     const UserModel = new this.UserModel(user)
     return await UserModel.save()
+  }
+
+  public async removeUserById(id: string): Promise<IUser> {
+    return await this.UserModel.findOneAndDelete({ _id: id })
   }
 
   public async createUserLink(id: string): Promise<IUserLink> {
@@ -41,8 +90,8 @@ export class UserService {
     return await UserLinkModel.save()
   }
 
-  public async getUserLink(link: string): Promise<IUserLink[]> {
-    return this.UserLinkModel.find({ link, is_used: false }).exec()
+  public async getUserLink(link: string): Promise<IUserLink> {
+    return this.UserLinkModel.findOne({ link, is_used: false }).exec()
   }
 
   public async updateUserLinkById(
@@ -53,8 +102,6 @@ export class UserService {
   }
 
   public getConfirmationLink(link: string): string {
-    return `${this.configService.get('baseUri')}:${this.configService.get(
-      'gatewayPort'
-    )}/users/confirm/${link}`
+    return `${this.configService.get('webUrl')}/confirm/${link}`
   }
 }

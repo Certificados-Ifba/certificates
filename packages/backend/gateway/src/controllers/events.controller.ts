@@ -74,15 +74,10 @@ export class EventsController {
     type: CreateEventResponseDto
   })
   public async createEvent(
-    @Req() request: IAuthorizedRequest,
     @Body() eventRequest: CreateEventDto
   ): Promise<CreateEventResponseDto> {
-    const userInfo = request.user
     const createEventResponse: IServiceEventCreateResponse = await this.eventServiceClient
-      .send(
-        'event_create',
-        Object.assign(eventRequest, { user_id: userInfo.id })
-      )
+      .send('event_create', Object.assign(eventRequest))
       .toPromise()
 
     if (createEventResponse.status !== HttpStatus.CREATED) {

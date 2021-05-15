@@ -4,5 +4,6 @@ export const confirmedPermissions = [
   'event_delete_by_id',
   'event_update_by_id',
   'generic_create',
-  'generic_list'
+  'generic_list',
+  'participant_create'
 ]
