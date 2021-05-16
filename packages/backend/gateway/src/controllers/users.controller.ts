@@ -8,7 +8,9 @@ import {
   Inject,
   HttpStatus,
   HttpException,
-  Param
+  Param,
+  Res,
+  Query
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import {
@@ -17,6 +19,10 @@ import {
   ApiCreatedResponse,
   ApiBearerAuth
 } from '@nestjs/swagger'
+import { Permission } from 'src/decorators/permission.decorator'
+import { GetUsersResponseDto } from 'src/interfaces/user/dto/get-user-response.dto'
+import { ListUserDto } from 'src/interfaces/user/dto/list-user.dto'
+import { IServiceUserListResponse } from 'src/interfaces/user/service-user-list-response.interface'
 
 import { Authorization } from '../decorators/authorization.decorator'
 import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
@@ -35,6 +41,8 @@ import { IServiceUserCreateResponse } from '../interfaces/user/service-user-crea
 import { IServiceUserGetByIdResponse } from '../interfaces/user/service-user-get-by-id-response.interface'
 import { IServiceUserSearchResponse } from '../interfaces/user/service-user-search-response.interface'
 
+import { Response } from 'express'
+
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
@@ -42,6 +50,40 @@ export class UsersController {
     @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy
   ) {}
+
+
+  @Get()
+  @Authorization(true)
+  @Permission('user_list')
+  @ApiOkResponse({
+    type: GetUsersResponseDto,
+    description: 'List of user'
+  })
+  public async getActivitys(
+    @Res({ passthrough: true }) res: Response,
+    @Query() query: ListUserDto
+  ): Promise<GetUsersResponseDto> {
+    const { search, page, per_page, sort_by, order_by } = query
+    const usersResponse: IServiceUserListResponse = await this.userServiceClient
+      .send('user_list', {
+        type: 'activity',
+        name: search,
+        page: Number(page),
+        perPage: Number(per_page),
+        sortBy: sort_by,
+        orderBy: order_by
+      })
+      .toPromise()
+
+    res.header('x-total-count', String(usersResponse?.data.totalCount))
+    res.header('x-total-page', String(usersResponse?.data.totalPages))
+
+    return {
+      message: usersResponse.message,
+      data: usersResponse?.data?.users
+    }
+  }
+
 
   @Get()
   @ApiBearerAuth('JWT')

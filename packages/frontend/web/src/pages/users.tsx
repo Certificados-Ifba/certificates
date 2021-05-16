@@ -49,7 +49,7 @@ const Users: React.FC = () => {
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const request = usePaginatedRequest<any>({
-    url: 'test/users'
+    url: 'users'
   })
   const [user, setUser] = useState<{ name: string; email: string }>(null)
 
@@ -111,13 +111,13 @@ const Users: React.FC = () => {
                   Nome
                 </Column>
               </th>
-              <th onClick={() => handleOrder('email')}>
-                <Column order={order} selected={column === 'email'}>
+              <th>
+                <Column>
                   E-mail
                 </Column>
               </th>
-              <th onClick={() => handleOrder('role')}>
-                <Column order={order} selected={column === 'role'}>
+              <th>
+                <Column>
                   Tipo
                 </Column>
               </th>
@@ -125,7 +125,7 @@ const Users: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {request.data?.data?.users?.map(user => (
+            {request.data?.data?.map(user => (
               <tr key={user.email}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>

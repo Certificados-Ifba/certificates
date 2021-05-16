@@ -159,9 +159,10 @@ export class UserController {
 
     if (
       userParams &&
-      userParams.role === 'PARTICIPANT' &&
-      userParams.personal_data.cpf &&
-      userParams.personal_data.dob
+      (userParams.role !== 'PARTICIPANT' ||
+        (userParams.role === 'PARTICIPANT' &&
+          userParams.personal_data.cpf &&
+          userParams.personal_data.dob))
     ) {
       const usersWithEmail = await this.userService.searchUser({
         email: userParams.email
