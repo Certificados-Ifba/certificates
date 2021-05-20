@@ -55,10 +55,8 @@ export const Container = styled.div<ModalProps>`
       width: 100%;
     }
 
-    @media (max-width: ${props => props.theme.responsive.smDown}) {
-      max-height: 400px;
-      overflow-y: auto;
-    }
+    max-height: 400px;
+    overflow-y: auto;
   }
 
   .modal-footer {

@@ -1,6 +1,7 @@
-import { Controller, Inject, Get } from '@nestjs/common'
+import { Controller, Inject, Get, Res } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger'
+import { Response } from 'express'
 
 import { GetEventsResponseDto } from '../interfaces/event/dto/get-events-response.dto'
 
@@ -10,6 +11,47 @@ export class TestEventsController {
   constructor(
     @Inject('EVENT_SERVICE') private readonly eventServiceClient: ClientProxy
   ) {}
+
+  @Get('events/1/activities')
+  @ApiOkResponse({
+    description: 'List of events'
+  })
+  public async getEventActivities(
+    @Res({ passthrough: true }) res: Response
+  ): Promise<any> {
+    res.header('x-total-count', String(3))
+    res.header('x-total-page', String(1))
+    return {
+      message: 'Lista de Atividades do Evento',
+      data: [
+        {
+          id: 1,
+          name: 'Competição Baiana de Veículos Autônomos em Escala',
+          activitieType: 'Competição',
+          workload: 10,
+          start_date: '22/09/1992',
+          end_date: '22/09/1992'
+        },
+        {
+          id: 2,
+          name: 'Competição Baiana de Veículos Autônomos em Escala',
+          activitieType: 'Palestra',
+          workload: 10,
+          start_date: '22/09/1992',
+          end_date: '22/09/1992'
+        },
+        {
+          id: 3,
+          name: 'Competição Baiana de Veículos Autônomos em Escala',
+          activitieType: 'Palestra',
+          workload: 10,
+          start_date: '22/09/1992',
+          end_date: '22/09/1992'
+        }
+      ],
+      errors: null
+    }
+  }
 
   @Get('events')
   @ApiOkResponse({

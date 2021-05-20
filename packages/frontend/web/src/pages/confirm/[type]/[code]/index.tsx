@@ -13,6 +13,7 @@ import Input from '../../../../components/input'
 import withoutAuth from '../../../../hocs/withoutAuth'
 import ConfirmLayout from '../../../../layouts/confirm'
 import { useToast } from '../../../../providers/toast'
+import api from '../../../../services/axios'
 import Row from '../../../../styles/components/row'
 import {
   Container,
@@ -35,7 +36,9 @@ const Confirm: React.FC = () => {
         formRef.current?.setErrors({})
 
         const schema = Yup.object().shape({
-          password: Yup.string().required('Por favor, digite a senha'),
+          password: Yup.string()
+            .required('Por favor, digite a senha')
+            .min(6, 'A senha deve ter no mínimo 6 caracteres'),
           repeatPassword: Yup.string()
             .required('Por favor, digite a senha novamente')
             .oneOf([data.password], 'As senhas devem ser iguais')
@@ -44,6 +47,18 @@ const Confirm: React.FC = () => {
         await schema.validate(data, {
           abortEarly: false
         })
+        const resp = await api.post(`users/confirm`, {
+          link: code,
+          password: data.password
+        })
+
+        if (resp.data?.message === 'user_confirm_success') {
+          addToast({
+            type: 'success',
+            title: 'Mensagem',
+            description: 'Seu usuário foi confirmado.'
+          })
+        }
 
         setLoading(false)
       } catch (err) {
@@ -61,11 +76,11 @@ const Confirm: React.FC = () => {
         addToast({
           type: 'error',
           title: 'Erro desconhecido',
-          description: 'Não foi possível redefinir sua senha.'
+          description: 'Não foi possível definir sua senha.'
         })
       }
     },
-    [addToast]
+    [addToast, code]
   )
   return (
     <Container>

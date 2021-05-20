@@ -16,12 +16,12 @@ import {
   FiTrash2,
   FiUsers,
   FiUser,
-  FiPlusCircle,
-  FiRefreshCw,
   FiX,
   FiMail,
   FiCheck,
-  FiUserPlus
+  FiUserPlus,
+  FiUnlock,
+  FiLock
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
@@ -36,9 +36,12 @@ import PaginatedTable from '../components/paginatedTable'
 import Select from '../components/select'
 import withAuth from '../hocs/withAuth'
 import { useToast } from '../providers/toast'
-import usePaginatedRequest from '../services/usePaginatedRequest'
-import Row from '../styles/components/row'
+import api from '../services/axios'
+import usePaginatedRequest, {
+  PaginatedRequest
+} from '../services/usePaginatedRequest'
 import { Container } from '../styles/pages/home'
+import theme from '../styles/theme'
 
 const Users: React.FC = () => {
   const [selectedId, setSelectedId] = useState(null)
@@ -49,18 +52,51 @@ const Users: React.FC = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
+  const [filters, setFilters] = useState(null)
   const request = usePaginatedRequest<any>({
-    url: 'users'
+    url: 'users',
+    params:
+      filters && order !== ''
+        ? Object.assign(filters, { sort_by: column, order_by: order })
+        : order !== ''
+        ? { sort_by: column, order_by: order }
+        : filters
   })
+
+  const { addToast } = useToast()
+  const [user, setUser] = useState(null)
   const handleSubmitDelete = useCallback(() => {
-    console.log('')
-  }, [])
+    api
+      .delete('users/' + user.id)
+      .then(resp => {
+        if (resp?.data?.message === 'user_delete_by_id_success') {
+          addToast({
+            title: 'Mensagem',
+            type: 'success',
+            description: 'O usuário foi excluído com sucesso.'
+          })
+          request.revalidate()
+          setOpenDeleteModal(false)
+        }
+      })
+      .catch(err => {
+        console.error(err)
+        addToast({
+          title: 'Erro desconhecido',
+          type: 'error',
+          description: 'Houve um erro ao deletar o usuário.'
+        })
+      })
+  }, [addToast, request, user])
 
-  const [user, setUser] = useState<{ name: string; email: string }>(null)
-
-  const handleFilter = useCallback(data => {
-    console.log(data)
-  }, [])
+  const handleFilter = useCallback(
+    data => {
+      !data.search && delete data.search
+      request.resetPage()
+      setFilters(data)
+    },
+    [request]
+  )
 
   const handleOrder = useCallback(
     columnSelected => {
@@ -116,16 +152,9 @@ const Users: React.FC = () => {
                   Nome
                 </Column>
               </th>
-              <th>
-                <Column>
-                  E-mail
-                </Column>
-              </th>
-              <th>
-                <Column>
-                  Tipo
-                </Column>
-              </th>
+              <th>E-mail</th>
+              <th>Tipo</th>
+              <th>Confirmado?</th>
               <th style={{ width: 32 }} />
             </tr>
           </thead>
@@ -134,7 +163,26 @@ const Users: React.FC = () => {
               <tr key={user.email}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
-                <td>{user.type}</td>
+                <td>
+                  {user.role === 'ADMIN' ? 'Administrador' : 'Coordenador'}
+                </td>
+                <td>
+                  <div style={{ display: 'flex' }}>
+                    {user.is_confirmed ? (
+                      <FiUnlock
+                        style={{ margin: 'auto' }}
+                        size={20}
+                        color={theme.colors.success}
+                      ></FiUnlock>
+                    ) : (
+                      <FiLock
+                        style={{ margin: 'auto' }}
+                        size={20}
+                        color={theme.colors.danger}
+                      ></FiLock>
+                    )}
+                  </div>
+                </td>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <Button
@@ -144,7 +192,7 @@ const Users: React.FC = () => {
                       color="warning"
                       size="small"
                       onClick={() => {
-                        setSelectedId(1)
+                        setSelectedId(user.id)
                         setTypeModal('update-email')
                         setOpenUserModal(true)
                       }}
@@ -158,7 +206,7 @@ const Users: React.FC = () => {
                       color="secondary"
                       size="small"
                       onClick={() => {
-                        setSelectedId(1)
+                        setSelectedId(user.id)
                         setTypeModal('update-user')
                         setOpenUserModal(true)
                       }}
@@ -172,10 +220,7 @@ const Users: React.FC = () => {
                       color="danger"
                       size="small"
                       onClick={() => {
-                        setUser({
-                          email: 'lucasn.bertoldi@gmail.com',
-                          name: 'Lucas Nascimento Bertoldi'
-                        })
+                        setUser(user)
                         setOpenDeleteModal(true)
                       }}
                     >
@@ -189,6 +234,7 @@ const Users: React.FC = () => {
         </PaginatedTable>
       </Card>
       <UserModal
+        request={request}
         openModal={openUserModal}
         setOpenModal={setOpenUserModal}
         type={typeModal}
@@ -219,12 +265,17 @@ const UserModal: React.FC<{
   openModal: boolean
   setOpenModal: Dispatch<SetStateAction<boolean>>
   selectId?: boolean
-}> = ({ type, openModal, setOpenModal, selectId }) => {
+  request: PaginatedRequest<any, any>
+}> = ({ type, openModal, setOpenModal, selectId, request }) => {
   const { addToast } = useToast()
 
   const formRef = useRef<FormHandles>(null)
 
-  const [user, setUser] = useState<{ name: string; email: string }>(null)
+  const [user, setUser] = useState<{
+    name: string
+    email: string
+    is_confirmed: boolean
+  }>(null)
 
   const handleCloseSaveModal = useCallback(() => {
     formRef.current.reset()
@@ -238,19 +289,44 @@ const UserModal: React.FC<{
       selectId &&
       (type === 'update-user' || type === 'update-email')
     ) {
-      if (type === 'update-user')
-        formRef.current.setData({
-          name: 'Lucas Nascimento',
-          email: 'lucasn.bertoldi@gmail.com',
-          role: 'ADMIN'
+      api
+        .get(`users/${selectId}`)
+        .then((response: any) => {
+          if (response?.data?.message === 'user_get_by_id_not_found') {
+            addToast({
+              title: 'Menssagem',
+              type: 'info',
+              description: 'Não foi possível encontrar o usuário.'
+            })
+            setOpenModal(false)
+          }
+
+          const user = response?.data?.data
+
+          if (user) {
+            setUser({
+              email: user.email,
+              name: user.name,
+              is_confirmed: user.is_confirmed
+            })
+            if (type === 'update-user') {
+              formRef.current?.setData(user)
+            } else {
+              formRef.current?.setData({})
+            }
+          }
         })
-      if (type === 'update-email' || type === 'update-user')
-        setUser({
-          email: 'lucasn.bertoldi@gmail.com',
-          name: 'Lucas Nascimento Bertoldi'
+        .catch(err => {
+          console.error(err)
+          addToast({
+            title: 'Erro desconhecido',
+            type: 'info',
+            description: 'Houve um erro desconhecido ao encontrar o usuário.'
+          })
+          setOpenModal(false)
         })
     }
-  }, [type, selectId, openModal])
+  }, [type, selectId, openModal, addToast, setOpenModal])
 
   const handleSubmit = useCallback(
     data => {
@@ -272,17 +348,33 @@ const UserModal: React.FC<{
           .required(`O usuário precisa ter um e-mail`)
       }
 
-      console.log(schemaObj)
-
       const schema = Yup.object().shape(schemaObj)
       schema
         .validate(data, {
           abortEarly: false
         })
-        .then(data => {
-          console.log(data)
+        .then(async data => {
+          let response: any = {}
 
-          // enviar req
+          if (type === 'add-user') {
+            response = await api.post('users', data)
+          } else if (type === 'update-user') {
+            response = await api.put(`users/${selectId}`, data)
+          }
+
+          if (response.data) {
+            addToast({
+              type: 'success',
+              title: `O usuário ${
+                type === 'add-user' ? 'cadastrado' : 'atualizado'
+              }`,
+              description: `O usuário foi ${
+                type === 'add-user' ? 'cadastrado' : 'atualizado'
+              } com sucesso.`
+            })
+            request.revalidate()
+            handleCloseSaveModal()
+          }
         })
         .catch(err => {
           const validationErrors: { [key: string]: string } = {}
@@ -292,24 +384,23 @@ const UserModal: React.FC<{
             })
             formRef.current?.setErrors(validationErrors)
           } else {
-            let message = 'Erro ao '
+            let title = 'Erro ao '
             if (type === 'update-email') {
-              message += 'atualizar o e-mail'
+              title += 'atualizar o e-mail'
             } else if (type === 'update-user') {
-              message += 'atualizar o usuário'
+              title += 'atualizar o usuário'
             } else {
-              message += 'adicionar o usuário'
+              title += 'adicionar o usuário'
             }
-            message += '.'
             addToast({
-              title: `Erro desconhecido`,
+              title: title,
               type: 'error',
-              description: message
+              description: err
             })
           }
         })
     },
-    [type, addToast]
+    [type, selectId, addToast, request, handleCloseSaveModal]
   )
 
   return (
@@ -347,8 +438,17 @@ const UserModal: React.FC<{
               <Alert size="sm" marginBottom="xs">
                 O antigo e-mail dele(a) é:
               </Alert>
-              <Alert size="sm" icon={FiMail} marginBottom="md">
+              <Alert size="sm" icon={FiMail} marginBottom="xs">
                 <b>{user?.email}</b>
+              </Alert>
+              <Alert
+                type={user?.is_confirmed ? 'success' : 'danger'}
+                icon={user?.is_confirmed ? FiUnlock : FiLock}
+                size="sm"
+                marginBottom="md"
+              >
+                Esse e-mail {user?.is_confirmed ? 'já foi' : 'não foi'}{' '}
+                confirmado
               </Alert>
             </>
           )}
@@ -384,7 +484,7 @@ const UserModal: React.FC<{
                 label: 'Administrador'
               },
               {
-                value: 'EVENT_MANAGER',
+                value: 'COORDINATOR',
                 label: 'Coordenador de Eventos'
               }
             ]}

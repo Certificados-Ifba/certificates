@@ -29,7 +29,12 @@ const Settings: React.FC = () => {
             name: 'Funções',
             icon: FiBriefcase,
             children: (
-              <Generic name="Função" plural="Funções" url="/functions" />
+              <Generic
+                icon={FiBriefcase}
+                name="Função"
+                plural="Funções"
+                url="/functions"
+              />
             )
           },
           {
@@ -37,6 +42,7 @@ const Settings: React.FC = () => {
             icon: FiFileText,
             children: (
               <Generic
+                icon={FiFileText}
                 name="Tipo de Atividade"
                 plural="Tipo de Atividades"
                 url="/activities"

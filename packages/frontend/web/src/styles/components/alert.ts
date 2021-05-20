@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 interface Props {
   marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
-  type: 'info' | 'warning' | 'danger'
+  type: 'info' | 'warning' | 'danger' | 'success'
   fontSize: string
 }
 

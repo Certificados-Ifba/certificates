@@ -1,6 +1,7 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { IconBaseProps } from 'react-icons'
 import {
   FiCheck,
   FiEdit,
@@ -29,6 +30,7 @@ interface GenericProps {
   name: string
   plural: string
   url: string
+  icon: React.ComponentType<IconBaseProps>
 }
 
 interface IResponse {
@@ -40,7 +42,7 @@ interface IResponse {
   }
 }
 
-const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
+const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
   const [idSelected, setIdSelected] = useState<string>(null)
   const [isDeleted, setIsDeleted] = useState(false)
   const [openModal, setOpenModal] = useState(false)
@@ -132,7 +134,6 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
           } else {
             response = await api.post(url, data)
           }
-
           if (response.data) {
             addToast({
               type: 'success',
@@ -272,7 +273,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
               name="name"
               label="Nome"
               placeholder="Nome"
-              icon={FiUser}
+              icon={icon}
               disabled={loading}
               hidden={isDeleted}
             />
