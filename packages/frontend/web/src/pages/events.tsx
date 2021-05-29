@@ -1,19 +1,12 @@
 import { Form } from '@unform/web'
 import Head from 'next/head'
-import { useCallback } from 'react'
-import {
-  FiAward,
-  FiCalendar,
-  FiEdit,
-  FiInfo,
-  FiPlus,
-  FiSearch,
-  FiTrash2,
-  FiUserPlus
-} from 'react-icons/fi'
+import { useRouter } from 'next/router'
+import { useCallback, useState } from 'react'
+import { FiCalendar, FiInfo, FiPlus, FiSearch } from 'react-icons/fi'
 
 import Button from '../components/button'
 import Card from '../components/card'
+import { EventModal } from '../components/event/eventModal'
 import Input from '../components/input'
 import PaginatedTable from '../components/paginatedTable'
 import withAuth from '../hocs/withAuth'
@@ -21,13 +14,17 @@ import usePaginatedRequest from '../services/usePaginatedRequest'
 import { Container } from '../styles/pages/home'
 
 const Events: React.FC = () => {
+  const router = useRouter()
+
   const request = usePaginatedRequest<any>({
-    url: 'test/events'
+    url: 'events'
   })
 
   const handleFilter = useCallback(data => {
     console.log(data)
   }, [])
+
+  const [openEventModal, setOpenEventModal] = useState(false)
 
   return (
     <Container>
@@ -44,7 +41,7 @@ const Events: React.FC = () => {
           </h2>
         </div>
         <nav>
-          <Button>
+          <Button onClick={() => setOpenEventModal(true)}>
             <FiPlus size={20} />
             <span className="hide-md-down">Adicionar Evento</span>
           </Button>
@@ -54,7 +51,7 @@ const Events: React.FC = () => {
         <header>
           <h2>Últimos Eventos</h2>
           <Form onSubmit={handleFilter}>
-            <Input name="search" placeholder="Buscar função" icon={FiSearch} />
+            <Input name="search" placeholder="Buscar evento" icon={FiSearch} />
           </Form>
         </header>
         <PaginatedTable request={request}>
@@ -69,13 +66,13 @@ const Events: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {request.data?.data?.events?.map(event => (
+            {request.data?.data?.map(event => (
               <tr key={event.initials}>
                 <td>{event.name}</td>
                 <td>{event.initials}</td>
-                <td>{event.year}</td>
-                <td>{event.start_date}</td>
-                <td>{event.end_date}</td>
+                <td>{new Date(event.start_date).getFullYear()}</td>
+                <td>{new Date(event.start_date).toLocaleDateString()}</td>
+                <td>{new Date(event.end_date).toLocaleDateString()}</td>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <Button
@@ -84,82 +81,25 @@ const Events: React.FC = () => {
                       square
                       color="secondary"
                       size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
+                      onClick={() => {
+                        router.replace(`events/${event.id}`)
+                      }}
                     >
                       <FiInfo size={20} />
                     </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="secondary"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
-                      <FiUserPlus size={20} />
-                    </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="primary"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
-                      <FiAward size={20} />
-                    </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="warning"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
-                      <FiEdit size={20} />
-                    </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="danger"
-                      size="small"
-                      // onClick={() =>
-                      //   history.push(
-                      //     `/access-control/collaborators/edit/${movie.id}`
-                      //   )
-                      // }
-                    >
-                      <FiTrash2 size={20} />
-                    </Button>
                   </div>
-                  {/*
-                </Button>
-                <Button inline size="small" color="danger">
-                  Deletar
-                </Button> */}
                 </td>
               </tr>
             ))}
           </tbody>
         </PaginatedTable>
       </Card>
+      <EventModal
+        request={request}
+        type="add"
+        openModal={openEventModal}
+        setOpenModal={setOpenEventModal}
+      />
     </Container>
   )
 }

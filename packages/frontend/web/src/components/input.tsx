@@ -16,6 +16,7 @@ import {
   Error,
   SecureToggle
 } from '../styles/components/input'
+import { getInputDate } from '../utils/formatDate'
 
 interface BaseProps<Multiline = false>
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -57,25 +58,58 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
 
   const { fieldName, defaultValue, registerField, error } = useField(name)
 
-  useEffect(() => {
-    if (error) setInputState('hasError')
-    if (!error && inputState === 'hasError')
-      setInputState(inputRef?.current?.value ? 'isFilled' : 'isDefault')
-  }, [error, inputState])
+  const clearFormError: () => void = useCallback(() => {
+    if (formRef)
+      try {
+        const err = formRef.current.getErrors()
+        delete err[name]
+        formRef.current.setErrors(err)
+      } catch (err) {}
+  }, [formRef, name])
+
+  const [lastError, setLastError] = useState(null)
 
   useEffect(() => {
-    const clearFormError: () => void = () => {
-      if (formRef)
-        try {
-          const err = formRef.current.getErrors()
-          delete err[name]
-          formRef.current.setErrors(err)
-        } catch (err) {}
+    switch (inputState) {
+      case 'isFocused': {
+        clearFormError()
+        break
+      }
+      case 'hasError': {
+        break
+      }
+      case 'isDefault': {
+        if (error) setInputState('hasError')
+        break
+      }
+      case 'isFilled': {
+        if (error && !inputRef.current?.value) {
+          setInputState('hasError')
+        } else {
+          if (error && error !== lastError) {
+            setInputState('hasError')
+          } else {
+            clearFormError()
+            if (rest.disabled) setInputState('isDisabled')
+          }
+        }
+        break
+      }
+      case 'isDisabled': {
+        clearFormError()
+        break
+      }
     }
-    if (inputState !== 'hasError' && !error) clearFormError()
-    if (inputState === 'isFilled' && rest.disabled) setInputState('isDisabled')
-    if (inputState === 'isFocused') clearFormError()
-  }, [inputState, error, rest.disabled, formRef, name])
+    setLastError(error)
+  }, [
+    error,
+    formRef,
+    inputState,
+    name,
+    rest.disabled,
+    clearFormError,
+    lastError
+  ])
 
   useEffect(() => {
     registerField<string>({
@@ -83,7 +117,14 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
       ref: inputRef.current,
       path: 'value',
       setValue(ref: any, value) {
-        ref.value = value || ''
+        if (
+          typeof value !== 'number' &&
+          new Date(value).toString() !== 'Invalid Date'
+        ) {
+          ref.value = getInputDate(new Date(value))
+        } else {
+          ref.value = value || ''
+        }
         setInputState(value ? 'isFilled' : 'isDefault')
       },
       clearValue: ref => {
@@ -105,10 +146,38 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
     setInputState(inputRef.current?.value ? 'isFilled' : 'isDefault')
   }, [])
 
+  const handleKeyup = useCallback(() => {
+    if (inputRef.current.value)
+      if (type === 'cpf') {
+        inputRef.current.value = inputRef.current.value
+          .replace(/\D/g, '')
+          .replace(/(\d{3})(\d)/, '$1.$2')
+          .replace(/(\d{3})(\d)/, '$1.$2')
+          .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+          .replace(/(-\d{2})\d+?$/, '$1')
+      } else if (type === 'phone') {
+        // if (inputRef.current.value.length > 3)
+        inputRef.current.value = inputRef.current.value
+          .replace(/\D/g, '')
+          .replace(/(\d{2})(\d)/, '($1) $2')
+          .replace(/\((\d{2})\) (\d{4})(\d{1})/, '($1) $2-$3')
+          .replace(/^\((\d{2})\) (\d{4})-(\d{1})(\d{4})/, '($1) $2$3-$4')
+          .replace(/^\((\d{2})\) (\d{5})-(\d{4})(\d{1,})/, '($1) $2-$3')
+      }
+  }, [type])
+
+  const handleOnChange = useCallback(() => {
+    if (inputState !== 'isFocused') {
+      setInputState(inputRef.current?.value ? 'isFilled' : 'isDefault')
+    }
+  }, [inputState])
+
   const props: any = {
     ...restAux,
     onFocus: handleInputFocus,
     onBlur: handleInputBlur,
+    onKeyUp: handleKeyup,
+    onChange: handleOnChange,
     ref: inputRef,
     id: fieldName,
     'aria-label': fieldName,

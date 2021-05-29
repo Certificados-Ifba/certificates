@@ -96,7 +96,6 @@ export class EventController {
   @MessagePattern('event_create')
   public async eventCreate(eventBody: IEvent): Promise<IEventCreateResponse> {
     let result: IEventCreateResponse
-
     if (eventBody) {
       try {
         const event = await this.eventService.createEvent(eventBody)

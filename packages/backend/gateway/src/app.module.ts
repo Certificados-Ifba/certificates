@@ -3,7 +3,9 @@ import { APP_GUARD } from '@nestjs/core'
 import { ClientProxyFactory } from '@nestjs/microservices'
 
 import { ActivitiesController } from './controllers/activities.controller'
-import { EventsController } from './controllers/events.controller'
+import { EventActivitiesController } from './controllers/event/event-activity.controller'
+import { EventParticipantsController } from './controllers/event/event-participant.controller'
+import { EventsController } from './controllers/event/events.controller'
 import { FunctionsController } from './controllers/functions.controller'
 import { ParticipantsController } from './controllers/participant.controller'
 import { TestEventsController } from './controllers/test.controller'
@@ -20,7 +22,9 @@ import { PermissionGuard } from './services/guards/permission.guard'
     FunctionsController,
     ParticipantsController,
     TestEventsController,
-    UsersController
+    UsersController,
+    EventActivitiesController,
+    EventParticipantsController
   ],
   providers: [
     ConfigService,

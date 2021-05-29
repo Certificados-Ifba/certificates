@@ -3,7 +3,7 @@ import { IconBaseProps } from 'react-icons'
 import { Container } from '../styles/components/alert'
 
 export interface AlertProps {
-  type?: 'info' | 'warning' | 'danger'
+  type?: 'info' | 'warning' | 'danger' | 'success'
   marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   size?: 'sm' | 'lg' | 'md'
   icon?: React.ComponentType<IconBaseProps>

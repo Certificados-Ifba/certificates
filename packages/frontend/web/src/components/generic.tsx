@@ -1,6 +1,7 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { IconBaseProps } from 'react-icons'
 import {
   FiCheck,
   FiEdit,
@@ -29,6 +30,7 @@ interface GenericProps {
   name: string
   plural: string
   url: string
+  icon: React.ComponentType<IconBaseProps>
 }
 
 interface IResponse {
@@ -40,7 +42,7 @@ interface IResponse {
   }
 }
 
-const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
+const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
   const [idSelected, setIdSelected] = useState<string>(null)
   const [isDeleted, setIsDeleted] = useState(false)
   const [openModal, setOpenModal] = useState(false)
@@ -132,7 +134,6 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
           } else {
             response = await api.post(url, data)
           }
-
           if (response.data) {
             addToast({
               type: 'success',
@@ -266,23 +267,24 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
           </h2>
         </header>
         <Form ref={formRef} onSubmit={handleSubmit}>
-          <Input
-            formRef={formRef}
-            marginBottom="md"
-            name="name"
-            label="Nome"
-            placeholder="Nome"
-            icon={FiUser}
-            disabled={loading}
-            hidden={isDeleted}
-          />
-          {isDeleted && (
-            <Alert marginBottom="md">
-              Tem certeza que você deseja excluir a {`${name.toLowerCase()} `}
-              <b>{selectedName}</b>?
-            </Alert>
-          )}
-          <Row>
+          <div className="modal-body">
+            <Input
+              formRef={formRef}
+              name="name"
+              label="Nome"
+              placeholder="Nome"
+              icon={icon}
+              disabled={loading}
+              hidden={isDeleted}
+            />
+            {isDeleted && (
+              <Alert>
+                Tem certeza que você deseja excluir a {`${name.toLowerCase()} `}
+                <b>{selectedName}</b>?
+              </Alert>
+            )}
+          </div>
+          <div className="modal-footer">
             <Button
               onClick={() => {
                 handleCloseModal()
@@ -316,7 +318,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url }) => {
                 </>
               )}
             </Button>
-          </Row>
+          </div>
         </Form>
       </Modal>
     </>

@@ -16,12 +16,12 @@ import {
   FiTrash2,
   FiUsers,
   FiUser,
-  FiPlusCircle,
-  FiRefreshCw,
   FiX,
   FiMail,
   FiCheck,
-  FiUserPlus
+  FiUserPlus,
+  FiUnlock,
+  FiLock
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
@@ -29,15 +29,20 @@ import Alert from '../components/alert'
 import Button from '../components/button'
 import Card from '../components/card'
 import Column from '../components/column'
+import DeleteModal from '../components/deleteModal'
 import Input from '../components/input'
 import Modal from '../components/modal'
 import PaginatedTable from '../components/paginatedTable'
 import Select from '../components/select'
+import { UserModal } from '../components/user/user.modal'
 import withAuth from '../hocs/withAuth'
 import { useToast } from '../providers/toast'
-import usePaginatedRequest from '../services/usePaginatedRequest'
-import Row from '../styles/components/row'
+import api from '../services/axios'
+import usePaginatedRequest, {
+  PaginatedRequest
+} from '../services/usePaginatedRequest'
 import { Container } from '../styles/pages/home'
+import theme from '../styles/theme'
 
 const Users: React.FC = () => {
   const [selectedId, setSelectedId] = useState(null)
@@ -48,14 +53,51 @@ const Users: React.FC = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
+  const [filters, setFilters] = useState(null)
   const request = usePaginatedRequest<any>({
-    url: 'test/users'
+    url: 'users',
+    params:
+      filters && order !== ''
+        ? Object.assign(filters, { sort_by: column, order_by: order })
+        : order !== ''
+        ? { sort_by: column, order_by: order }
+        : filters
   })
-  const [user, setUser] = useState<{ name: string; email: string }>(null)
 
-  const handleFilter = useCallback(data => {
-    console.log(data)
-  }, [])
+  const { addToast } = useToast()
+  const [user, setUser] = useState(null)
+  const handleSubmitDelete = useCallback(() => {
+    api
+      .delete('users/' + user.id)
+      .then(resp => {
+        if (resp?.data?.message === 'user_delete_by_id_success') {
+          addToast({
+            title: 'Mensagem',
+            type: 'success',
+            description: 'O usuário foi excluído com sucesso.'
+          })
+          request.revalidate()
+          setOpenDeleteModal(false)
+        }
+      })
+      .catch(err => {
+        console.error(err)
+        addToast({
+          title: 'Erro desconhecido',
+          type: 'error',
+          description: 'Houve um erro ao deletar o usuário.'
+        })
+      })
+  }, [addToast, request, user])
+
+  const handleFilter = useCallback(
+    data => {
+      !data.search && delete data.search
+      request.resetPage()
+      setFilters(data)
+    },
+    [request]
+  )
 
   const handleOrder = useCallback(
     columnSelected => {
@@ -111,25 +153,51 @@ const Users: React.FC = () => {
                   Nome
                 </Column>
               </th>
-              <th onClick={() => handleOrder('email')}>
-                <Column order={order} selected={column === 'email'}>
-                  E-mail
-                </Column>
-              </th>
-              <th onClick={() => handleOrder('role')}>
-                <Column order={order} selected={column === 'role'}>
-                  Tipo
-                </Column>
-              </th>
+              <th>E-mail</th>
+              <th>Tipo</th>
+              <th></th>
               <th style={{ width: 32 }} />
             </tr>
           </thead>
           <tbody>
-            {request.data?.data?.users?.map(user => (
+            {request.data?.data?.map(user => (
               <tr key={user.email}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
-                <td>{user.type}</td>
+                <td>
+                  {user.role === 'ADMIN' ? 'Administrador' : 'Coordenador'}
+                </td>
+                <td>
+                  {user.is_confirmed ? (
+                    <div style={{ display: 'flex' }}>
+                      <FiUnlock size={20} color={theme.colors.success} />
+                      <span
+                        style={{
+                          marginLeft: '10px',
+                          marginTop: 'auto',
+                          marginBottom: 'auto'
+                        }}
+                      >
+                        Entrou em{' '}
+                        {new Date(user.last_login).toLocaleDateString()} às{' '}
+                        {new Date(user.last_login).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex' }}>
+                      <FiLock size={20} color={theme.colors.danger} />
+                      <span
+                        style={{
+                          marginLeft: '10px',
+                          marginTop: 'auto',
+                          marginBottom: 'auto'
+                        }}
+                      >
+                        Não confirmou o cadastro
+                      </span>
+                    </div>
+                  )}
+                </td>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <Button
@@ -139,7 +207,7 @@ const Users: React.FC = () => {
                       color="warning"
                       size="small"
                       onClick={() => {
-                        setSelectedId(1)
+                        setSelectedId(user.id)
                         setTypeModal('update-email')
                         setOpenUserModal(true)
                       }}
@@ -153,7 +221,7 @@ const Users: React.FC = () => {
                       color="secondary"
                       size="small"
                       onClick={() => {
-                        setSelectedId(1)
+                        setSelectedId(user.id)
                         setTypeModal('update-user')
                         setOpenUserModal(true)
                       }}
@@ -167,10 +235,7 @@ const Users: React.FC = () => {
                       color="danger"
                       size="small"
                       onClick={() => {
-                        setUser({
-                          email: 'lucasn.bertoldi@gmail.com',
-                          name: 'Lucas Nascimento Bertoldi'
-                        })
+                        setUser(user)
                         setOpenDeleteModal(true)
                       }}
                     >
@@ -184,283 +249,29 @@ const Users: React.FC = () => {
         </PaginatedTable>
       </Card>
       <UserModal
+        request={request}
         openModal={openUserModal}
         setOpenModal={setOpenUserModal}
         type={typeModal}
         selectId={selectedId}
       />
       <DeleteModal
-        user={user}
+        name="Usuário"
         openModal={openDeleteModal}
         setOpenModal={setOpenDeleteModal}
-      />
+        handleSubmit={handleSubmitDelete}
+      >
+        <>
+          <Alert marginBottom="sm">
+            Tem certeza que você deseja excluir o usuário de <b>{user?.name}</b>
+            ?
+          </Alert>
+          <Alert size="sm" icon={FiMail}>
+            <b>{user?.email}</b>
+          </Alert>
+        </>
+      </DeleteModal>
     </Container>
-  )
-}
-
-const DeleteModal: React.FC<{
-  openModal: boolean
-  setOpenModal: Dispatch<SetStateAction<boolean>>
-  user: { name: string; email: string }
-}> = ({ openModal, setOpenModal, user }) => {
-  const handleSubmit = useCallback(data => {
-    console.log(data)
-  }, [])
-  const handleCloseSaveModal = useCallback(() => {
-    setOpenModal(false)
-  }, [setOpenModal])
-  return (
-    <Modal open={openModal} onClose={handleCloseSaveModal}>
-      <header>
-        <h2>
-          <FiTrash2 size={20} />
-          <span>Excluir Usuário</span>
-        </h2>
-      </header>
-      <Form onSubmit={handleSubmit}>
-        <Alert marginBottom="sm">
-          Tem certeza que você deseja excluir o usuário de <b>{user?.name}</b>?
-        </Alert>
-        <Alert size="sm" icon={FiMail} marginBottom="md">
-          <b>{user?.email}</b>
-        </Alert>
-        <Row>
-          <Button
-            onClick={() => {
-              setOpenModal(false)
-            }}
-            color="secondary"
-            type="button"
-          >
-            <FiX size={20} />
-            <span>Cancelar</span>
-          </Button>
-          <Button color="danger" type="submit" outline>
-            <FiTrash2 size={20} /> <span>Excluir</span>
-          </Button>
-        </Row>
-      </Form>
-    </Modal>
-  )
-}
-
-const UserModal: React.FC<{
-  type: 'add-user' | 'update-user' | 'update-email'
-  openModal: boolean
-  setOpenModal: Dispatch<SetStateAction<boolean>>
-  selectId?: boolean
-}> = ({ type, openModal, setOpenModal, selectId }) => {
-  const { addToast } = useToast()
-
-  const formRef = useRef<FormHandles>(null)
-
-  const [user, setUser] = useState<{ name: string; email: string }>(null)
-
-  const handleCloseSaveModal = useCallback(() => {
-    formRef.current.setErrors({})
-    formRef.current.reset()
-    setOpenModal(false)
-  }, [setOpenModal])
-
-  useEffect(() => {
-    if (
-      openModal &&
-      selectId &&
-      (type === 'update-user' || type === 'update-email')
-    ) {
-      if (type === 'update-user')
-        formRef.current.setData({
-          name: 'Lucas Nascimento',
-          email: 'lucasn.bertoldi@gmail.com',
-          role: 'ADMIN'
-        })
-      if (type === 'update-email' || type === 'update-user')
-        setUser({
-          email: 'lucasn.bertoldi@gmail.com',
-          name: 'Lucas Nascimento Bertoldi'
-        })
-    }
-  }, [type, selectId, openModal])
-
-  const handleSubmit = useCallback(
-    data => {
-      const schema = Yup.object().shape({
-        name: Yup.string().required(`O usuário precisa ter um nome`),
-        email: Yup.string()
-          .email('Por favor, digite um e-mail válido')
-          .required(`O usuário precisa ter um e-mail`),
-        repeatEmail: Yup.string()
-          .email('Por favor, digite um e-mail válido')
-          .required('Você precisa repetir o e-mail')
-          .oneOf([data.email], 'Os e-mails devem ser iguais.'),
-        role: Yup.string().required(`Você precisa selecionar um privilégio`)
-      })
-      schema
-        .validate(data, {
-          abortEarly: false
-        })
-        .then(data => {
-          console.log(data)
-
-          // enviar req
-        })
-        .catch(err => {
-          const validationErrors: { [key: string]: string } = {}
-          if (err instanceof Yup.ValidationError) {
-            err.inner.forEach((error: Yup.ValidationError) => {
-              validationErrors[error.path] = error.message
-            })
-            formRef.current?.setErrors(validationErrors)
-          } else {
-            let message = 'Erro ao '
-            if (type === 'update-email') {
-              message += 'atualizar o e-mail'
-            } else if (type === 'update-user') {
-              message += 'atualizar o usuário'
-            } else {
-              message += 'adicionar o usuário'
-            }
-            message += '.'
-            addToast({
-              title: `Erro desconhecido`,
-              type: 'error',
-              description: message
-            })
-          }
-        })
-    },
-    [type, addToast]
-  )
-
-  return (
-    <Modal open={openModal} onClose={handleCloseSaveModal}>
-      <header>
-        <h2>
-          {type === 'update-user' ? (
-            <>
-              <FiEdit size={20} />
-              <span>Editar Usuário</span>
-            </>
-          ) : type === 'update-email' ? (
-            <>
-              <FiMail size={20} />
-              <span>Atualizar E-mail</span>
-            </>
-          ) : (
-            <>
-              <FiUserPlus size={20} />
-              <span>Adicionar Usuário</span>
-            </>
-          )}
-        </h2>
-      </header>
-      <Form ref={formRef} onSubmit={handleSubmit}>
-        {type === 'update-email' && (
-          <>
-            <Alert size="sm" marginBottom="xs">
-              Você irá alterar o e-mail de:
-            </Alert>
-            <Alert size="sm" icon={FiUser} marginBottom="sm">
-              <b>{user?.name}</b>
-            </Alert>
-            <Alert size="sm" marginBottom="xs">
-              O antigo e-mail dele(a) é:
-            </Alert>
-            <Alert size="sm" icon={FiMail} marginBottom="md">
-              <b>{user?.email}</b>
-            </Alert>
-          </>
-        )}
-        {type === 'update-user' && (
-          <>
-            <Alert size="sm" marginBottom="sm">
-              O e-mail de {user?.name} é:
-            </Alert>
-            <Alert size="sm" icon={FiMail} marginBottom="md">
-              <b>{user?.email}</b>
-            </Alert>
-          </>
-        )}
-        <Input
-          formRef={formRef}
-          marginBottom="sm"
-          name="name"
-          label="Nome"
-          placeholder="Nome"
-          icon={FiUser}
-          hidden={type === 'update-email'}
-        />
-        <Select
-          hidden={type === 'update-email'}
-          formRef={formRef}
-          label="Privilégio"
-          name="role"
-          isSearchable={false}
-          marginBottom={type === 'add-user' ? 'sm' : 'md'}
-          options={[
-            {
-              value: 'ADMIN',
-              label: 'Administrador'
-            },
-            {
-              value: 'EVENT_MANAGER',
-              label: 'Coordenador de Eventos'
-            }
-          ]}
-        />
-        <Input
-          hidden={type === 'update-user'}
-          formRef={formRef}
-          marginBottom="sm"
-          name="email"
-          label={type === 'update-email' ? 'Novo E-mail' : 'E-mail'}
-          placeholder="email@exemplo.com"
-          icon={FiMail}
-          type="text"
-        />
-        <Input
-          hidden={type === 'update-user'}
-          formRef={formRef}
-          marginBottom="md"
-          name="repeatEmail"
-          label={
-            type === 'update-email'
-              ? 'Repetir o Novo E-mail'
-              : 'Repetir o E-mail'
-          }
-          placeholder="email@exemplo.com"
-          icon={FiMail}
-          type="text"
-        />
-        <Row>
-          <Button
-            onClick={() => {
-              handleCloseSaveModal()
-            }}
-            color="secondary"
-            type="button"
-            outline
-          >
-            <FiX size={20} />
-            <span>Cancelar</span>
-          </Button>
-          <Button
-            color={type === 'add-user' ? 'primary' : 'secondary'}
-            type="submit"
-          >
-            {type === 'update-user' || type === 'update-email' ? (
-              <>
-                <FiCheck size={20} /> <span>Atualizar</span>
-              </>
-            ) : (
-              <>
-                <FiPlus size={20} /> <span>Adicionar</span>
-              </>
-            )}
-          </Button>
-        </Row>
-      </Form>
-    </Modal>
   )
 }
 
