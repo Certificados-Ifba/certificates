@@ -16,6 +16,7 @@ import {
   Error,
   SecureToggle
 } from '../styles/components/input'
+import { getInputDate } from '../utils/formatDate'
 
 interface BaseProps<Multiline = false>
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -116,7 +117,14 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
       ref: inputRef.current,
       path: 'value',
       setValue(ref: any, value) {
-        ref.value = value || ''
+        if (
+          typeof value !== 'number' &&
+          new Date(value).toString() !== 'Invalid Date'
+        ) {
+          ref.value = getInputDate(new Date(value))
+        } else {
+          ref.value = value || ''
+        }
         setInputState(value ? 'isFilled' : 'isDefault')
       },
       clearValue: ref => {

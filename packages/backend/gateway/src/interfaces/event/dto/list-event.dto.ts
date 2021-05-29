@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
-export class ListUserDto {
+export class ListEventDto {
   @ApiProperty({ example: 1 })
   page: number
 

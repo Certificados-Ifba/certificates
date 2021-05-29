@@ -12,6 +12,7 @@ import Card from '../../../../components/card'
 import Input from '../../../../components/input'
 import withoutAuth from '../../../../hocs/withoutAuth'
 import ConfirmLayout from '../../../../layouts/confirm'
+import { useAuth } from '../../../../providers/auth'
 import { useToast } from '../../../../providers/toast'
 import api from '../../../../services/axios'
 import Row from '../../../../styles/components/row'
@@ -25,10 +26,12 @@ import getValidationErrors from '../../../../utils/getValidationErrors'
 
 const Confirm: React.FC = () => {
   const [loading, setLoading] = useState(false)
-  const { query } = useRouter()
+  const router = useRouter()
+  const { query } = router
   const { addToast } = useToast()
   const formRef = useRef<FormHandles>(null)
   const { code, type } = query
+  const { signIn } = useAuth()
   const handleForgotPassword = useCallback(
     async data => {
       try {
@@ -58,6 +61,8 @@ const Confirm: React.FC = () => {
             title: 'Mensagem',
             description: 'Seu usuário foi confirmado.'
           })
+          signIn({ token: resp.data.data?.token })
+          router.replace('/')
         }
 
         setLoading(false)
@@ -80,7 +85,7 @@ const Confirm: React.FC = () => {
         })
       }
     },
-    [addToast, code]
+    [addToast, code, router, signIn]
   )
   return (
     <Container>

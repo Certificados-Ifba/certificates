@@ -36,7 +36,8 @@ const theme = {
   },
   modal: {
     size: {
-      sm: '400px'
+      sm: '400px',
+      lg: '800px'
     }
   },
   responsive: {

@@ -1,5 +1,6 @@
-import { IUser } from '../user.interface'
 import { ApiProperty } from '@nestjs/swagger'
+
+import { IUser } from '../user.interface'
 
 export class GetUsersResponseDto {
   @ApiProperty({ example: 'user_search_success' })

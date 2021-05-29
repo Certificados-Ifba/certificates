@@ -381,16 +381,6 @@ const ParticipantModal: React.FC<{
           <Input
             formRef={formRef}
             marginBottom="sm"
-            name="phone"
-            label="Telefone"
-            placeholder="Telefone"
-            type="phone"
-            icon={FiPhoneCall}
-            hidden={type === 'update-email'}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
             name="birthday"
             label="Data de Nascimento"
             type="date"
@@ -437,6 +427,16 @@ const ParticipantModal: React.FC<{
             placeholder="email@exemplo.com"
             icon={FiMail}
             type="text"
+          />
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
+            name="phone"
+            label="Telefone"
+            placeholder="Telefone"
+            type="phone"
+            icon={FiPhoneCall}
+            hidden={type === 'update-email'}
           />
         </div>
         <div className="modal-footer">

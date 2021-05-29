@@ -1,5 +1,6 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
+import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useRef, useCallback, useEffect } from 'react'
 import {
   FiBookmark,
@@ -11,18 +12,24 @@ import {
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import { useToast } from '../providers/toast'
-import Button from './button'
-import Input from './input'
-import Modal from './modal'
-import Select from './select'
+import { useToast } from '../../providers/toast'
+import api from '../../services/axios'
+import { PaginatedRequest } from '../../services/usePaginatedRequest'
+import Button from '../button'
+import Input from '../input'
+import Modal from '../modal'
+import Select from '../select'
 
 export const EventModal: React.FC<{
   event?: any
   openModal: boolean
   setOpenModal: Dispatch<SetStateAction<boolean>>
-}> = ({ openModal, setOpenModal, event }) => {
+  type: 'add' | 'edit'
+  request?: PaginatedRequest<any, any>
+}> = ({ openModal, setOpenModal, event, type, request }) => {
   const { addToast } = useToast()
+
+  const router = useRouter()
 
   const formRef = useRef<FormHandles>(null)
 
@@ -46,18 +53,34 @@ export const EventModal: React.FC<{
       const schema = Yup.object().shape({
         name: Yup.string().required(`O evento precisa ter um nome`),
         initials: Yup.string().required(`Por favor, digite a sigla do projeto`),
-        coordinator: Yup.string().required(
+        user_id: Yup.string().required(
           `Você precisa selecionar um coordenador para o evento`
         ),
-        startDate: Yup.string().required(`Selecione a data de início`),
-        endDate: Yup.string().required(`Selecione a data do fim`)
+        start_date: Yup.string().required(`Selecione a data de início`),
+        end_date: Yup.string().required(`Selecione a data do fim`)
       })
       schema
         .validate(data, {
           abortEarly: false
         })
-        .then(data => {
-          console.log(data)
+        .then(async (data: any) => {
+          data.year = '2020'
+          const response: any = await api.post('events', data)
+          if (response.data) {
+            addToast({
+              type: 'success',
+              title: `O evento ${type === 'add' ? 'cadastrado' : 'atualizado'}`,
+              description: `O evento foi ${
+                type === 'add' ? 'cadastrado' : 'atualizado'
+              } com sucesso.`
+            })
+            handleCloseSaveModal()
+
+            if (response.data?.data?.event) {
+              if (type === 'add')
+                router.replace(`events/${response.data?.data?.event.id}`)
+            }
+          }
         })
         .catch(err => {
           const validationErrors: { [key: string]: string } = {}
@@ -76,7 +99,7 @@ export const EventModal: React.FC<{
           }
         })
     },
-    [addToast]
+    [addToast, handleCloseSaveModal, router, type]
   )
 
   return (
@@ -108,16 +131,16 @@ export const EventModal: React.FC<{
           <Input
             formRef={formRef}
             marginBottom="sm"
-            name="number"
-            label="Número"
-            placeholder="Número"
-            type="number"
+            name="edition"
+            label="Edição"
+            placeholder="Edição"
+            type="text"
             icon={FiTag}
           />
           <Input
             formRef={formRef}
             marginBottom="sm"
-            name="startDate"
+            name="start_date"
             label="Data Inicial"
             placeholder="Data Inicial"
             type="date"
@@ -126,31 +149,19 @@ export const EventModal: React.FC<{
           <Input
             formRef={formRef}
             marginBottom="sm"
-            name="endDate"
+            name="end_date"
             label="Data Final"
             placeholder="Data Final"
             type="date"
             icon={FiCalendar}
           />
           <Select
+            async={true}
+            url="users"
             formRef={formRef}
             label="Coordenador"
-            name="coordinator"
+            name="user_id"
             isSearchable={true}
-            options={[
-              {
-                value: '1',
-                label: 'Lucas Nascimento Bertoldi'
-              },
-              {
-                value: '2',
-                label: 'Pablo F Matos'
-              },
-              {
-                value: '3',
-                label: 'Matheus Coqueiro'
-              }
-            ]}
           />
         </div>
         <div className="modal-footer">

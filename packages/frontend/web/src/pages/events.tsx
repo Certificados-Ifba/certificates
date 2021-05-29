@@ -6,7 +6,7 @@ import { FiCalendar, FiInfo, FiPlus, FiSearch } from 'react-icons/fi'
 
 import Button from '../components/button'
 import Card from '../components/card'
-import { EventModal } from '../components/eventModal'
+import { EventModal } from '../components/event/eventModal'
 import Input from '../components/input'
 import PaginatedTable from '../components/paginatedTable'
 import withAuth from '../hocs/withAuth'
@@ -17,7 +17,7 @@ const Events: React.FC = () => {
   const router = useRouter()
 
   const request = usePaginatedRequest<any>({
-    url: 'test/events'
+    url: 'events'
   })
 
   const handleFilter = useCallback(data => {
@@ -66,13 +66,13 @@ const Events: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {request.data?.data?.events?.map(event => (
+            {request.data?.data?.map(event => (
               <tr key={event.initials}>
                 <td>{event.name}</td>
                 <td>{event.initials}</td>
-                <td>{event.year}</td>
-                <td>{event.start_date}</td>
-                <td>{event.end_date}</td>
+                <td>{new Date(event.start_date).getFullYear()}</td>
+                <td>{new Date(event.start_date).toLocaleDateString()}</td>
+                <td>{new Date(event.end_date).toLocaleDateString()}</td>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <Button
@@ -82,7 +82,7 @@ const Events: React.FC = () => {
                       color="secondary"
                       size="small"
                       onClick={() => {
-                        router.replace('events/1')
+                        router.replace(`events/${event.id}`)
                       }}
                     >
                       <FiInfo size={20} />
@@ -94,7 +94,12 @@ const Events: React.FC = () => {
           </tbody>
         </PaginatedTable>
       </Card>
-      <EventModal openModal={openEventModal} setOpenModal={setOpenEventModal} />
+      <EventModal
+        request={request}
+        type="add"
+        openModal={openEventModal}
+        setOpenModal={setOpenEventModal}
+      />
     </Container>
   )
 }

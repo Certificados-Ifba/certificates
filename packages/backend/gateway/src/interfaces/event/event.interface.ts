@@ -6,4 +6,6 @@ export interface IEvent {
   edition: string
   start_date: Date
   end_date: Date
+  id?: string
+  user_id: { id: string; name: string } | string
 }

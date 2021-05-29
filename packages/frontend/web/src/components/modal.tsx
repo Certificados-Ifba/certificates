@@ -4,7 +4,7 @@ import Card from './card'
 interface ModalProps {
   open: boolean
   onClose: () => void
-  size?: 'sm'
+  size?: 'sm' | 'lg'
 }
 
 const Modal: React.FC<ModalProps> = ({
