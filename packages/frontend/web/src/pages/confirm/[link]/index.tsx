@@ -1,33 +1,64 @@
 import { FormHandles } from '@unform/core'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useCallback, useRef, useState } from 'react'
-import { FiLock, FiUserCheck, FiRefreshCw } from 'react-icons/fi'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { FiLock, FiUserCheck, FiRefreshCw, FiCheck } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import Logo from '../../../../assets/logo-full.svg'
-import Alert from '../../../../components/alert'
-import Button from '../../../../components/button'
-import Card from '../../../../components/card'
-import Input from '../../../../components/input'
-import withoutAuth from '../../../../hocs/withoutAuth'
-import ConfirmLayout from '../../../../layouts/confirm'
-import { useToast } from '../../../../providers/toast'
-import Row from '../../../../styles/components/row'
+import Logo from '../../../assets/logo-full.svg'
+import Alert from '../../../components/alert'
+import Button from '../../../components/button'
+import Card from '../../../components/card'
+import Input from '../../../components/input'
+import withoutAuth from '../../../hocs/withoutAuth'
+import ConfirmLayout from '../../../layouts/confirm'
+import { useAuth } from '../../../providers/auth'
+import { useToast } from '../../../providers/toast'
+import api from '../../../services/axios'
+import Row from '../../../styles/components/row'
 import {
   Container,
   FormArea,
   LogoArea,
   FormContainer
-} from '../../../../styles/pages/confirm'
-import getValidationErrors from '../../../../utils/getValidationErrors'
+} from '../../../styles/pages/confirm'
+import getValidationErrors from '../../../utils/getValidationErrors'
+
+interface IResponse {
+  message: string
+  data: 'register' | 'reset' | null
+}
 
 const Confirm: React.FC = () => {
   const [loading, setLoading] = useState(false)
-  const { query } = useRouter()
+  const [type, setType] = useState('')
+  const { query, replace } = useRouter()
   const { addToast } = useToast()
+  const { resetPassword } = useAuth()
   const formRef = useRef<FormHandles>(null)
-  const { code, type } = query
+  const { link } = query
+
+  useEffect(() => {
+    if (link) {
+      async function loadData() {
+        try {
+          const response = await api.get<IResponse>(`users/link/${link}`)
+          setType(response?.data?.data)
+        } catch (err) {
+          addToast({
+            type: 'error',
+            title: 'Erro na confirmação',
+            description: err
+          })
+          replace('/login')
+        }
+      }
+      setLoading(true)
+      loadData()
+      setLoading(false)
+    }
+  }, [link, addToast, replace])
+
   const handleForgotPassword = useCallback(
     async data => {
       try {
@@ -45,7 +76,13 @@ const Confirm: React.FC = () => {
           abortEarly: false
         })
 
+        await resetPassword({
+          link: typeof link === 'string' ? link : link[0],
+          password: data.password
+        })
+
         setLoading(false)
+        replace('/')
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err)
@@ -65,7 +102,7 @@ const Confirm: React.FC = () => {
         })
       }
     },
-    [addToast]
+    [link, addToast, replace, resetPassword]
   )
   return (
     <Container>
@@ -133,16 +170,8 @@ const Confirm: React.FC = () => {
                 type="submit"
                 loading={loading}
               >
-                {type === 'register' && (
-                  <>
-                    <FiUserCheck size={20} /> <span>Confirmar</span>
-                  </>
-                )}
-                {type === 'reset' && (
-                  <>
-                    <FiRefreshCw size={20} /> <span>Redefinir</span>
-                  </>
-                )}
+                <FiCheck size={20} />
+                <span>{type === 'register' ? 'Confirmar' : 'Redefinir'}</span>
               </Button>
             </Row>
           </FormContainer>

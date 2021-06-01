@@ -17,6 +17,12 @@ import {
   ApiCreatedResponse,
   ApiBearerAuth
 } from '@nestjs/swagger'
+import { ForgotPasswordUserResponseDto } from 'src/interfaces/user/dto/forgot-password-user-response.dto'
+import { ForgotPasswordUserDto } from 'src/interfaces/user/dto/forgot-password-user.dto'
+import { UserLinkResponseDto } from 'src/interfaces/user/dto/user-link-response.dto'
+import { UserLinkDto } from 'src/interfaces/user/dto/user-link.dto'
+import { IServiceUserForgotPasswordResponse } from 'src/interfaces/user/service-user-forgot-password-response.interface'
+import { IServiceUserLinkResponse } from 'src/interfaces/user/service-user-link-response.interface'
 
 import { Authorization } from '../decorators/authorization.decorator'
 import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
@@ -143,7 +149,6 @@ export class UsersController {
   public async logoutUser(
     @Req() request: IAuthorizedRequest
   ): Promise<LogoutUserResponseDto> {
-    console.log(request, 'Teste')
     const userInfo = request.user
 
     const destroyTokenResponse: IServiceTokenDestroyResponse = await this.tokenServiceClient
@@ -170,7 +175,7 @@ export class UsersController {
     }
   }
 
-  @Post('/confirm')
+  @Post('/reset')
   @ApiCreatedResponse({
     type: ConfirmUserResponseDto
   })
@@ -207,6 +212,63 @@ export class UsersController {
       data: {
         token: createTokenResponse.token
       }
+    }
+  }
+
+  @Post('/forgot')
+  @ApiCreatedResponse({
+    type: ForgotPasswordUserResponseDto
+  })
+  public async forgotPassword(
+    @Body() forgotPasswordRequest: ForgotPasswordUserDto
+  ): Promise<ForgotPasswordUserResponseDto> {
+    const forgotPasswordUserResponse: IServiceUserForgotPasswordResponse = await this.userServiceClient
+      .send('user_forgot_password', {
+        email: forgotPasswordRequest.email
+      })
+      .toPromise()
+
+    if (forgotPasswordUserResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: forgotPasswordUserResponse.message,
+          data: null,
+          errors: forgotPasswordUserResponse.errors
+        },
+        forgotPasswordUserResponse.status
+      )
+    }
+
+    return {
+      message: forgotPasswordUserResponse.message,
+      errors: null
+    }
+  }
+
+  @Get('/link/:link')
+  @ApiCreatedResponse({
+    type: UserLinkResponseDto
+  })
+  public async getUserLink(
+    @Param() params: UserLinkDto
+  ): Promise<UserLinkResponseDto> {
+    const linkUserResponse: IServiceUserLinkResponse = await this.userServiceClient
+      .send('user_get_by_link', params.link)
+      .toPromise()
+
+    if (linkUserResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: linkUserResponse.message,
+          data: null
+        },
+        linkUserResponse.status
+      )
+    }
+
+    return {
+      message: linkUserResponse.message,
+      data: linkUserResponse.data
     }
   }
 }

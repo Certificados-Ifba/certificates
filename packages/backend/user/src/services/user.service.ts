@@ -83,9 +83,13 @@ export class UserService {
     return await this.UserModel.findOneAndDelete({ _id: id })
   }
 
-  public async createUserLink(id: string): Promise<IUserLink> {
+  public async createUserLink(
+    id: string,
+    expired?: number
+  ): Promise<IUserLink> {
     const UserLinkModel = new this.UserLinkModel({
-      user_id: id
+      user_id: id,
+      expired
     })
     return await UserLinkModel.save()
   }

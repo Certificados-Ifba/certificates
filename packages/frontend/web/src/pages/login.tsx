@@ -13,6 +13,7 @@ import Input from '../components/input'
 import withoutAuth from '../hocs/withoutAuth'
 import { useAuth } from '../providers/auth'
 import { useToast } from '../providers/toast'
+import api from '../services/axios'
 import Row from '../styles/components/row'
 import {
   Container,
@@ -61,8 +62,8 @@ const FormForgotPassword: React.FC<{
         setLoading(true)
         formRef.current?.setErrors({})
         const schema = Yup.object().shape({
-          login: Yup.string()
-            .required('Por favor, digite o seu login')
+          email: Yup.string()
+            .required('Por favor, digite o seu email')
             .email('Por favor, digite um e-mail válido')
         })
 
@@ -70,6 +71,14 @@ const FormForgotPassword: React.FC<{
           abortEarly: false
         })
 
+        await api.post('/users/forgot', data)
+
+        addToast({
+          type: 'success',
+          title: 'Email de recuperação enviado',
+          description: 'Verifique sua caixa de entrada para recuperar a senha.'
+        })
+        setForgotPassword(false)
         setLoading(false)
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -85,12 +94,12 @@ const FormForgotPassword: React.FC<{
 
         addToast({
           type: 'error',
-          title: 'Erro desconhecido',
-          description: 'Não foi possível redefinir sua senha.'
+          title: 'Erro na solicitação',
+          description: err
         })
       }
     },
-    [addToast]
+    [addToast, setForgotPassword]
   )
   const [loading, setLoading] = useState(false)
   return (
@@ -124,7 +133,7 @@ const FormForgotPassword: React.FC<{
           <Input
             formRef={formRef}
             label="E-mail"
-            name="login"
+            name="email"
             icon={FiMail}
             placeholder="email@exemplo.com"
             autoComplete="username"

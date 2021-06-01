@@ -20,7 +20,6 @@ api.interceptors.response.use(
     // const router = useRouter()
 
     const { data } = error.response
-    console.log(data)
 
     if (data?.code === 'token.expired') {
       Cookie.remove('certificates.session')

@@ -26,6 +26,10 @@ export const UserLinkSchema = new mongoose.Schema(
     link: {
       type: String,
       default: generateLink()
+    },
+    expired: {
+      type: Number,
+      default: null
     }
   },
   {

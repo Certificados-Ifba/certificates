@@ -4,6 +4,8 @@ import { MessagePattern, ClientProxy } from '@nestjs/microservices'
 import { IUserConfirmResponse } from './interfaces/user-confirm-response.interface'
 import { IUserCreateResponse } from './interfaces/user-create-response.interface'
 import { IUserDeleteResponse } from './interfaces/user-delete-response.interface'
+import { IUserForgotPasswordResponse } from './interfaces/user-forgot-password-response.interface'
+import { IUserGetByLinkResponse } from './interfaces/user-get-by-link-response.interface'
 import { IUserListParams } from './interfaces/user-list-params.interface'
 import { IUserListResponse } from './interfaces/user-list-response.interface'
 import { IUserSearchResponse } from './interfaces/user-search-response.interface'
@@ -107,6 +109,44 @@ export class UserController {
     return result
   }
 
+  @MessagePattern('user_get_by_link')
+  public async getUserByLink(link: string): Promise<IUserGetByLinkResponse> {
+    let result: IUserGetByLinkResponse
+
+    if (link) {
+      const userLink = await this.userService.getUserLink(link)
+      if (userLink) {
+        if (userLink.expired && userLink.expired < Date.now()) {
+          result = {
+            status: HttpStatus.GONE,
+            message: 'user_get_by_link_expired',
+            data: null
+          }
+        } else {
+          result = {
+            status: HttpStatus.OK,
+            message: 'user_get_by_link_success',
+            data: userLink.expired ? 'reset' : 'register'
+          }
+        }
+      } else {
+        result = {
+          status: HttpStatus.NOT_FOUND,
+          message: 'user_get_by_link_not_found',
+          data: null
+        }
+      }
+    } else {
+      result = {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'user_get_by_link_bad_request',
+        data: null
+      }
+    }
+
+    return result
+  }
+
   @MessagePattern('user_confirm')
   public async confirmUser(confirmParams: {
     password: string
@@ -145,6 +185,47 @@ export class UserController {
         status: HttpStatus.BAD_REQUEST,
         message: 'user_confirm_bad_request',
         user: null,
+        errors: null
+      }
+    }
+
+    return result
+  }
+
+  @MessagePattern('user_forgot_password')
+  public async forgotPasswordUser(forgotPasswordParams: {
+    email: string
+  }): Promise<IUserForgotPasswordResponse> {
+    let result: IUserForgotPasswordResponse
+    const user = await this.userService.searchUser({
+      email: forgotPasswordParams.email
+    })
+    if (user) {
+      const userLink = await this.userService.createUserLink(
+        user.id,
+        Date.now() + 2 * 60 * 60 * 1000
+      )
+      result = {
+        status: HttpStatus.OK,
+        message: 'user_forgot_password_success',
+        errors: null
+      }
+      this.mailerServiceClient
+        .send('mail_send', {
+          to: user.email,
+          subject: 'Recuperação de senha',
+          template: '/templates/forgot_password',
+          context: {
+            name: user.name,
+            email: user.email,
+            link: this.userService.getConfirmationLink(userLink.link)
+          }
+        })
+        .toPromise()
+    } else {
+      result = {
+        status: HttpStatus.NOT_FOUND,
+        message: 'user_forgot_password_not_found',
         errors: null
       }
     }

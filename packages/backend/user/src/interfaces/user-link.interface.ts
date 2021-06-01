@@ -5,4 +5,5 @@ export interface IUserLink extends Document {
   user_id: string
   link: string
   is_used: boolean
+  expired?: number
 }

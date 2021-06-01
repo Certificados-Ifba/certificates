@@ -22,9 +22,15 @@ interface SignInCredentials {
   password: string
 }
 
+interface ResetCredentials {
+  link: string
+  password: string
+}
+
 export interface AuthContextData {
   user: User
-  signIn(credentials: SignInCredentials): Promise<void>
+  resetPassword(data: ResetCredentials): Promise<void>
+  signIn(data: SignInCredentials): Promise<void>
   signOut(): Promise<void>
 }
 
@@ -44,6 +50,22 @@ const AuthProvider: React.FC = ({ children }) => {
 
     return {} as AuthState
   })
+
+  const resetPassword = useCallback(
+    async ({ link, password }) => {
+      const response = await api.post('/users/reset', {
+        link,
+        password
+      })
+
+      const { token } = response.data?.data
+      const payload: any = decode(token || '')
+
+      setToken(token)
+      setData({ token, user: payload?.user })
+    },
+    [setToken]
+  )
 
   const signIn = useCallback(
     async ({ login, password }) => {
@@ -72,6 +94,7 @@ const AuthProvider: React.FC = ({ children }) => {
     <AuthContext.Provider
       value={{
         user: data.user,
+        resetPassword,
         signIn,
         signOut
       }}
