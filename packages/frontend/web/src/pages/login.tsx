@@ -153,7 +153,7 @@ const FormForgotPassword: React.FC<{
 const FormLogin: React.FC<{
   setForgotPassword: Dispatch<SetStateAction<boolean>>
 }> = ({ setForgotPassword }) => {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<boolean>(false)
   const formRef = useRef<FormHandles>(null)
   const { addToast } = useToast()
   const router = useRouter()

@@ -2,10 +2,10 @@ import { ButtonProps, Container } from '../styles/components/button'
 import theme from '../styles/theme'
 import Spinner from './spinner'
 
-const Button: React.FC<ButtonProps> = ({ children, ...rest }) => {
+const Button: React.FC<ButtonProps> = ({ children, loading, ...rest }) => {
   return (
     <Container {...rest}>
-      {rest.loading ? (
+      {loading ? (
         <>
           <Spinner size={20} color={theme.colors.light} />
           <span>Carregando</span>

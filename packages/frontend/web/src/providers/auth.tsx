@@ -18,8 +18,9 @@ interface AuthState {
 }
 
 interface SignInCredentials {
-  login: string
-  password: string
+  login?: string
+  password?: string
+  token?: string
 }
 
 interface ResetCredentials {
@@ -68,15 +69,18 @@ const AuthProvider: React.FC = ({ children }) => {
   )
 
   const signIn = useCallback(
-    async ({ login, password }) => {
-      const response = await api.post('/users/login', {
-        email: login,
-        password
-      })
-
-      const { token } = response.data?.data
+    async (data: SignInCredentials) => {
+      let token
+      if (data.login && data.password) {
+        const response = await api.post('/users/login', {
+          email: data.login,
+          password: data.password
+        })
+        token = response.data?.data.token
+      } else {
+        token = data.token
+      }
       const payload: any = decode(token || '')
-
       setToken(token)
       setData({ token, user: payload?.user })
     },

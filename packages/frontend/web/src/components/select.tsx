@@ -8,10 +8,13 @@ import {
 } from 'react'
 import { FiAlertCircle } from 'react-icons/fi'
 import ReactSelect, { OptionTypeBase, Props as SelectProps } from 'react-select'
+import AsyncSelect from 'react-select/async'
 
+import api from '../services/axios'
 import { Label, Error } from '../styles/components/input'
 import { Container } from '../styles/components/select'
 import theme from '../styles/theme'
+import { Debounce } from '../utils/debounce'
 
 interface Props extends SelectProps<OptionTypeBase> {
   name?: string
@@ -19,6 +22,8 @@ interface Props extends SelectProps<OptionTypeBase> {
   marginBottom?: string
   formRef?: MutableRefObject<FormHandles>
   hidden?: boolean
+  async?: boolean
+  url?: string
 }
 
 const normalStyle = {
@@ -54,6 +59,8 @@ const Select: React.FC<Props> = ({
   label,
   formRef,
   hidden,
+  async,
+  url,
   ...rest
 }) => {
   const [isFilled, setIsFilled] = useState(false)
@@ -70,8 +77,12 @@ const Select: React.FC<Props> = ({
   }, [formRef, name])
 
   const handleOnBlurSelect = useCallback(() => {
-    setIsFilled(!!selectRef.current?.state.value)
-  }, [])
+    if (async) {
+      setIsFilled(!!selectRef.current?.select?.state.value)
+    } else {
+      setIsFilled(!!selectRef.current?.state.value)
+    }
+  }, [async])
 
   const props = {
     ref: selectRef,
@@ -121,41 +132,149 @@ const Select: React.FC<Props> = ({
         name: fieldName,
         ref: selectRef.current,
         setValue: (ref, value) => {
-          const selected = ref.props.options.filter(
-            (option: any) => option.value === value
-          )
-          ref.select.setValue(selected[0] || null)
-          setIsFilled(!!selected[0])
+          let selected
+          let options: any = []
+          let setValue
+          if (async) {
+            options = ref.select.props.options
+            setValue = ref.select.select.setValue
+          } else {
+            options = ref.props.options
+            setValue = ref.select.setValue
+          }
+          if (value) {
+            if (value.id) {
+              const opt = { label: value.name, value: value.id }
+              setDefaultOptions([opt])
+              setFocusLoaded(false)
+              selected = [opt]
+            } else {
+              selected = options.filter((option: any) => option.value === value)
+            }
+          }
+          if (selected) {
+            setValue(selected[0] || null)
+            setIsFilled(!!selected[0])
+          } else {
+            setValue(null)
+            setIsFilled(false)
+          }
         },
         getValue: (ref: any) => {
-          if (rest.isMulti) {
-            if (!ref.state.value) {
-              return []
+          if (async) {
+            const value = ref.select?.select.getValue()
+            if (value.length === 1) {
+              return value[0].value
+            } else {
+              return ''
             }
-            return ref.state.value.map((option: OptionTypeBase) => option.value)
+          } else {
+            if (rest.isMulti) {
+              if (!ref.state.value) {
+                return []
+              }
+              return ref.state.value.map(
+                (option: OptionTypeBase) => option.value
+              )
+            }
+            if (!ref.state.value) {
+              return ''
+            }
+            return ref.state.value.value
           }
-          if (!ref.state.value) {
-            return ''
-          }
-          return ref.state.value.value
         },
         clearValue: ref => {
-          ref.select.clearValue()
+          let clearValue
+          if (async) {
+            clearValue = ref.select?.select?.clearValue
+          } else {
+            clearValue = ref.select?.clearValue
+          }
+          clearValue()
           setIsFilled(false)
         }
       })
     }
-  }, [name, fieldName, registerField, rest.isMulti])
+  }, [name, fieldName, registerField, rest.isMulti, async])
+
+  const [defaultOptions, setDefaultOptions] = useState([])
+  const [focusLoaded, setFocusLoaded] = useState(false)
+
+  const debounceFocus: Debounce<void> = new Debounce(async () => {
+    const respApi = await api.get(url, {
+      params: { search: '' }
+    })
+
+    const listOpt: any[] = []
+    if (respApi?.data?.data) {
+      const list = respApi?.data?.data
+      for (const obj of list) {
+        listOpt.push({ value: obj.id, label: obj.name })
+      }
+    }
+    setDefaultOptions(listOpt)
+  })
+
+  const onFocus = () => {
+    if (!focusLoaded) {
+      setFocusLoaded(true)
+      debounceFocus.notify()
+    }
+  }
+
+  const debounceLoad: Debounce<{
+    inputValue: string
+    callback: any
+  }> = new Debounce(async ({ inputValue, callback }) => {
+    const resp = []
+
+    const filter = (inputValue: string) => {
+      return resp
+    }
+
+    try {
+      const respApi = await api.get(url, {
+        params: { search: inputValue }
+      })
+
+      if (respApi?.data?.data) {
+        const list = respApi?.data?.data
+        for (const obj of list) {
+          resp.push({ value: obj.id, label: obj.name })
+        }
+      }
+      callback(filter(inputValue))
+    } catch (error) {
+      console.error(error)
+      callback(filter(inputValue))
+    }
+    callback(filter(inputValue))
+  })
+
+  const loadOptions = (inputValue, callback) => {
+    debounceLoad.notify({ inputValue, callback })
+  }
 
   return (
     <Container hidden={hidden} marginBottom={marginBottom}>
       <>
         {label && <Label htmlFor={name}>{label}</Label>}
-        <ReactSelect
-          styles={selectStyle}
-          defaultValue={''}
-          {...(props as Props)}
-        />
+        {!async && (
+          <ReactSelect
+            styles={selectStyle}
+            defaultValue={''}
+            {...(props as Props)}
+          />
+        )}
+        {async && (
+          <AsyncSelect
+            loadOptions={loadOptions}
+            onFocus={onFocus}
+            defaultOptions={defaultOptions}
+            styles={selectStyle}
+            {...(props as Props)}
+          />
+        )}
         {error && (
           <Error>
             <span>

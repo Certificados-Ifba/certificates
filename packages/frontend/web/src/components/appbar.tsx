@@ -17,7 +17,7 @@ import {
 const Appbar: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { user, signOut } = useAuth()
+  const { user, signOut, data } = useAuth()
   const { addToast } = useToast()
 
   const { toogleActive } = useContext(SidebarContext)
@@ -40,6 +40,8 @@ const Appbar: React.FC = () => {
       })
     }
   }, [router, signOut, addToast])
+
+  console.log(data)
 
   return (
     <Container>

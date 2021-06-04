@@ -1,6 +1,7 @@
-import { Controller, Inject, Get } from '@nestjs/common'
+import { Controller, Inject, Get, Res } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger'
+import { Response } from 'express'
 
 import { GetEventsResponseDto } from '../interfaces/event/dto/get-events-response.dto'
 
@@ -10,49 +11,6 @@ export class TestEventsController {
   constructor(
     @Inject('EVENT_SERVICE') private readonly eventServiceClient: ClientProxy
   ) {}
-
-  @Get('events')
-  @ApiOkResponse({
-    type: GetEventsResponseDto,
-    description: 'List of events'
-  })
-  public async getEvents(): Promise<GetEventsResponseDto> {
-    return {
-      message: 'Lista de Eventos',
-      data: {
-        events: [
-          {
-            name: 'Competição Baiana de Veículos Autônomos em Escala',
-            initials: 'CBVAE',
-            year: '2019',
-            start_date: new Date(),
-            end_date: new Date(),
-            description: 'Competição Baiana de Veículos Autônomos em Escala',
-            edition: ''
-          },
-          {
-            name: 'Projeto de Extensão do NAPNEE 	Curso LIBRAS',
-            initials: 'LIBRAS',
-            year: '2018',
-            start_date: new Date(),
-            end_date: new Date(),
-            description: 'Projeto de Extensão do NAPNEE 	Curso LIBRAS',
-            edition: ''
-          },
-          {
-            name: 'Projeto de Extensão do NAPNEE 	Curso TEA',
-            initials: 'TEA',
-            year: '2017',
-            start_date: new Date(),
-            end_date: new Date(),
-            description: 'Projeto de Extensão do NAPNEE 	Curso TEA',
-            edition: ''
-          }
-        ]
-      },
-      errors: null
-    }
-  }
 
   @Get('participants')
   @ApiOkResponse({
