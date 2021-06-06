@@ -19,5 +19,6 @@ export const adminPermissions = [
   'generic_get_by_id',
   'generic_delete_by_id',
   'generic_update_by_id',
-  'participant_create'
+  'participant_create',
+  'participant_list'
 ]

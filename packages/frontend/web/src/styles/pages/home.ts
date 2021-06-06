@@ -8,7 +8,7 @@ export const Container = styled.div`
   }
 
   @media (max-width: 768px) {
-    margin: 24px 30px 32px;
+    margin: 24px 10px 32px;
   }
 
   > header {

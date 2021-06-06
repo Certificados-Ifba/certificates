@@ -4,10 +4,18 @@ import {
   useEffect,
   useState,
   MutableRefObject,
-  useCallback
+  useCallback,
+  PropsWithChildren
 } from 'react'
-import { FiAlertCircle } from 'react-icons/fi'
-import ReactSelect, { OptionTypeBase, Props as SelectProps } from 'react-select'
+import { IconBaseProps } from 'react-icons'
+import { FiAlertCircle, FiAlignCenter } from 'react-icons/fi'
+import ReactSelect, {
+  components,
+  GroupTypeBase,
+  OptionProps,
+  OptionTypeBase,
+  Props as SelectProps
+} from 'react-select'
 import AsyncSelect from 'react-select/async'
 
 import api from '../services/axios'
@@ -24,6 +32,9 @@ interface Props extends SelectProps<OptionTypeBase> {
   hidden?: boolean
   async?: boolean
   url?: string
+  handleOnSelect?: (value: { label: string; value: any }) => void
+  icon?: React.ComponentType<IconBaseProps>
+  optionContent?: React.FC<{ props: any }>
 }
 
 const normalStyle = {
@@ -53,6 +64,20 @@ const filledStyle = {
   })
 }
 
+interface ContentProps {
+  icon?: React.ComponentType<IconBaseProps>
+  content: any
+}
+
+const SelectContent: React.FC<ContentProps> = ({ content, icon: Icon }) => {
+  return (
+    <>
+      {Icon && <Icon style={{ marginLeft: '10px' }} size={20}></Icon>}
+      {content}
+    </>
+  )
+}
+
 const Select: React.FC<Props> = ({
   name,
   marginBottom,
@@ -61,28 +86,38 @@ const Select: React.FC<Props> = ({
   hidden,
   async,
   url,
+  handleOnSelect,
+  icon,
+  optionContent: OptionContent,
   ...rest
 }) => {
   const [isFilled, setIsFilled] = useState(false)
   const selectRef = useRef(null)
 
-  const handleOnChangeSelect = useCallback(() => {
-    if (formRef) {
-      try {
-        const err = formRef.current.getErrors()
-        delete err[name]
-        formRef.current.setErrors(err)
-      } catch (err) {}
-    }
-  }, [formRef, name])
+  const handleOnChangeSelect = useCallback(
+    data => {
+      if (formRef) {
+        try {
+          const err = formRef.current.getErrors()
+          delete err[name]
+          formRef.current.setErrors(err)
+        } catch (err) {}
+      }
+      if (handleOnSelect) {
+        if (async) {
+          handleOnSelect(data)
+        } else {
+          handleOnSelect(data)
+        }
+      }
+      setIsFilled(!!data)
+    },
+    [formRef, handleOnSelect, name, async]
+  )
 
-  const handleOnBlurSelect = useCallback(() => {
-    if (async) {
-      setIsFilled(!!selectRef.current?.select?.state.value)
-    } else {
-      setIsFilled(!!selectRef.current?.state.value)
-    }
-  }, [async])
+  const selectOpt = useCallback(data => {
+    console.log(data)
+  }, [])
 
   const props = {
     ref: selectRef,
@@ -91,8 +126,8 @@ const Select: React.FC<Props> = ({
     menuPosition: 'fixed',
     defaultValue: '',
     inputId: name,
+    selectOption: selectOpt,
     onChange: handleOnChangeSelect,
-    onBlur: handleOnBlurSelect,
     ...rest
   }
 
@@ -144,7 +179,7 @@ const Select: React.FC<Props> = ({
           }
           if (value) {
             if (value.id) {
-              const opt = { label: value.name, value: value.id }
+              const opt = { label: value.name, value: value.id, ...value }
               setDefaultOptions([opt])
               setFocusLoaded(false)
               selected = [opt]
@@ -209,7 +244,9 @@ const Select: React.FC<Props> = ({
     if (respApi?.data?.data) {
       const list = respApi?.data?.data
       for (const obj of list) {
-        listOpt.push({ value: obj.id, label: obj.name })
+        console.log(obj)
+
+        listOpt.push({ value: obj.id, label: obj.name, ...obj })
       }
     }
     setDefaultOptions(listOpt)
@@ -240,7 +277,7 @@ const Select: React.FC<Props> = ({
       if (respApi?.data?.data) {
         const list = respApi?.data?.data
         for (const obj of list) {
-          resp.push({ value: obj.id, label: obj.name })
+          resp.push({ value: obj.id, label: obj.name, ...obj })
         }
       }
       callback(filter(inputValue))
@@ -264,6 +301,23 @@ const Select: React.FC<Props> = ({
             styles={selectStyle}
             defaultValue={''}
             {...(props as Props)}
+            components={{
+              // eslint-disable-next-line react/display-name
+              Option: props => {
+                return (
+                  <components.Option {...props}>
+                    {OptionContent && <OptionContent props={props} />}
+                    {!OptionContent && <>{props.children}</>}
+                  </components.Option>
+                )
+              },
+              // eslint-disable-next-line react/display-name
+              Control: ({ children, ...rest }) => (
+                <components.Control {...rest}>
+                  <SelectContent content={children} icon={icon}></SelectContent>
+                </components.Control>
+              )
+            }}
           />
         )}
         {async && (
@@ -273,6 +327,23 @@ const Select: React.FC<Props> = ({
             defaultOptions={defaultOptions}
             styles={selectStyle}
             {...(props as Props)}
+            components={{
+              // eslint-disable-next-line react/display-name
+              Control: ({ children, ...rest }) => (
+                <components.Control {...rest}>
+                  <SelectContent content={children} icon={icon}></SelectContent>
+                </components.Control>
+              ),
+              // eslint-disable-next-line react/display-name
+              Option: props => {
+                return (
+                  <components.Option {...props}>
+                    {OptionContent && <OptionContent props={props} />}
+                    {!OptionContent && <>{props.children}</>}
+                  </components.Option>
+                )
+              }
+            }}
           />
         )}
         {error && (

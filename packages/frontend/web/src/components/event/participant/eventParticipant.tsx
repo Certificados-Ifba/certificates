@@ -2,23 +2,22 @@ import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { useCallback, useRef, useState } from 'react'
 import {
-  FiEdit,
+  FiDownload,
+  FiExternalLink,
   FiMinusCircle,
   FiPlus,
   FiSearch,
-  FiTrash2
+  FiUsers
 } from 'react-icons/fi'
 
 import { useToast } from '../../../providers/toast'
-import api from '../../../services/axios'
 import usePaginatedRequest from '../../../services/usePaginatedRequest'
-import Alert from '../../alert'
+import Accordion from '../../accordion'
 import Button from '../../button'
 import Column from '../../column'
-import DeleteModal from '../../deleteModal'
 import Input from '../../input'
 import PaginatedTable from '../../paginatedTable'
-import { AddParticipantModal } from './addParticipantModal'
+import { AddParticipant } from './addParticipant'
 
 export const EventParticipant: React.FC<{ event: any }> = ({ event }) => {
   const { addToast } = useToast()
@@ -88,92 +87,99 @@ export const EventParticipant: React.FC<{ event: any }> = ({ event }) => {
 
   return (
     <>
-      <header>
-        <h2>Participantes do Evento</h2>
-        <Form ref={searchFormRef} onSubmit={handleFilter}>
-          <Input
-            name="search"
-            placeholder={`Buscar participante no evento`}
-            icon={FiSearch}
-          />
-        </Form>
-        <Button
-          size="small"
-          inline
-          onClick={() => {
-            setOpenModal(true)
-          }}
-        >
-          <FiPlus size={20} />
-          <span>Adicionar Atividade</span>
-        </Button>
-      </header>
-      <PaginatedTable request={request}>
-        <thead>
-          <tr>
-            <th onClick={() => handleOrder('name')}>
-              <Column order={order} selected={column === 'name'}>
-                Nome
-              </Column>
-            </th>
-            <th>CPF</th>
-            <th>Atividade</th>
-            <th>Carga Horária</th>
-            <th>Data Início</th>
-            <th>Data Fim</th>
-            <th style={{ width: 32 }} />
-          </tr>
-        </thead>
-        <tbody>
-          {request.data?.data?.map(part => (
-            <tr key={part.id}>
-              <td>{part.name}</td>
-              <td>{part.cpf}</td>
-              <td>{part.activity}</td>
-              <td>{part.workload} h</td>
-              <td>{new Date(part.start_date).toLocaleDateString()}</td>
-              <td>{new Date(part.end_date).toLocaleDateString()}</td>
-              <td>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Button
-                    inline
-                    ghost
-                    square
-                    color="danger"
-                    size="small"
-                    onClick={() => {
-                      //   setActivitySelected(act.id)
-                      //   setNameActivitySelected(act.name)
-                      //   setOpenDeleteModal(true)
-                    }}
-                  >
-                    <FiMinusCircle size={20} />
-                  </Button>
-                </div>
-              </td>
+      <Accordion title="Participantes do Evento" open={true} icon={FiUsers}>
+        <header>
+          <h2></h2>
+          <Form ref={searchFormRef} onSubmit={handleFilter}>
+            <Input
+              name="search"
+              placeholder={`Buscar participante no evento`}
+              icon={FiSearch}
+            />
+          </Form>
+        </header>
+        <PaginatedTable request={request}>
+          <thead>
+            <tr>
+              <th onClick={() => handleOrder('name')}>
+                <Column order={order} selected={column === 'name'}>
+                  Nome
+                </Column>
+              </th>
+              <th>CPF</th>
+              <th>Atividade</th>
+              <th>Carga Horária</th>
+              <th>Data Início</th>
+              <th>Data Fim</th>
+              <th>Incluído Em</th>
+              <th style={{ width: 32 }} />
             </tr>
-          ))}
-        </tbody>
-      </PaginatedTable>
-
-      <AddParticipantModal
-        event={event}
-        openModal={openModal}
-        request={request}
-        setOpenModal={setOpenModal}
-      />
-      {/*
-      <DeleteModal
-        handleSubmit={handleSubmitDelete}
-        name="Atividade"
-        openModal={openDeleteModal}
-        setOpenModal={setOpenDeleteModal}
-      >
-        <Alert>
-          Tem certeza que você deseja excluir a atividade{' '}
-          <b>{nameActivitySelected}</b>?
-        </Alert>
-      </DeleteModal> */}
+          </thead>
+          <tbody>
+            {request.data?.data?.map(part => (
+              <tr key={part.id}>
+                <td>{part.name}</td>
+                <td>{part.cpf}</td>
+                <td>{part.activity}</td>
+                <td>{part.workload} h</td>
+                <td>{new Date(part.start_date).toLocaleDateString()}</td>
+                <td>{new Date(part.end_date).toLocaleDateString()}</td>
+                <td>
+                  {new Date().toLocaleDateString()} às{' '}
+                  {new Date().toLocaleTimeString()}
+                </td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Button
+                      inline
+                      ghost
+                      square
+                      color="success"
+                      size="small"
+                      onClick={() => {
+                        //   setActivitySelected(act.id)
+                        //   setNameActivitySelected(act.name)
+                        //   setOpenDeleteModal(true)
+                      }}
+                    >
+                      <FiExternalLink size={20} />
+                    </Button>
+                    <Button
+                      inline
+                      ghost
+                      square
+                      color="info"
+                      size="small"
+                      onClick={() => {
+                        //   setActivitySelected(act.id)
+                        //   setNameActivitySelected(act.name)
+                        //   setOpenDeleteModal(true)
+                      }}
+                    >
+                      <FiDownload size={20} />
+                    </Button>
+                    <Button
+                      inline
+                      ghost
+                      square
+                      color="danger"
+                      size="small"
+                      onClick={() => {
+                        //   setActivitySelected(act.id)
+                        //   setNameActivitySelected(act.name)
+                        //   setOpenDeleteModal(true)
+                      }}
+                    >
+                      <FiMinusCircle size={20} />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </PaginatedTable>
+      </Accordion>
+      <AddParticipant event={event} request={request}></AddParticipant>
     </>
   )
 }

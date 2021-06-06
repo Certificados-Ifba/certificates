@@ -31,7 +31,7 @@ export class EventActivitiesController {
       data: {
         id: 1,
         name: 'Competição Baiana de Veículos Autônomos em Escala',
-        activitieType: { id: 1, name: 'Competição' },
+        activityType: { id: 1, name: 'Competição' },
         workload: 10,
         start_date: new Date(),
         end_date: new Date()
@@ -55,25 +55,25 @@ export class EventActivitiesController {
       message: 'Lista de Atividades do Evento',
       data: [
         {
-          id: 1,
+          id: '1',
           name: 'Competição Baiana de Veículos Autônomos em Escala',
-          activitieType: 'Competição',
+          activityType: 'Competição',
           workload: 10,
           start_date: new Date(),
           end_date: new Date()
         },
         {
-          id: 2,
+          id: '2',
           name: 'Competição Baiana de Veículos Autônomos em Escala',
-          activitieType: 'Palestra',
+          activityType: 'Palestra',
           workload: 10,
           start_date: new Date(),
           end_date: new Date()
         },
         {
-          id: 3,
+          id: '3',
           name: 'Competição Baiana de Veículos Autônomos em Escala',
-          activitieType: 'Palestra',
+          activityType: 'Palestra',
           workload: 10,
           start_date: new Date(),
           end_date: new Date()

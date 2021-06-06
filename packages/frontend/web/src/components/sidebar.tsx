@@ -30,7 +30,8 @@ const Sidebar: React.FC = () => {
     {
       name: 'Eventos',
       link: '/events',
-      icon: FiCalendar
+      icon: FiCalendar,
+      activeLinks: ['/events', '/events/[tab]/[id]']
     },
     {
       name: 'Participantes',
@@ -44,7 +45,8 @@ const Sidebar: React.FC = () => {
     },
     {
       name: 'Configurações',
-      link: '/settings',
+      link: '/settings/function',
+      activeLinks: ['/settings/[tab]'],
       icon: FiSettings
     }
   ]
@@ -58,9 +60,9 @@ const Sidebar: React.FC = () => {
       </LogoArea>
       <Buttons>
         <ScrollBar>
-          {itens.map(({ name, link, icon: Icon }, key) => (
+          {itens.map(({ name, link, icon: Icon, activeLinks }, key) => (
             <li key={key} onClick={hideSidebar}>
-              <ActiveLink href={link}>
+              <ActiveLink activeLinks={activeLinks} href={link}>
                 <a>
                   <Icon size={24} />
                   <span>{name}</span>

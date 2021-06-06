@@ -82,7 +82,7 @@ const Events: React.FC = () => {
                       color="secondary"
                       size="small"
                       onClick={() => {
-                        router.replace(`events/${event.id}`)
+                        router.replace(`events/info/${event.id}`)
                       }}
                     >
                       <FiInfo size={20} />

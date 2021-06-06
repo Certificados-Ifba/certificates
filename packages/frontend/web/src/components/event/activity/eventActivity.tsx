@@ -60,7 +60,7 @@ export const EventActivity: React.FC<{ event: any }> = ({ event }) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const handleSubmitDelete = useCallback(() => {
     api
-      .delete(`event/${event.id}/activity/${activitySelected}`)
+      .delete(`events/${event.id}/activities/${activitySelected}`)
       .then(resp => {
         if (resp?.data?.message === 'event_activity_delete_by_id_success') {
           addToast({
@@ -124,7 +124,7 @@ export const EventActivity: React.FC<{ event: any }> = ({ event }) => {
           {request.data?.data?.map(act => (
             <tr key={act.id}>
               <td>{act.name}</td>
-              <td>{act.activitieType}</td>
+              <td>{act.activityType}</td>
               <td>{act.workload} h</td>
               <td>{new Date(act.start_date).toLocaleDateString()}</td>
               <td>{new Date(act.end_date).toLocaleDateString()}</td>

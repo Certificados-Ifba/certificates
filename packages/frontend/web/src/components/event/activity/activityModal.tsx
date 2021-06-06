@@ -65,7 +65,7 @@ export const EventActivityModal: React.FC<{
     data => {
       const schema = Yup.object().shape({
         name: Yup.string().required(`A atividade do evento precisa de um nome`),
-        activitieType: Yup.string().required(`Selecione um tipo de atividade`),
+        activityType: Yup.string().required(`Selecione um tipo de atividade`),
         workload: Yup.string().required('Por favor, digite a carga horária'),
         start_date: Yup.string().required(
           'Selecione a data inicial da atividade'
@@ -150,7 +150,7 @@ export const EventActivityModal: React.FC<{
           <Select
             formRef={formRef}
             label="Tipo de Atividade"
-            name="activitieType"
+            name="activityType"
             isSearchable={true}
             marginBottom="sm"
             async={true}
