@@ -1,6 +1,5 @@
 export interface IEventUpdateParams {
   name: string
-  description: string
   initials: string
   year: string
   edition: string

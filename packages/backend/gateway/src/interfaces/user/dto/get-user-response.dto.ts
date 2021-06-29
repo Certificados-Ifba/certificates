@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { IUser } from '../user.interface'
 
 export class GetUsersResponseDto {
-  @ApiProperty({ example: 'user_search_success' })
+  @ApiProperty({ example: 'user_list_success' })
   message: string
 
   @ApiProperty({

@@ -11,14 +11,15 @@ import {
 } from 'react-icons/fi'
 
 import Button from '../../../components/button'
-import { EventActivity } from '../../../components/event/activity/eventActivity'
-import { EventInfo } from '../../../components/event/eventInfo'
-import { EventParticipant } from '../../../components/event/participant/eventParticipant'
 import Tab from '../../../components/tab'
+import EventActivity from '../../../components/tabs/eventActivity'
+import EventInfo from '../../../components/tabs/eventInfo'
+import EventParticipant from '../../../components/tabs/eventParticipant'
 import withAuth from '../../../hocs/withAuth'
 import { useToast } from '../../../providers/toast'
 import api from '../../../services/axios'
 import { Container } from '../../../styles/pages/home'
+import { formatData } from '../../../utils/formatters'
 
 const EventDetail: React.FC = () => {
   const router = useRouter()
@@ -27,32 +28,27 @@ const EventDetail: React.FC = () => {
   const { addToast } = useToast()
 
   useEffect(() => {
-    api
-      .get(`events/${id}`)
-      .then((response: any) => {
-        if (response?.data?.message === 'event_get_by_id_not_found') {
-          addToast({
-            title: 'Menssagem',
-            type: 'info',
-            description: 'Não foi possível encontrar o evento.'
-          })
-          router.replace(`/events`)
-        }
+    const loadData = async () => {
+      try {
+        const response = await api.get(`events/${id}`)
+
         const event = response?.data?.data
+
         if (event) {
           setEvent(event)
         }
-      })
-      .catch(err => {
-        console.error(err)
+      } catch (err) {
         addToast({
-          title: 'Erro desconhecido',
+          title: 'Erro no carregamento',
           type: 'error',
-          description: 'Houve um erro desconhecido ao encontrar o evento.'
+          description: err
         })
-        router.replace(`/events`)
-      })
-  }, [addToast, id, router])
+        history.back()
+      }
+    }
+    if (id) loadData()
+  }, [id, addToast])
+
   return (
     <Container>
       <Head>
@@ -64,15 +60,16 @@ const EventDetail: React.FC = () => {
             <FiCalendar size={24} /> {event?.name}
           </h1>
           <h2>
-            Início em {new Date(event?.start_date).toLocaleDateString()} e
-            coordenado por {event?.user_id.name}
+            {`Início em ${formatData(event?.start_date)} e coordenado por ${
+              event?.user.name
+            }`}
           </h2>
         </div>
         <nav>
           <Button
             ghost
             onClick={() => {
-              router.replace('/events')
+              router.push('/events')
             }}
           >
             <FiChevronLeft size={20} />
@@ -85,17 +82,17 @@ const EventDetail: React.FC = () => {
           {
             name: 'Informações',
             icon: FiInfo,
-            children: <EventInfo event={event}></EventInfo>
+            children: <EventInfo event={event} setEvent={setEvent} />
           },
           {
             name: 'Atividades',
             icon: FiFileText,
-            children: <EventActivity event={event}></EventActivity>
+            children: <EventActivity event={event} />
           },
           {
             name: 'Participantes',
             icon: FiUsers,
-            children: <EventParticipant event={event}></EventParticipant>
+            children: <EventParticipant event={event} />
           },
           {
             name: 'Certificados',

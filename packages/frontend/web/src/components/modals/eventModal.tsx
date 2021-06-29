@@ -8,25 +8,55 @@ import {
   FiCalendar,
   FiX,
   FiPlus,
-  FiCheck
+  FiCheck,
+  FiHash
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
-import { PaginatedRequest } from '../../services/usePaginatedRequest'
+import getValidationErrors from '../../utils/getValidationErrors'
 import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
 import Select from '../select'
 
-export const EventModal: React.FC<{
-  event?: any
+interface IUser {
+  id: string
+  name: string
+  email: string
+  role: string
+  is_confirmed: boolean
+  last_login?: Date
+}
+
+interface IEvent {
+  id: string
+  name: string
+  description: string
+  initials: string
+  year: string
+  edition: string
+  start_date: string
+  end_date: string
+  user: IUser
+}
+
+interface Props {
+  type: 'add' | 'edit'
   openModal: boolean
   setOpenModal: Dispatch<SetStateAction<boolean>>
-  type: 'add' | 'edit'
-  request?: PaginatedRequest<any, any>
-}> = ({ openModal, setOpenModal, event, type, request }) => {
+  setEvent?: Dispatch<SetStateAction<IEvent>>
+  event?: IEvent
+}
+
+const EventModal: React.FC<Props> = ({
+  type,
+  openModal,
+  setOpenModal,
+  setEvent,
+  event
+}) => {
   const { addToast } = useToast()
 
   const router = useRouter()
@@ -43,63 +73,59 @@ export const EventModal: React.FC<{
     if (event) {
       formRef.current.setData(event)
     } else {
-      formRef.current.reset()
       formRef.current.setErrors({})
     }
-  }, [event])
+  }, [event, openModal])
 
   const handleSubmit = useCallback(
-    data => {
+    async data => {
       const schema = Yup.object().shape({
-        name: Yup.string().required(`O evento precisa ter um nome`),
-        initials: Yup.string().required(`Por favor, digite a sigla do projeto`),
-        user_id: Yup.string().required(
-          `Você precisa selecionar um coordenador para o evento`
+        name: Yup.string().required('O evento precisa ter um nome'),
+        initials: Yup.string().required('Por favor, digite a sigla do projeto'),
+        user: Yup.string().required(
+          'Você precisa selecionar um coordenador para o evento'
         ),
-        start_date: Yup.string().required(`Selecione a data de início`),
-        end_date: Yup.string().required(`Selecione a data do fim`)
+        start_date: Yup.date().required('Selecione a data de início'),
+        end_date: Yup.date().required('Selecione a data do fim')
       })
-      schema
-        .validate(data, {
+
+      try {
+        await schema.validate(data, {
           abortEarly: false
         })
-        .then(async (data: any) => {
-          data.year = '2020'
-          const response: any = await api.post('events', data)
-          if (response.data) {
-            addToast({
-              type: 'success',
-              title: `O evento ${type === 'add' ? 'cadastrado' : 'atualizado'}`,
-              description: `O evento foi ${
-                type === 'add' ? 'cadastrado' : 'atualizado'
-              } com sucesso.`
-            })
-            handleCloseSaveModal()
 
-            if (response.data?.data?.event) {
-              if (type === 'add')
-                router.replace(`events/${response.data?.data?.event.id}`)
-            }
-          }
+        if (type === 'add') {
+          const response = await api.post('events', data)
+          router.push(`events/${response.data?.data?.event.id}`)
+        } else {
+          const response = await api.put(`events/${event.id}`, data)
+          setEvent(response.data?.data?.event)
+        }
+
+        addToast({
+          type: 'success',
+          title: `O evento ${type === 'add' ? 'cadastrado' : 'atualizado'}`,
+          description: `O evento foi ${
+            type === 'add' ? 'cadastrado' : 'atualizado'
+          } com sucesso.`
         })
-        .catch(err => {
-          const validationErrors: { [key: string]: string } = {}
-          if (err instanceof Yup.ValidationError) {
-            err.inner.forEach((error: Yup.ValidationError) => {
-              validationErrors[error.path] = error.message
-            })
-            formRef.current?.setErrors(validationErrors)
-          } else {
-            const message = 'Erro ao adicionar o evento.'
-            addToast({
-              title: `Erro desconhecido`,
-              type: 'error',
-              description: message
-            })
-          }
+        handleCloseSaveModal()
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err)
+          formRef.current?.setErrors(errors)
+          return
+        }
+        addToast({
+          type: 'error',
+          title: `Erro ao ${
+            type === 'add' ? 'adicionar o usuário' : 'atualizar o usuário'
+          }`,
+          description: err
         })
+      }
     },
-    [addToast, handleCloseSaveModal, router, type]
+    [router, type, event?.id, addToast, handleCloseSaveModal, setEvent]
   )
 
   return (
@@ -126,7 +152,7 @@ export const EventModal: React.FC<{
             name="initials"
             label="Sigla"
             placeholder="Sigla"
-            icon={FiTag}
+            icon={FiHash}
           />
           <Input
             formRef={formRef}
@@ -134,7 +160,6 @@ export const EventModal: React.FC<{
             name="edition"
             label="Edição"
             placeholder="Edição"
-            type="text"
             icon={FiTag}
           />
           <Input
@@ -160,7 +185,7 @@ export const EventModal: React.FC<{
             url="users"
             formRef={formRef}
             label="Coordenador"
-            name="user_id"
+            name="user"
             isSearchable={true}
           />
         </div>
@@ -192,3 +217,5 @@ export const EventModal: React.FC<{
     </Modal>
   )
 }
+
+export default EventModal

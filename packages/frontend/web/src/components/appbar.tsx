@@ -4,7 +4,6 @@ import { FiLogOut, FiMenu } from 'react-icons/fi'
 
 import { useAuth } from '../providers/auth'
 import { SidebarContext } from '../providers/sidebar'
-import { useToast } from '../providers/toast'
 import {
   Container,
   Button,
@@ -13,46 +12,32 @@ import {
   Avatar,
   Right
 } from '../styles/components/appbar'
+import getRole from '../utils/getRole'
 
 const Appbar: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { user, signOut, data } = useAuth()
-  const { addToast } = useToast()
+  const { user, signOut } = useAuth()
 
-  const { toogleActive } = useContext(SidebarContext)
+  const { toggleActive } = useContext(SidebarContext)
 
-  const handleSignOut = useCallback(async () => {
-    try {
-      setLoading(true)
-
-      await signOut()
-
-      setLoading(false)
-      router.replace('/login')
-    } catch (err) {
-      setLoading(false)
-
-      addToast({
-        type: 'error',
-        title: 'Erro na autenticação',
-        description: 'Ocorreu um erro ao sair, tente novamente mais tarde.'
-      })
-    }
-  }, [router, signOut, addToast])
-
-  console.log(data)
+  const handleSignOut = useCallback(() => {
+    setLoading(true)
+    signOut()
+    setLoading(false)
+    router.replace('/login')
+  }, [router, signOut])
 
   return (
     <Container>
-      <Button onClick={toogleActive}>
+      <Button onClick={toggleActive}>
         <FiMenu size={24} />
       </Button>
       <Right>
         <UserInfo className="hide-md-down">
           <Info>
             <b>{user?.name}</b>
-            <span>{user?.role}</span>
+            <span>{getRole(user?.role)}</span>
           </Info>
           <Avatar>{user?.name.substr(0, 1).toUpperCase()}</Avatar>
         </UserInfo>

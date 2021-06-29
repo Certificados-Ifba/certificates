@@ -11,7 +11,7 @@ export class Debounce<T> {
   private callback: (data: T) => void
   private time: number
 
-  private timeout
+  private timeout: any
 
   notify(data: T): void {
     if (this.timeout) clearTimeout(this.timeout)

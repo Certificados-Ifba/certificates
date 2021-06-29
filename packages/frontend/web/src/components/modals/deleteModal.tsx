@@ -1,10 +1,9 @@
 import { Form } from '@unform/web'
 import { Dispatch, SetStateAction, useCallback } from 'react'
-import { FiMail, FiTrash2, FiX } from 'react-icons/fi'
+import { FiTrash2, FiX } from 'react-icons/fi'
 
-import Row from '../styles/components/row'
-import Button from './button'
-import Modal from './modal'
+import Button from '../button'
+import Modal from '../modal'
 
 const DeleteModal: React.FC<{
   openModal: boolean

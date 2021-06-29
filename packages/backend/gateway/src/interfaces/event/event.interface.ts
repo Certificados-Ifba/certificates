@@ -1,4 +1,7 @@
+import { IUser } from '../user/user.interface'
+
 export interface IEvent {
+  id?: string
   name: string
   description: string
   initials: string
@@ -6,6 +9,5 @@ export interface IEvent {
   edition: string
   start_date: Date
   end_date: Date
-  id?: string
-  user_id: { id: string; name: string } | string
+  user: IUser
 }

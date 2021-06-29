@@ -21,7 +21,7 @@ import ActiveLink from './activeLink'
 const Sidebar: React.FC = () => {
   const { isActive, hideSidebar } = useContext(SidebarContext)
 
-  const itens = [
+  const items = [
     {
       name: 'Dashboard',
       link: '/',
@@ -58,7 +58,7 @@ const Sidebar: React.FC = () => {
       </LogoArea>
       <Buttons>
         <ScrollBar>
-          {itens.map(({ name, link, icon: Icon }, key) => (
+          {items.map(({ name, link, icon: Icon }, key) => (
             <li key={key} onClick={hideSidebar}>
               <ActiveLink href={link}>
                 <a>

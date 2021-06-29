@@ -3,7 +3,7 @@ import { ReactNode, createContext, useState, useEffect } from 'react'
 export interface SidebarContextData {
   isActive: boolean
   isMobile: boolean
-  toogleActive: () => void
+  toggleActive: () => void
   hideSidebar: () => void
 }
 
@@ -17,7 +17,7 @@ const SidebarProvider = ({ children }: SidebarProviderProps): JSX.Element => {
   const [isActive, setIsActive] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  const toogleActive = () => {
+  const toggleActive = () => {
     setIsActive(isActive => !isActive)
   }
   const hideSidebar = () => {
@@ -41,7 +41,7 @@ const SidebarProvider = ({ children }: SidebarProviderProps): JSX.Element => {
   return (
     <>
       <SidebarContext.Provider
-        value={{ isActive, isMobile, toogleActive, hideSidebar }}
+        value={{ isActive, isMobile, toggleActive, hideSidebar }}
       >
         {children}
       </SidebarContext.Provider>

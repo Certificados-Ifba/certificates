@@ -3,8 +3,9 @@ export interface IParticipant {
   name: string
   email: string
   personal_data: {
-    cpf: String
+    cpf: string
     dob: Date
-    is_student: Boolean
+    phone: string
+    institution: boolean
   }
 }

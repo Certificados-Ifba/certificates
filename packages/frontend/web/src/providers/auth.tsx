@@ -32,7 +32,7 @@ export interface AuthContextData {
   user: User
   resetPassword(data: ResetCredentials): Promise<void>
   signIn(data: SignInCredentials): Promise<void>
-  signOut(): Promise<void>
+  signOut(): void
 }
 
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData)
@@ -54,7 +54,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
   const resetPassword = useCallback(
     async ({ link, password }) => {
-      const response = await api.post('/users/reset', {
+      const response = await api.post('/password/reset', {
         link,
         password
       })
@@ -72,7 +72,7 @@ const AuthProvider: React.FC = ({ children }) => {
     async (data: SignInCredentials) => {
       let token
       if (data.login && data.password) {
-        const response = await api.post('/users/login', {
+        const response = await api.post('/sessions', {
           email: data.login,
           password: data.password
         })
@@ -87,8 +87,8 @@ const AuthProvider: React.FC = ({ children }) => {
     [setToken]
   )
 
-  const signOut = useCallback(async () => {
-    api.put('/users/logout')
+  const signOut = useCallback(() => {
+    api.delete('/sessions')
     setToken(null)
 
     setData({} as AuthState)

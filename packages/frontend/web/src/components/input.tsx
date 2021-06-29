@@ -16,7 +16,8 @@ import {
   Error,
   SecureToggle
 } from '../styles/components/input'
-import { getInputDate } from '../utils/formatDate'
+import { formatCpf, formatPhone } from '../utils/formatters'
+// import { getInputDate } from '../utils/formatDate'
 
 interface BaseProps<Multiline = false>
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -117,14 +118,12 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
       ref: inputRef.current,
       path: 'value',
       setValue(ref: any, value) {
-        if (
-          typeof value !== 'number' &&
-          new Date(value).toString() !== 'Invalid Date'
-        ) {
-          ref.value = getInputDate(new Date(value))
+        if (value && ref.type === 'date') {
+          ref.value = new Date(value).toISOString().substr(0, 10)
         } else {
           ref.value = value || ''
         }
+
         setInputState(value ? 'isFilled' : 'isDefault')
       },
       clearValue: ref => {
@@ -149,20 +148,10 @@ const Input: React.FC<InputProps | TextAreaProps> = ({
   const handleKeyup = useCallback(() => {
     if (inputRef.current.value)
       if (type === 'cpf') {
-        inputRef.current.value = inputRef.current.value
-          .replace(/\D/g, '')
-          .replace(/(\d{3})(\d)/, '$1.$2')
-          .replace(/(\d{3})(\d)/, '$1.$2')
-          .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-          .replace(/(-\d{2})\d+?$/, '$1')
+        inputRef.current.value = formatCpf(inputRef.current.value)
       } else if (type === 'phone') {
         // if (inputRef.current.value.length > 3)
-        inputRef.current.value = inputRef.current.value
-          .replace(/\D/g, '')
-          .replace(/(\d{2})(\d)/, '($1) $2')
-          .replace(/\((\d{2})\) (\d{4})(\d{1})/, '($1) $2-$3')
-          .replace(/^\((\d{2})\) (\d{4})-(\d{1})(\d{4})/, '($1) $2$3-$4')
-          .replace(/^\((\d{2})\) (\d{5})-(\d{4})(\d{1,})/, '($1) $2-$3')
+        inputRef.current.value = formatPhone(inputRef.current.value)
       }
   }, [type])
 

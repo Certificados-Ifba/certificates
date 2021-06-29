@@ -2,29 +2,58 @@ import { Form } from '@unform/web'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
-import { FiCalendar, FiInfo, FiPlus, FiSearch } from 'react-icons/fi'
+import { FiCalendar, FiPlus, FiSearch } from 'react-icons/fi'
 
 import Button from '../components/button'
 import Card from '../components/card'
-import { EventModal } from '../components/event/eventModal'
+import Column from '../components/column'
 import Input from '../components/input'
+import EventModal from '../components/modals/eventModal'
 import PaginatedTable from '../components/paginatedTable'
 import withAuth from '../hocs/withAuth'
 import usePaginatedRequest from '../services/usePaginatedRequest'
 import { Container } from '../styles/pages/home'
+import { formatData } from '../utils/formatters'
 
 const Events: React.FC = () => {
+  const [filters, setFilters] = useState(null)
+  const [column, setColumn] = useState('name')
+  const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
+  const [openEventModal, setOpenEventModal] = useState(false)
   const router = useRouter()
 
   const request = usePaginatedRequest<any>({
-    url: 'events'
+    url: 'events',
+    params:
+      filters && order !== ''
+        ? Object.assign(filters, { sort_by: column, order_by: order })
+        : order !== ''
+        ? { sort_by: column, order_by: order }
+        : filters
   })
 
-  const handleFilter = useCallback(data => {
-    console.log(data)
-  }, [])
+  const handleFilter = useCallback(
+    data => {
+      !data.search && delete data.search
+      request.resetPage()
+      setFilters(data)
+    },
+    [request]
+  )
 
-  const [openEventModal, setOpenEventModal] = useState(false)
+  const handleOrder = useCallback(
+    columnSelected => {
+      if (column !== columnSelected) {
+        setColumn(columnSelected)
+        setOrder('ASC')
+      } else {
+        setOrder(value =>
+          value === '' ? 'ASC' : value === 'ASC' ? 'DESC' : ''
+        )
+      }
+    },
+    [column]
+  )
 
   return (
     <Container>
@@ -57,45 +86,58 @@ const Events: React.FC = () => {
         <PaginatedTable request={request}>
           <thead>
             <tr>
-              <th>Nome</th>
-              <th>Sigla</th>
-              <th>Ano</th>
-              <th>Data Inicial</th>
-              <th>Data Final</th>
-              <th style={{ width: 32 }} />
+              <th onClick={() => handleOrder('name')}>
+                <Column order={order} selected={column === 'name'}>
+                  Nome
+                </Column>
+              </th>
+              <th onClick={() => handleOrder('edition')}>
+                <Column order={order} selected={column === 'edition'}>
+                  Edição
+                </Column>
+              </th>
+              <th onClick={() => handleOrder('name')}>
+                <Column order={order} selected={column === 'name'}>
+                  Ano
+                </Column>
+              </th>
+              <th onClick={() => handleOrder('start_date')}>
+                <Column order={order} selected={column === 'start_date'}>
+                  Data Inicial
+                </Column>
+              </th>
+              <th onClick={() => handleOrder('end_date')}>
+                <Column order={order} selected={column === 'end_date'}>
+                  Data Final
+                </Column>
+              </th>
+              <th onClick={() => handleOrder('user')}>
+                <Column order={order} selected={column === 'user'}>
+                  Coordenador
+                </Column>
+              </th>
             </tr>
           </thead>
           <tbody>
             {request.data?.data?.map(event => (
-              <tr key={event.initials}>
-                <td>{event.name}</td>
-                <td>{event.initials}</td>
-                <td>{new Date(event.start_date).getFullYear()}</td>
-                <td>{new Date(event.start_date).toLocaleDateString()}</td>
-                <td>{new Date(event.end_date).toLocaleDateString()}</td>
-                <td>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="secondary"
-                      size="small"
-                      onClick={() => {
-                        router.replace(`events/${event.id}`)
-                      }}
-                    >
-                      <FiInfo size={20} />
-                    </Button>
-                  </div>
-                </td>
+              <tr
+                key={event.initials}
+                onClick={() => {
+                  router.push(`events/${event.id}`)
+                }}
+              >
+                <td>{`${event.name} (${event.initials})`}</td>
+                <td>{event.edition}</td>
+                <td>{event.year}</td>
+                <td>{formatData(event.start_date)}</td>
+                <td>{formatData(event.end_date)}</td>
+                <td>{event?.user?.name}</td>
               </tr>
             ))}
           </tbody>
         </PaginatedTable>
       </Card>
       <EventModal
-        request={request}
         type="add"
         openModal={openEventModal}
         setOpenModal={setOpenEventModal}

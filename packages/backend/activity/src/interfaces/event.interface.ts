@@ -1,9 +1,17 @@
 import { Document } from 'mongoose'
 
-export interface IEvent extends Document {
-  user_id: string
+interface IUser extends Document {
+  id: string
   name: string
-  description: string
+  email: string
+  role: string
+  is_confirmed: boolean
+  last_login?: Date
+}
+
+export interface IEvent extends Document {
+  user: IUser
+  name: string
   initials: string
   year: string
   edition: string

@@ -1,6 +1,5 @@
 import axios from 'axios'
 import Cookie from 'js-cookie'
-import { useRouter } from 'next/router'
 
 import getErrorMessage from '../utils/getErrorMessage'
 
@@ -17,15 +16,12 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   config => config,
   error => {
-    // const router = useRouter()
-
     const { data } = error.response
 
-    if (data?.code === 'token.expired') {
+    if (data?.message === 'token_decode_unauthorized') {
       Cookie.remove('certificates.session')
-      // router.replace('/login')
     }
-    return Promise.reject(getErrorMessage(data?.message))
+    return Promise.reject(getErrorMessage(data?.message, data?.errors))
   }
 )
 

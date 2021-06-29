@@ -29,6 +29,7 @@ interface Props extends SelectProps<OptionTypeBase> {
 const normalStyle = {
   control: base => ({
     ...base,
+    'font-size': '0.875rem',
     'border-radius': '5px',
     border: `2px solid ${theme.colors.mediumTint}`,
     color: `${theme.colors.mediumTint}`
@@ -38,6 +39,7 @@ const normalStyle = {
 const errorStyle = {
   control: base => ({
     ...base,
+    'font-size': '0.875rem',
     'border-radius': '5px',
     border: `2px solid ${theme.colors.danger}`,
     color: `${theme.colors.danger}`
@@ -47,6 +49,7 @@ const errorStyle = {
 const filledStyle = {
   control: base => ({
     ...base,
+    'font-size': '0.875rem',
     'border-radius': '5px',
     border: `2px solid ${theme.colors.primary}`,
     color: `${theme.colors.primary}`
@@ -133,32 +136,22 @@ const Select: React.FC<Props> = ({
         ref: selectRef.current,
         setValue: (ref, value) => {
           let selected
-          let options: any = []
-          let setValue
-          if (async) {
-            options = ref.select.props.options
-            setValue = ref.select.select.setValue
+          const options = async ? ref.select.props.options : ref.props.options
+          const setValue = async
+            ? ref.select.select.setValue
+            : ref.select.setValue
+
+          if (value?.id) {
+            const opt = { label: value.name, value: value.id }
+            setDefaultOptions([opt])
+            setFocusLoaded(false)
+            selected = [opt]
           } else {
-            options = ref.props.options
-            setValue = ref.select.setValue
+            selected = options.filter((option: any) => option.value === value)
           }
-          if (value) {
-            if (value.id) {
-              const opt = { label: value.name, value: value.id }
-              setDefaultOptions([opt])
-              setFocusLoaded(false)
-              selected = [opt]
-            } else {
-              selected = options.filter((option: any) => option.value === value)
-            }
-          }
-          if (selected) {
-            setValue(selected[0] || null)
-            setIsFilled(!!selected[0])
-          } else {
-            setValue(null)
-            setIsFilled(false)
-          }
+
+          setValue(selected && selected[0] ? selected[0] : null)
+          setIsFilled(!!selected[0] && selected)
         },
         getValue: (ref: any) => {
           if (async) {

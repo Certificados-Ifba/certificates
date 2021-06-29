@@ -7,6 +7,6 @@ export interface IUserUpdateParams {
   personal_data?: {
     cpf: String
     dob: Date
-    is_student: Boolean
+    institution: Boolean
   }
 }

@@ -1,5 +1,6 @@
 export const adminPermissions = [
   'user_get_by_id',
+  'user_resend',
   'user_list',
   'user_create',
   'user_confirm',
@@ -19,5 +20,8 @@ export const adminPermissions = [
   'generic_get_by_id',
   'generic_delete_by_id',
   'generic_update_by_id',
-  'participant_create'
+  'participant_create',
+  'participant_list',
+  'participant_delete_by_id',
+  'participant_update_by_id'
 ]

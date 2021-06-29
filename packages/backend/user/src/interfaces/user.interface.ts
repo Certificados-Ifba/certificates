@@ -11,7 +11,7 @@ export interface IUser extends Document {
   personal_data?: {
     cpf: String
     dob: Date
-    is_student: Boolean
+    institution: Boolean
   }
   compareEncryptedPassword: (password: string) => boolean
   getEncryptedPassword: (password: string) => string

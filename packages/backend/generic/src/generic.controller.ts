@@ -1,11 +1,11 @@
 import { Controller, HttpStatus } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
 
+import { IGenericByIdResponse } from './interfaces/generic-by-id-response.interface'
 import { IGenericCreateResponse } from './interfaces/generic-create-response.interface'
 import { IGenericDeleteResponse } from './interfaces/generic-delete-response.interface'
 import { IGenericListParams } from './interfaces/generic-list-params.interface'
 import { IGenericListResponse } from './interfaces/generic-list-response.interface'
-import { IGenericSearchResponse } from './interfaces/generic-search-response.interface'
 import { IGenericUpdateByIdResponse } from './interfaces/generic-update-by-id-response.interface'
 import { IGenericUpdateParams } from './interfaces/generic-update-params.interface'
 import { IGeneric } from './interfaces/generic.interface'
@@ -41,8 +41,8 @@ export class GenericController {
   }
 
   @MessagePattern('generic_get_by_id')
-  public async getGenericById(id: string): Promise<IGenericSearchResponse> {
-    let result: IGenericSearchResponse
+  public async getGenericById(id: string): Promise<IGenericByIdResponse> {
+    let result: IGenericByIdResponse
 
     if (id) {
       const generic = await this.genericService.searchGenericById(id)

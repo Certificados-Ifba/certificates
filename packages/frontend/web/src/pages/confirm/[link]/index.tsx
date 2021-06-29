@@ -42,7 +42,7 @@ const Confirm: React.FC = () => {
     if (link) {
       async function loadData() {
         try {
-          const response = await api.get<IResponse>(`users/link/${link}`)
+          const response = await api.get<IResponse>(`password/link/${link}`)
           setType(response?.data?.data)
         } catch (err) {
           addToast({
@@ -66,8 +66,11 @@ const Confirm: React.FC = () => {
         formRef.current?.setErrors({})
 
         const schema = Yup.object().shape({
-          password: Yup.string().required('Por favor, digite a senha'),
+          password: Yup.string()
+            .min(6, 'Senha precisa ter no mínimo 6 caracteres')
+            .required('Por favor, digite a senha'),
           repeatPassword: Yup.string()
+            .min(6, 'Senha precisa ter no mínimo 6 caracteres')
             .required('Por favor, digite a senha novamente')
             .oneOf([data.password], 'As senhas devem ser iguais')
         })
@@ -75,10 +78,15 @@ const Confirm: React.FC = () => {
         await schema.validate(data, {
           abortEarly: false
         })
-
         await resetPassword({
           link: typeof link === 'string' ? link : link[0],
           password: data.password
+        })
+
+        addToast({
+          type: 'success',
+          title: 'Mensagem',
+          description: 'Seu usuário foi confirmado.'
         })
 
         setLoading(false)
@@ -156,12 +164,12 @@ const Confirm: React.FC = () => {
             />
             <Input
               formRef={formRef}
-              label="Repetir a Senha"
+              label="Confirme a Senha"
               name="repeatPassword"
               type="password"
               icon={FiLock}
               placeholder="Digite novamente a senha"
-              marginBottom="sm"
+              marginBottom="md"
             />
             <Row>
               <Button

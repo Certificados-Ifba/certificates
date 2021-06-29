@@ -65,14 +65,14 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
         pages.push({
           value:
             (index - 1 > lower && index + 1 < upper) ||
-              index < 3 ||
-              index > numberOfPages - 2
+            index < 3 ||
+            index > numberOfPages - 2
               ? index
               : 0,
           label:
             (index - 1 > lower && index + 1 < upper) ||
-              index < 3 ||
-              index > numberOfPages - 2
+            index < 3 ||
+            index > numberOfPages - 2
               ? String(index)
               : '...'
         })
@@ -127,19 +127,15 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
             ]}
           />
         </div>
-        <div className="hide-md-down">
-          <span>
-            {`${!data || data?.data?.length === 0
+        <span className="hide-md-down">
+          {`${
+            !data || data?.data?.length === 0
               ? 0
               : 1 + (page - 1) * perPage.value
-              } - ${!data
-                ? 0
-                : !hasNextPage
-                  ? numberOfRegisters
-                  : page * perPage.value
-              } de ${!data ? 0 : numberOfRegisters}`}
-          </span>
-        </div>
+          } - ${
+            !data ? 0 : !hasNextPage ? numberOfRegisters : page * perPage.value
+          } de ${!data ? 0 : numberOfRegisters}`}
+        </span>
         <nav>
           <Button
             ghost

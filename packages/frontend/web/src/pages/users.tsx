@@ -1,59 +1,46 @@
-import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import Head from 'next/head'
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react'
+import { useCallback, useState } from 'react'
 import {
   FiEdit,
   FiPlus,
   FiSearch,
   FiTrash2,
   FiUsers,
-  FiUser,
-  FiX,
   FiMail,
-  FiCheck,
-  FiUserPlus,
   FiUnlock,
-  FiLock
+  FiLock,
+  FiSend
 } from 'react-icons/fi'
-import * as Yup from 'yup'
 
 import Alert from '../components/alert'
 import Button from '../components/button'
 import Card from '../components/card'
 import Column from '../components/column'
-import DeleteModal from '../components/deleteModal'
 import Input from '../components/input'
-import Modal from '../components/modal'
+import DeleteModal from '../components/modals/deleteModal'
+import UserModal from '../components/modals/userModal'
 import PaginatedTable from '../components/paginatedTable'
-import Select from '../components/select'
-import { UserModal } from '../components/user/user.modal'
+import Tooltip from '../components/tooltip'
 import withAuth from '../hocs/withAuth'
 import { useToast } from '../providers/toast'
 import api from '../services/axios'
-import usePaginatedRequest, {
-  PaginatedRequest
-} from '../services/usePaginatedRequest'
-import { Container } from '../styles/pages/home'
+import usePaginatedRequest from '../services/usePaginatedRequest'
+import { Container, TableRow } from '../styles/pages/home'
 import theme from '../styles/theme'
+import getRole from '../utils/getRole'
 
 const Users: React.FC = () => {
-  const [selectedId, setSelectedId] = useState(null)
-  const [typeModal, setTypeModal] = useState<
-    'update-user' | 'add-user' | 'update-email'
-  >(null)
+  const [user, setUser] = useState(null)
+  const [filters, setFilters] = useState(null)
   const [openUserModal, setOpenUserModal] = useState(false)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
-  const [filters, setFilters] = useState(null)
+  const [typeModal, setTypeModal] = useState<'update' | 'add' | 'update-email'>(
+    null
+  )
+
   const request = usePaginatedRequest<any>({
     url: 'users',
     params:
@@ -65,29 +52,44 @@ const Users: React.FC = () => {
   })
 
   const { addToast } = useToast()
-  const [user, setUser] = useState(null)
-  const handleSubmitDelete = useCallback(() => {
-    api
-      .delete('users/' + user.id)
-      .then(resp => {
-        if (resp?.data?.message === 'user_delete_by_id_success') {
-          addToast({
-            title: 'Mensagem',
-            type: 'success',
-            description: 'O usuário foi excluído com sucesso.'
-          })
-          request.revalidate()
-          setOpenDeleteModal(false)
-        }
-      })
-      .catch(err => {
-        console.error(err)
+
+  const handleResendMail = useCallback(
+    async id => {
+      try {
+        await api.get(`users/${id}/resend`)
         addToast({
-          title: 'Erro desconhecido',
-          type: 'error',
-          description: 'Houve um erro ao deletar o usuário.'
+          title: 'E-mail reenviado',
+          type: 'success',
+          description: 'Peça para o usuário verificar a caixa de mensagens.'
         })
+      } catch (err) {
+        addToast({
+          title: 'Erro no reenvio',
+          type: 'error',
+          description: err
+        })
+      }
+    },
+    [addToast]
+  )
+
+  const handleSubmitDelete = useCallback(async () => {
+    try {
+      await api.delete(`users/${user.id}`)
+      addToast({
+        title: 'Usuário excluido',
+        type: 'success',
+        description: `${user.name} excluído com sucesso.`
       })
+      request.revalidate()
+      setOpenDeleteModal(false)
+    } catch (err) {
+      addToast({
+        title: 'Erro na exclusão',
+        type: 'error',
+        description: err
+      })
+    }
   }, [addToast, request, user])
 
   const handleFilter = useCallback(
@@ -123,13 +125,13 @@ const Users: React.FC = () => {
           <h1>
             <FiUsers size={24} /> Usuários
           </h1>
-          <h2>São pessoas que terão acesso gerencial ao sistema.</h2>
+          <h2>São pessoas que terão acesso gerencial ao sistema</h2>
         </div>
         <nav>
           <Button
             onClick={() => {
-              setSelectedId(null)
-              setTypeModal('add-user')
+              setUser(null)
+              setTypeModal('add')
               setOpenUserModal(true)
             }}
           >
@@ -153,95 +155,110 @@ const Users: React.FC = () => {
                   Nome
                 </Column>
               </th>
-              <th>E-mail</th>
-              <th>Tipo</th>
-              <th></th>
+              <th onClick={() => handleOrder('email')}>
+                <Column order={order} selected={column === 'email'}>
+                  E-mail
+                </Column>
+              </th>
+              <th onClick={() => handleOrder('role')}>
+                <Column order={order} selected={column === 'role'}>
+                  Tipo
+                </Column>
+              </th>
+              <th onClick={() => handleOrder('last_login')}>
+                <Column order={order} selected={column === 'last_login'}>
+                  Acesso
+                </Column>
+              </th>
               <th style={{ width: 32 }} />
             </tr>
           </thead>
           <tbody>
             {request.data?.data?.map(user => (
-              <tr key={user.email}>
+              <tr key={user.id}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
+                <td>{getRole(user.role)}</td>
                 <td>
-                  {user.role === 'ADMIN' ? 'Administrador' : 'Coordenador'}
-                </td>
-                <td>
-                  {user.is_confirmed ? (
-                    <div style={{ display: 'flex' }}>
+                  <TableRow>
+                    {user.is_confirmed ? (
                       <FiUnlock size={20} color={theme.colors.success} />
-                      <span
-                        style={{
-                          marginLeft: '10px',
-                          marginTop: 'auto',
-                          marginBottom: 'auto'
-                        }}
-                      >
-                        Entrou em{' '}
-                        {new Date(user.last_login).toLocaleDateString()} às{' '}
-                        {new Date(user.last_login).toLocaleTimeString()}
-                      </span>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex' }}>
+                    ) : (
                       <FiLock size={20} color={theme.colors.danger} />
-                      <span
-                        style={{
-                          marginLeft: '10px',
-                          marginTop: 'auto',
-                          marginBottom: 'auto'
-                        }}
-                      >
-                        Não confirmou o cadastro
-                      </span>
-                    </div>
-                  )}
+                    )}
+                    <span>
+                      {user.last_login
+                        ? `Acessou em ${new Date(
+                            user.last_login
+                          ).toLocaleDateString()} às ${new Date(
+                            user.last_login
+                          ).toLocaleTimeString()}`
+                        : 'Nunca acessou'}
+                    </span>
+                  </TableRow>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="warning"
-                      size="small"
-                      onClick={() => {
-                        setSelectedId(user.id)
-                        setTypeModal('update-email')
-                        setOpenUserModal(true)
-                      }}
-                    >
-                      <FiMail size={20} />
-                    </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="secondary"
-                      size="small"
-                      onClick={() => {
-                        setSelectedId(user.id)
-                        setTypeModal('update-user')
-                        setOpenUserModal(true)
-                      }}
-                    >
-                      <FiEdit size={20} />
-                    </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="danger"
-                      size="small"
-                      onClick={() => {
-                        setUser(user)
-                        setOpenDeleteModal(true)
-                      }}
-                    >
-                      <FiTrash2 size={20} />
-                    </Button>
-                  </div>
+                  <TableRow>
+                    <Tooltip title="Reenviar e-mail">
+                      <Button
+                        inline
+                        ghost
+                        square
+                        color="primary"
+                        size="small"
+                        onClick={() => handleResendMail(user.id)}
+                      >
+                        <FiSend size={20} />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Atualizar e-mail">
+                      <Button
+                        inline
+                        ghost
+                        square
+                        color="warning"
+                        size="small"
+                        onClick={() => {
+                          setUser(user)
+                          setTypeModal('update-email')
+                          setOpenUserModal(true)
+                        }}
+                      >
+                        <FiMail size={20} />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Editar">
+                      <Button
+                        inline
+                        ghost
+                        square
+                        color="secondary"
+                        size="small"
+                        onClick={() => {
+                          setUser(user)
+                          setTypeModal('update')
+                          setOpenUserModal(true)
+                        }}
+                      >
+                        <FiEdit size={20} />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Excluir">
+                      <Button
+                        inline
+                        ghost
+                        square
+                        color="danger"
+                        size="small"
+                        onClick={() => {
+                          setUser(user)
+                          setOpenDeleteModal(true)
+                        }}
+                      >
+                        <FiTrash2 size={20} />
+                      </Button>
+                    </Tooltip>
+                  </TableRow>
                 </td>
               </tr>
             ))}
@@ -253,7 +270,7 @@ const Users: React.FC = () => {
         openModal={openUserModal}
         setOpenModal={setOpenUserModal}
         type={typeModal}
-        selectId={selectedId}
+        user={user}
       />
       <DeleteModal
         name="Usuário"
@@ -261,15 +278,12 @@ const Users: React.FC = () => {
         setOpenModal={setOpenDeleteModal}
         handleSubmit={handleSubmitDelete}
       >
-        <>
-          <Alert marginBottom="sm">
-            Tem certeza que você deseja excluir o usuário de <b>{user?.name}</b>
-            ?
-          </Alert>
-          <Alert size="sm" icon={FiMail}>
-            <b>{user?.email}</b>
-          </Alert>
-        </>
+        <Alert marginBottom="sm">
+          Tem certeza que você deseja excluir o usuário de <b>{user?.name}</b>?
+        </Alert>
+        <Alert size="sm" icon={FiMail}>
+          <b>{user?.email}</b>
+        </Alert>
       </DeleteModal>
     </Container>
   )

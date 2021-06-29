@@ -1,17 +1,64 @@
 import { Controller, HttpStatus } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
 
+import { IEventByIdResponse } from './interfaces/event-by-id-response.interface'
 import { IEventCreateResponse } from './interfaces/event-create-response.interface'
 import { IEventDeleteResponse } from './interfaces/event-delete-response.interface'
+import { IEventListParams } from './interfaces/event-list-params.interface'
+import { IEventListResponse } from './interfaces/event-list-response.interface'
 import { IEventSearchByUserResponse } from './interfaces/event-search-by-user-response.interface'
 import { IEventUpdateByIdResponse } from './interfaces/event-update-by-id-response.interface'
 import { IEventUpdateParams } from './interfaces/event-update-params.interface'
 import { IEvent } from './interfaces/event.interface'
+import { IUser } from './interfaces/user.interface'
 import { EventService } from './services/event.service'
 
 @Controller()
 export class EventController {
   constructor(private readonly eventService: EventService) {}
+
+  @MessagePattern('event_list')
+  public async eventList(
+    params: IEventListParams
+  ): Promise<IEventListResponse> {
+    const events = await this.eventService.listEvents(params)
+
+    return {
+      status: HttpStatus.OK,
+      message: 'event_list_success',
+      data: events
+    }
+  }
+
+  @MessagePattern('event_get_by_id')
+  public async getEventById(id: string): Promise<IEventByIdResponse> {
+    let result: IEventByIdResponse
+
+    if (id) {
+      const event = await this.eventService.searchEventById(id)
+      if (event) {
+        result = {
+          status: HttpStatus.OK,
+          message: 'event_get_by_id_success',
+          data: { event }
+        }
+      } else {
+        result = {
+          status: HttpStatus.NOT_FOUND,
+          message: 'event_get_by_id_not_found',
+          data: null
+        }
+      }
+    } else {
+      result = {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'event_get_by_id_bad_request',
+        data: null
+      }
+    }
+
+    return result
+  }
 
   @MessagePattern('event_search_by_user_id')
   public async eventSearchByUserId(
@@ -41,14 +88,16 @@ export class EventController {
   public async eventUpdateById(params: {
     event: IEventUpdateParams
     id: string
-    userId: string
+    user: IUser
   }): Promise<IEventUpdateByIdResponse> {
     let result: IEventUpdateByIdResponse
     if (params.id) {
       try {
         const event = await this.eventService.findEventById(params.id)
         if (event) {
-          if (event.user_id === params.userId) {
+          console.log(event)
+
+          if (event.user === params.user.id || params.user.role === 'ADMIN') {
             const updatedEvent = Object.assign(event, params.event)
             await updatedEvent.save()
             result = {
@@ -127,17 +176,17 @@ export class EventController {
 
   @MessagePattern('event_delete_by_id')
   public async eventDeleteForUser(params: {
-    userId: string
+    user: IUser
     id: string
   }): Promise<IEventDeleteResponse> {
     let result: IEventDeleteResponse
 
-    if (params && params.userId && params.id) {
+    if (params && params.user.id && params.id) {
       try {
         const event = await this.eventService.findEventById(params.id)
 
         if (event) {
-          if (event.user_id === params.userId) {
+          if (event.user === params.user.id || params.user.role === 'ADMIN') {
             await this.eventService.removeEventById(params.id)
             result = {
               status: HttpStatus.OK,

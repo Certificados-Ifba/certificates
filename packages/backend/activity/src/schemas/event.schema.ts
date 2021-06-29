@@ -8,8 +8,9 @@ function transformValue(doc, ret: { [key: string]: any }) {
 
 export const EventSchema = new mongoose.Schema(
   {
-    user_id: {
-      type: String,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: [true, 'User can not be empty']
     },
     name: {

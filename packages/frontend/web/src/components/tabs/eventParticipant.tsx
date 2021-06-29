@@ -9,18 +9,19 @@ import {
   FiTrash2
 } from 'react-icons/fi'
 
-import { useToast } from '../../../providers/toast'
-import api from '../../../services/axios'
-import usePaginatedRequest from '../../../services/usePaginatedRequest'
-import Alert from '../../alert'
-import Button from '../../button'
-import Column from '../../column'
-import DeleteModal from '../../deleteModal'
-import Input from '../../input'
-import PaginatedTable from '../../paginatedTable'
-import { AddParticipantModal } from './addParticipantModal'
+import { useToast } from '../../providers/toast'
+import api from '../../services/axios'
+import usePaginatedRequest from '../../services/usePaginatedRequest'
+import { TableRow } from '../../styles/pages/home'
+import Alert from '../alert'
+import Button from '../button'
+import Column from '../column'
+import Input from '../input'
+import DeleteModal from '../modals/deleteModal'
+import ParticipationModal from '../modals/participationModal'
+import PaginatedTable from '../paginatedTable'
 
-export const EventParticipant: React.FC<{ event: any }> = ({ event }) => {
+const EventParticipant: React.FC<{ event: any }> = ({ event }) => {
   const { addToast } = useToast()
 
   const [openModal, setOpenModal] = useState(false)
@@ -134,7 +135,7 @@ export const EventParticipant: React.FC<{ event: any }> = ({ event }) => {
               <td>{new Date(part.start_date).toLocaleDateString()}</td>
               <td>{new Date(part.end_date).toLocaleDateString()}</td>
               <td>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <TableRow>
                   <Button
                     inline
                     ghost
@@ -149,14 +150,14 @@ export const EventParticipant: React.FC<{ event: any }> = ({ event }) => {
                   >
                     <FiMinusCircle size={20} />
                   </Button>
-                </div>
+                </TableRow>
               </td>
             </tr>
           ))}
         </tbody>
       </PaginatedTable>
 
-      <AddParticipantModal
+      <ParticipationModal
         event={event}
         openModal={openModal}
         request={request}
@@ -177,3 +178,5 @@ export const EventParticipant: React.FC<{ event: any }> = ({ event }) => {
     </>
   )
 }
+
+export default EventParticipant

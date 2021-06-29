@@ -26,127 +26,31 @@ import { DeleteUserResponseDto } from 'src/interfaces/user/dto/delete-user-respo
 import { GetUserByIdResponseDto } from 'src/interfaces/user/dto/get-user-by-id-response.dto'
 import { GetUsersResponseDto } from 'src/interfaces/user/dto/get-user-response.dto'
 import { ListUserDto } from 'src/interfaces/user/dto/list-user.dto'
+import { ResendMailResponseDto } from 'src/interfaces/user/dto/resend-mail-response.dto'
 import { UpdateUserResponseDto } from 'src/interfaces/user/dto/update-user-response.dto'
 import { UpdateUserDto } from 'src/interfaces/user/dto/update-user.dto'
 import { UserIdDto } from 'src/interfaces/user/dto/user-id.dto'
 import { IServiceUserDeleteResponse } from 'src/interfaces/user/service-user-delete-response.interface'
 import { IServiceUserListResponse } from 'src/interfaces/user/service-user-list-response.interface'
+import { IServiceUserResendResponse } from 'src/interfaces/user/service-user-resend-response.interface'
 import { IServiceUserUpdateByIdResponse } from 'src/interfaces/user/service-user-update-by-id-response.interface'
+import capitalize from 'src/utils/capitalize'
 
 import { Authorization } from '../decorators/authorization.decorator'
 import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
-import { IServiveTokenCreateResponse } from '../interfaces/token/service-token-create-response.interface'
-import { IServiceTokenDestroyResponse } from '../interfaces/token/service-token-destroy-response.interface'
-import { ConfirmUserResponseDto } from '../interfaces/user/dto/confirm-user-response.dto'
-import { ConfirmUserDto } from '../interfaces/user/dto/confirm-user.dto'
 import { CreateUserResponseDto } from '../interfaces/user/dto/create-user-response.dto'
 import { CreateUserDto } from '../interfaces/user/dto/create-user.dto'
 import { GetUserByTokenResponseDto } from '../interfaces/user/dto/get-user-by-token-response.dto'
-import { LoginUserResponseDto } from '../interfaces/user/dto/login-user-response.dto'
-import { LoginUserDto } from '../interfaces/user/dto/login-user.dto'
-import { LogoutUserResponseDto } from '../interfaces/user/dto/logout-user-response.dto'
-import { IServiceUserConfirmResponse } from '../interfaces/user/service-user-confirm-response.interface'
 import { IServiceUserCreateResponse } from '../interfaces/user/service-user-create-response.interface'
 import { IServiceUserGetByIdResponse } from '../interfaces/user/service-user-get-by-id-response.interface'
-import { IServiceUserSearchResponse } from '../interfaces/user/service-user-search-response.interface'
 
 @Controller('users')
+@ApiBearerAuth('JWT')
 @ApiTags('users')
 export class UsersController {
   constructor(
-    @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy
   ) {}
-
-  @Delete(':id')
-  @Authorization(true)
-  @Permission('user_delete_by_id')
-  @ApiOkResponse({
-    type: DeleteUserResponseDto
-  })
-  public async deleteUser(
-    @Param() params: UserIdDto
-  ): Promise<DeleteUserResponseDto> {
-    const deleteUserResponse: IServiceUserDeleteResponse = await this.userServiceClient
-      .send('user_delete_by_id', {
-        id: params.id
-      })
-      .toPromise()
-
-    if (deleteUserResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: deleteUserResponse.message,
-          errors: deleteUserResponse.errors,
-          data: null
-        },
-        deleteUserResponse.status
-      )
-    }
-
-    return {
-      message: deleteUserResponse.message,
-      data: null,
-      errors: null
-    }
-  }
-
-  @Put(':id')
-  @Authorization(true)
-  @Permission('user_update_by_id')
-  @ApiOkResponse({
-    type: UpdateUserResponseDto
-  })
-  public async updateUser(
-    @Param() params: UserIdDto,
-    @Body() userRequest: UpdateUserDto
-  ): Promise<UpdateUserResponseDto> {
-    const updateUserResponse: IServiceUserUpdateByIdResponse = await this.userServiceClient
-      .send('user_update_by_id', {
-        user: { name: userRequest.name, role: userRequest.role },
-        id: params.id
-      })
-      .toPromise()
-
-    if (updateUserResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: updateUserResponse.message,
-          errors: updateUserResponse.errors,
-          data: null
-        },
-        updateUserResponse.status
-      )
-    }
-
-    return {
-      message: updateUserResponse.message,
-      data: updateUserResponse.user,
-      errors: null
-    }
-  }
-
-  @Get(':id')
-  @Authorization(true)
-  @Permission('user_get_by_id')
-  @ApiOkResponse({
-    type: GetUserByIdResponseDto,
-    description: 'Find user by id'
-  })
-  public async getUserById(
-    @Param() params: UserIdDto
-  ): Promise<GetUserByIdResponseDto> {
-    const { id } = params
-
-    const userResponse: IServiceUserGetByIdResponse = await this.userServiceClient
-      .send('user_get_by_id', id)
-      .toPromise()
-
-    return {
-      message: userResponse.message,
-      data: userResponse?.data?.user
-    }
-  }
 
   @Get()
   @Authorization(true)
@@ -181,8 +85,8 @@ export class UsersController {
   }
 
   @Get()
-  @ApiBearerAuth('JWT')
   @Authorization(true)
+  @Permission('user_get_by_id')
   @ApiOkResponse({
     type: GetUserByTokenResponseDto
   })
@@ -205,12 +109,17 @@ export class UsersController {
   }
 
   @Post()
+  @Authorization(true)
+  @Permission('user_create')
   @ApiCreatedResponse({
     type: CreateUserResponseDto
   })
   public async createUser(
     @Body() userRequest: CreateUserDto
   ): Promise<CreateUserResponseDto> {
+    if (userRequest.name) userRequest.name = capitalize(userRequest.name.trim())
+    if (userRequest.email)
+      userRequest.email = userRequest.email.toLowerCase().trim()
     const createUserResponse: IServiceUserCreateResponse = await this.userServiceClient
       .send('user_create', userRequest)
       .toPromise()
@@ -234,172 +143,117 @@ export class UsersController {
     }
   }
 
-  @Post('/login')
-  @ApiCreatedResponse({
-    type: LoginUserResponseDto
-  })
-  public async loginUser(
-    @Body() loginRequest: LoginUserDto
-  ): Promise<LoginUserResponseDto> {
-    const getUserResponse: IServiceUserSearchResponse = await this.userServiceClient
-      .send('user_search_by_credentials', loginRequest)
-      .toPromise()
-
-    if (getUserResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: getUserResponse.message,
-          data: null,
-          errors: null
-        },
-        HttpStatus.UNAUTHORIZED
-      )
-    }
-
-    const createTokenResponse: IServiveTokenCreateResponse = await this.tokenServiceClient
-      .send('token_create', {
-        user: getUserResponse.data.user
-      })
-      .toPromise()
-
-    return {
-      message: createTokenResponse.message,
-      data: {
-        token: createTokenResponse.token
-      },
-      errors: null
-    }
-  }
-
-  @Put('/logout')
-  @ApiBearerAuth('JWT')
+  @Get(':id')
   @Authorization(true)
-  @ApiCreatedResponse({
-    type: LogoutUserResponseDto
+  @Permission('user_get_by_id')
+  @ApiOkResponse({
+    type: GetUserByIdResponseDto,
+    description: 'Find user by id'
   })
-  public async logoutUser(
-    @Req() request: IAuthorizedRequest
-  ): Promise<LogoutUserResponseDto> {
-    const userInfo = request.user
+  public async getUserById(
+    @Param() params: UserIdDto
+  ): Promise<GetUserByIdResponseDto> {
+    const { id } = params
 
-    const destroyTokenResponse: IServiceTokenDestroyResponse = await this.tokenServiceClient
-      .send('token_destroy', {
-        userId: userInfo.id
-      })
-      .toPromise()
-
-    if (destroyTokenResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: destroyTokenResponse.message,
-          data: null,
-          errors: destroyTokenResponse.errors
-        },
-        destroyTokenResponse.status
-      )
-    }
-
-    return {
-      message: destroyTokenResponse.message,
-      errors: null,
-      data: null
-    }
-  }
-
-  @Post('/reset')
-  @ApiCreatedResponse({
-    type: ConfirmUserResponseDto
-  })
-  public async confirmUser(
-    @Body() confirmRequest: ConfirmUserDto
-  ): Promise<ConfirmUserResponseDto> {
-    const confirmUserResponse: IServiceUserConfirmResponse = await this.userServiceClient
-      .send('user_confirm', {
-        password: confirmRequest.password,
-        link: confirmRequest.link
-      })
-      .toPromise()
-
-    if (confirmUserResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: confirmUserResponse.message,
-          data: null,
-          errors: confirmUserResponse.errors
-        },
-        confirmUserResponse.status
-      )
-    }
-
-    const createTokenResponse: IServiveTokenCreateResponse = await this.tokenServiceClient
-      .send('token_create', {
-        user: confirmUserResponse.user
-      })
+    const userResponse: IServiceUserGetByIdResponse = await this.userServiceClient
+      .send('user_get_by_id', id)
       .toPromise()
 
     return {
-      message: confirmUserResponse.message,
-      errors: null,
-      data: {
-        token: createTokenResponse.token
-      }
+      message: userResponse.message,
+      data: userResponse?.data?.user
     }
   }
 
-  @Post('/forgot')
-  @ApiCreatedResponse({
-    type: ForgotPasswordUserResponseDto
+  @Put(':id')
+  @Authorization(true)
+  @Permission('user_update_by_id')
+  @ApiOkResponse({
+    type: UpdateUserResponseDto
   })
-  public async forgotPassword(
-    @Body() forgotPasswordRequest: ForgotPasswordUserDto
-  ): Promise<ForgotPasswordUserResponseDto> {
-    const forgotPasswordUserResponse: IServiceUserForgotPasswordResponse = await this.userServiceClient
-      .send('user_forgot_password', {
-        email: forgotPasswordRequest.email
+  public async updateUser(
+    @Param() params: UserIdDto,
+    @Body() userRequest: UpdateUserDto
+  ): Promise<UpdateUserResponseDto> {
+    if (userRequest.name) userRequest.name = capitalize(userRequest.name.trim())
+    if (userRequest.email)
+      userRequest.email = userRequest.email.toLowerCase().trim()
+    const updateUserResponse: IServiceUserUpdateByIdResponse = await this.userServiceClient
+      .send('user_update_by_id', {
+        user: userRequest,
+        id: params.id
       })
       .toPromise()
 
-    if (forgotPasswordUserResponse.status !== HttpStatus.OK) {
+    if (updateUserResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
-          message: forgotPasswordUserResponse.message,
-          data: null,
-          errors: forgotPasswordUserResponse.errors
-        },
-        forgotPasswordUserResponse.status
-      )
-    }
-
-    return {
-      message: forgotPasswordUserResponse.message,
-      errors: null
-    }
-  }
-
-  @Get('/link/:link')
-  @ApiCreatedResponse({
-    type: UserLinkResponseDto
-  })
-  public async getUserLink(
-    @Param() params: UserLinkDto
-  ): Promise<UserLinkResponseDto> {
-    const linkUserResponse: IServiceUserLinkResponse = await this.userServiceClient
-      .send('user_get_by_link', params.link)
-      .toPromise()
-
-    if (linkUserResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: linkUserResponse.message,
+          message: updateUserResponse.message,
+          errors: updateUserResponse.errors,
           data: null
         },
-        linkUserResponse.status
+        updateUserResponse.status
       )
     }
 
     return {
-      message: linkUserResponse.message,
-      data: linkUserResponse.data
+      message: updateUserResponse.message,
+      data: updateUserResponse.user,
+      errors: null
+    }
+  }
+
+  @Delete(':id')
+  @Authorization(true)
+  @Permission('user_delete_by_id')
+  @ApiOkResponse({
+    type: DeleteUserResponseDto
+  })
+  public async deleteUser(
+    @Param() params: UserIdDto
+  ): Promise<DeleteUserResponseDto> {
+    const deleteUserResponse: IServiceUserDeleteResponse = await this.userServiceClient
+      .send('user_delete_by_id', {
+        id: params.id
+      })
+      .toPromise()
+
+    if (deleteUserResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: deleteUserResponse.message,
+          errors: deleteUserResponse.errors,
+          data: null
+        },
+        deleteUserResponse.status
+      )
+    }
+
+    return {
+      message: deleteUserResponse.message,
+      data: null,
+      errors: null
+    }
+  }
+
+  @Get(':id/resend')
+  @Authorization(true)
+  @Permission('user_resend')
+  @ApiOkResponse({
+    type: ResendMailResponseDto,
+    description: 'Resend confirmation email'
+  })
+  public async getUserResendMail(
+    @Param() params: UserIdDto
+  ): Promise<ResendMailResponseDto> {
+    const { id } = params
+
+    const userResponse: IServiceUserResendResponse = await this.userServiceClient
+      .send('user_resend', id)
+      .toPromise()
+
+    return {
+      message: userResponse.message
     }
   }
 }

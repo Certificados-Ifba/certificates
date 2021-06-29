@@ -1,8 +1,8 @@
 import Head from 'next/head'
 import { FiSettings, FiBriefcase, FiFileText } from 'react-icons/fi'
 
-import Generic from '../components/generic'
 import Tab from '../components/tab'
+import Generic from '../components/tabs/generic'
 import withAuth from '../hocs/withAuth'
 import { Container } from '../styles/pages/home'
 

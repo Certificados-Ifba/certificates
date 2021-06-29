@@ -1,6 +1,6 @@
 import { IGeneric } from './generic.interface'
 
-export interface IGenericSearchResponse {
+export interface IGenericByIdResponse {
   status: number
   message: string
   generic: IGeneric | null

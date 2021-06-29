@@ -4,16 +4,8 @@ export class CreateEventDto {
   @ApiProperty({ example: 'V Week-IT' })
   name: string
 
-  @ApiProperty({
-    example: 'Cidades Inteligentes: Práticas Colaborativas no Sudoeste da Bahia'
-  })
-  description: string
-
   @ApiProperty({ example: 'Week-IT' })
   initials: string
-
-  @ApiProperty({ example: '2019' })
-  year: string
 
   @ApiProperty({ example: '5º' })
   edition: string
@@ -25,5 +17,5 @@ export class CreateEventDto {
   end_date: Date
 
   @ApiProperty({ example: '5d987c3bfb881ec86b476bcc' })
-  user_id: string
+  user: string
 }

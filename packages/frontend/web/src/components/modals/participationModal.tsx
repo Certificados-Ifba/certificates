@@ -11,25 +11,31 @@ import {
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import { useToast } from '../../../providers/toast'
-import api from '../../../services/axios'
-import { PaginatedRequest } from '../../../services/usePaginatedRequest'
-import { Row } from '../../../styles/components/modal'
-import getValidationErrors from '../../../utils/getValidationErrors'
-import Button from '../../button'
-import Input from '../../input'
-import Modal from '../../modal'
-import Select from '../../select'
+import { useToast } from '../../providers/toast'
+import api from '../../services/axios'
+import { PaginatedRequest } from '../../services/usePaginatedRequest'
+import { Row } from '../../styles/components/modal'
+import getValidationErrors from '../../utils/getValidationErrors'
+import Button from '../button'
+import Input from '../input'
+import Modal from '../modal'
+import Select from '../select'
 
-export const AddParticipantModal: React.FC<{
+interface Props {
   event: any
   openModal: boolean
   setOpenModal: Dispatch<SetStateAction<boolean>>
   request: PaginatedRequest<any, any>
-}> = ({ event, openModal, setOpenModal, request }) => {
+}
+
+const ParticipationModal: React.FC<Props> = ({
+  event,
+  openModal,
+  setOpenModal,
+  request
+}) => {
   const [loading, setLoading] = useState(false)
   const formRef = useRef<FormHandles>(null)
-
   const { addToast } = useToast()
 
   const handleCloseModal = useCallback(() => {
@@ -42,7 +48,7 @@ export const AddParticipantModal: React.FC<{
     data => {
       const schema = Yup.object().shape({
         name: Yup.string().required(`A atividade do evento precisa de um nome`),
-        activitieType: Yup.string().required(`Selecione um tipo de atividade`),
+        activityType: Yup.string().required(`Selecione um tipo de atividade`),
         workload: Yup.string().required('Por favor, digite a carga horária'),
         start_date: Yup.string().required(
           'Selecione a data inicial da atividade'
@@ -109,11 +115,11 @@ export const AddParticipantModal: React.FC<{
               <Select
                 formRef={formRef}
                 label="Tipo de Atividade"
-                name="activitieType"
+                name="activityType"
                 isSearchable={true}
                 marginBottom="sm"
                 async={true}
-                url="activities"
+                url="activitys"
               />
               <Input
                 type="number"
@@ -169,3 +175,5 @@ export const AddParticipantModal: React.FC<{
     </Modal>
   )
 }
+
+export default ParticipationModal

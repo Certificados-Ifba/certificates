@@ -1,22 +1,20 @@
 import * as mongoose from 'mongoose'
 
-import { IEvent } from '../interfaces/event.interface'
-
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id
 }
 
 export const EventSchema = new mongoose.Schema(
   {
-    user_id: {
-      type: String,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: [true, 'User can not be empty']
     },
     name: {
       type: String,
       required: [true, 'Name can not be empty']
     },
-    description: String,
     initials: String,
     year: {
       type: String,
@@ -53,11 +51,11 @@ export const EventSchema = new mongoose.Schema(
   }
 )
 
-EventSchema.pre('validate', function (next) {
-  const self = this as IEvent
+// EventSchema.pre('validate', function (next) {
+//   const self = this as IEvent
 
-  if (this.isModified('user_id') && self.created_at) {
-    this.invalidate('user_id', 'The field value can not be updated')
-  }
-  next()
-})
+//   if (this.isModified('user_id') && self.created_at) {
+//     this.invalidate('user_id', 'The field value can not be updated')
+//   }
+//   next()
+// })

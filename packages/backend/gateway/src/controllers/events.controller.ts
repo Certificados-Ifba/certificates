@@ -35,6 +35,8 @@ import { UpdateEventResponseDto } from 'src/interfaces/event/dto/update-event-re
 import { UpdateEventDto } from 'src/interfaces/event/dto/update-event.dto'
 import { IServiceEventCreateResponse } from 'src/interfaces/event/service-event-create-response.interface'
 import { IServiceEventDeleteResponse } from 'src/interfaces/event/service-event-delete-response.interface'
+import { IServiceEventGetByIdResponse } from 'src/interfaces/event/service-event-get-by-id-response.interface'
+import { IServiceEventListResponse } from 'src/interfaces/event/service-event-list-response.interface'
 import { IServiceEventUpdateByIdResponse } from 'src/interfaces/event/service-event-update-by-id-response.interface'
 
 @Controller('events')
@@ -57,28 +59,14 @@ export class EventsController {
   ): Promise<GetEventByIdResponseDto> {
     const { id } = params
 
-    // const userResponse: IServiceEventGetByIdResponse = await this.eventServiceClient
-    //   .send('event_get_by_id', id)
-    //   .toPromise()
+    const eventResponse: IServiceEventGetByIdResponse = await this.eventServiceClient
+      .send('event_get_by_id', id)
+      .toPromise()
+    console.log(eventResponse)
 
     return {
-      // message: userResponse.message,
-      // data: userResponse?.data?.user
-      message: 'user_get_by_id_success',
-      data: {
-        name: 'Competição Baiana de Veículos Autônomos em Escala',
-        initials: 'CBVAE',
-        year: '2019',
-        start_date: new Date(),
-        end_date: new Date(),
-        description: 'Competição Baiana de Veículos Autônomos em Escala',
-        edition: '1N',
-        id: '60b0506e8db1d10032144025',
-        user_id: {
-          id: '6b421b70-1e33-4fc0-a225-1b20ff2b68e7',
-          name: 'Pablo Matos'
-        }
-      }
+      message: eventResponse.message,
+      data: eventResponse?.data?.event
     }
   }
 
@@ -94,60 +82,22 @@ export class EventsController {
     @Query() query: ListEventDto
   ): Promise<GetEventsResponseDto> {
     const { search, page, per_page, sort_by, order_by } = query
-    // const usersResponse: IServiceEventListResponse = await this.eventServiceClient
-    //   .send('event_list', {
-    //     type: 'event',
-    //     name: search,
-    //     page: Number(page),
-    //     perPage: Number(per_page),
-    //     sortBy: sort_by,
-    //     orderBy: order_by
-    //   })
-    //   .toPromise()
+    const eventsResponse: IServiceEventListResponse = await this.eventServiceClient
+      .send('event_list', {
+        name: search,
+        page: Number(page),
+        perPage: Number(per_page),
+        sortBy: sort_by,
+        orderBy: order_by
+      })
+      .toPromise()
 
-    // res.header('x-total-count', String(usersResponse?.data.totalCount))
-    // res.header('x-total-page', String(usersResponse?.data.totalPages))
+    res.header('x-total-count', String(eventsResponse?.data.totalCount))
+    res.header('x-total-page', String(eventsResponse?.data.totalPages))
 
-    res.header('x-total-count', String(3))
-    res.header('x-total-page', String(1))
     return {
-      message: 'Lista de Eventos',
-      // data: usersResponse?.data?.events
-      data: [
-        {
-          name: 'Competição Baiana de Veículos Autônomos em Escala',
-          initials: 'CBVAE',
-          year: '2019',
-          start_date: new Date(),
-          end_date: new Date(),
-          description: 'Competição Baiana de Veículos Autônomos em Escala',
-          edition: '',
-          id: '60b038c58db1d10032144021',
-          user_id: '6b421b70-1e33-4fc0-a225-1b20ff2b68e7'
-        },
-        {
-          name: 'Projeto de Extensão do NAPNEE 	Curso LIBRAS',
-          initials: 'LIBRAS',
-          year: '2018',
-          start_date: new Date(),
-          end_date: new Date(),
-          description: 'Projeto de Extensão do NAPNEE 	Curso LIBRAS',
-          edition: '',
-          id: '60afd392e2369e004a185d39',
-          user_id: '6b421b70-1e33-4fc0-a225-1b20ff2b68e7'
-        },
-        {
-          name: 'Projeto de Extensão do NAPNEE 	Curso TEA',
-          initials: 'TEA',
-          year: '2017',
-          start_date: new Date(),
-          end_date: new Date(),
-          description: 'Projeto de Extensão do NAPNEE 	Curso TEA',
-          edition: '',
-          id: '60afd392e2369e004a185d39',
-          user_id: '6b421b70-1e33-4fc0-a225-1b20ff2b68e7'
-        }
-      ]
+      message: eventsResponse.message,
+      data: eventsResponse?.data?.events
     }
   }
 
@@ -161,7 +111,12 @@ export class EventsController {
     @Body() eventRequest: CreateEventDto
   ): Promise<CreateEventResponseDto> {
     const createEventResponse: IServiceEventCreateResponse = await this.eventServiceClient
-      .send('event_create', Object.assign(eventRequest))
+      .send(
+        'event_create',
+        Object.assign(eventRequest, {
+          year: new Date(eventRequest.start_date).getFullYear()
+        })
+      )
       .toPromise()
 
     if (createEventResponse.status !== HttpStatus.CREATED) {
@@ -199,7 +154,7 @@ export class EventsController {
     const deleteEventResponse: IServiceEventDeleteResponse = await this.eventServiceClient
       .send('event_delete_by_id', {
         id: params.id,
-        userId: userInfo.id
+        user: userInfo
       })
       .toPromise()
 
@@ -236,7 +191,7 @@ export class EventsController {
     const updateEventResponse: IServiceEventUpdateByIdResponse = await this.eventServiceClient
       .send('event_update_by_id', {
         id: params.id,
-        userId: userInfo.id,
+        user: userInfo,
         event: eventRequest
       })
       .toPromise()

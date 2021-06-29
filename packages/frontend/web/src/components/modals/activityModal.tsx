@@ -20,16 +20,16 @@ import {
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import { useToast } from '../../../providers/toast'
-import api from '../../../services/axios'
-import { PaginatedRequest } from '../../../services/usePaginatedRequest'
-import getValidationErrors from '../../../utils/getValidationErrors'
-import Button from '../../button'
-import Input from '../../input'
-import Modal from '../../modal'
-import Select from '../../select'
+import { useToast } from '../../providers/toast'
+import api from '../../services/axios'
+import { PaginatedRequest } from '../../services/usePaginatedRequest'
+import getValidationErrors from '../../utils/getValidationErrors'
+import Button from '../button'
+import Input from '../input'
+import Modal from '../modal'
+import Select from '../select'
 
-export const EventActivityModal: React.FC<{
+const EventActivityModal: React.FC<{
   event: any
   openModal: boolean
   setOpenModal: Dispatch<SetStateAction<boolean>>
@@ -218,3 +218,5 @@ export const EventActivityModal: React.FC<{
     </Modal>
   )
 }
+
+export default EventActivityModal

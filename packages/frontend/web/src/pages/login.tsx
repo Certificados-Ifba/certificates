@@ -63,7 +63,7 @@ const FormForgotPassword: React.FC<{
         formRef.current?.setErrors({})
         const schema = Yup.object().shape({
           email: Yup.string()
-            .required('Por favor, digite o seu email')
+            .required('Por favor, digite o seu e-mail')
             .email('Por favor, digite um e-mail válido')
         })
 
@@ -71,11 +71,11 @@ const FormForgotPassword: React.FC<{
           abortEarly: false
         })
 
-        await api.post('/users/forgot', data)
+        await api.post('/password/forgot', data)
 
         addToast({
           type: 'success',
-          title: 'Email de recuperação enviado',
+          title: 'E-mail de recuperação enviado',
           description: 'Verifique sua caixa de entrada para recuperar a senha.'
         })
         setForgotPassword(false)
@@ -127,7 +127,7 @@ const FormForgotPassword: React.FC<{
             Esqueceu sua senha? <b>Não se preocupe.</b>
           </Alert>
           <Alert marginBottom="md">
-            É só nos dizer seu email que enviaremos um link para você cadastrar
+            É só nos dizer seu e-mail que enviaremos um link para você cadastrar
             uma <b>nova senha</b>.
           </Alert>
           <Input
@@ -141,7 +141,7 @@ const FormForgotPassword: React.FC<{
           />
           <Row>
             <Button size="big" loading={loading} color="primary" type="submit">
-              <FiSend size={20} /> <span>Enviar email</span>
+              <FiSend size={20} /> <span>Enviar e-mail</span>
             </Button>
           </Row>
         </FormContainer>
@@ -212,11 +212,11 @@ const FormLogin: React.FC<{
         <FormContainer>
           <Input
             formRef={formRef}
-            label="Email"
+            label="E-mail"
             name="login"
             icon={FiMail}
             type="email"
-            placeholder="Digite seu email"
+            placeholder="Digite seu e-mail"
             autoComplete="username"
             marginBottom="sm"
           />
