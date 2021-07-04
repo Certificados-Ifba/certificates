@@ -4,11 +4,6 @@ import { FiAlertCircle, FiCheckCircle, FiInfo, FiXCircle } from 'react-icons/fi'
 import { ToastMessage, useToast } from '../providers/toast'
 import { Container } from '../styles/components/toast'
 
-interface ToastProps {
-  message: ToastMessage
-  style: object
-}
-
 const icons = {
   info: FiInfo,
   warning: FiAlertCircle,
@@ -16,7 +11,12 @@ const icons = {
   success: FiCheckCircle
 }
 
-const Toast: React.FC<ToastProps> = ({ message, style }) => {
+interface Props {
+  message: ToastMessage
+  style: object
+}
+
+const Toast: React.FC<Props> = ({ message, style }) => {
   const { removeToast } = useToast()
   const Icon = icons[message.type || 'info']
 

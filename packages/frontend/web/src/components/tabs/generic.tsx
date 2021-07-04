@@ -96,6 +96,14 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
     [column]
   )
 
+  const handleCloseGenericModal = useCallback(() => {
+    setOpenGenericModal(false)
+  }, [])
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setOpenDeleteModal(false)
+  }, [])
+
   return (
     <>
       <header>
@@ -176,7 +184,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
       </PaginatedTable>
       <GenericModal
         openModal={openGenericModal}
-        setOpenModal={setOpenGenericModal}
+        onClose={handleCloseGenericModal}
         type={typeModal}
         generic={generic}
         request={request}
@@ -187,7 +195,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
       <DeleteModal
         name={name}
         openModal={openDeleteModal}
-        setOpenModal={setOpenDeleteModal}
+        onClose={handleCloseDeleteModal}
         handleSubmit={handleSubmitDelete}
       >
         <Alert marginBottom="sm">
@@ -195,82 +203,6 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
           <b>{generic?.name}</b>?
         </Alert>
       </DeleteModal>
-      {/* <Modal open={openModal} onClose={handleCloseModal}>
-        <header>
-          <h2>
-            {isDeleted ? (
-              <>
-                <FiTrash2 size={20} />
-                <span>Excluir {name}</span>
-              </>
-            ) : idSelected ? (
-              <>
-                <FiEdit size={20} />
-                <span>Editar {name}</span>
-              </>
-            ) : (
-              <>
-                <FiPlusCircle size={20} />
-                <span>Adicionar {name}</span>
-              </>
-            )}
-          </h2>
-        </header>
-        <Form ref={formRef} onSubmit={handleSubmit}>
-          <div className="modal-body">
-            <Input
-              formRef={formRef}
-              name="name"
-              label="Nome"
-              placeholder="Nome"
-              icon={icon}
-              disabled={loading}
-              hidden={isDeleted}
-            />
-            {isDeleted && (
-              <Alert>
-                Tem certeza que você deseja excluir a {`${name.toLowerCase()} `}
-                <b>{selectedName}</b>?
-              </Alert>
-            )}
-          </div>
-          <div className="modal-footer">
-            <Button
-              onClick={() => {
-                handleCloseModal()
-              }}
-              color="secondary"
-              type="button"
-              outline={!isDeleted}
-            >
-              <FiX size={20} />
-              <span>Cancelar</span>
-            </Button>
-            <Button
-              color={
-                isDeleted ? 'danger' : idSelected ? 'secondary' : 'primary'
-              }
-              type="submit"
-              loading={loading}
-              outline={isDeleted}
-            >
-              {isDeleted ? (
-                <>
-                  <FiTrash2 size={20} /> <span>Excluir</span>
-                </>
-              ) : idSelected ? (
-                <>
-                  <FiCheck size={20} /> <span>Atualizar</span>
-                </>
-              ) : (
-                <>
-                  <FiPlus size={20} /> <span>Adicionar</span>
-                </>
-              )}
-            </Button>
-          </div>
-        </Form>
-      </Modal> */}
     </>
   )
 }

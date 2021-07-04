@@ -11,11 +11,13 @@ import {
   FiCalendar,
   FiEdit,
   FiHash,
+  FiMapPin,
   FiTag,
   FiTrash2,
   FiUser
 } from 'react-icons/fi'
 
+import IEvent from '../../dtos/IEvent'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import {
@@ -27,27 +29,6 @@ import Alert from '../alert'
 import Button from '../button'
 import DeleteModal from '../modals/deleteModal'
 import EventModal from '../modals/eventModal'
-
-interface IUser {
-  id: string
-  name: string
-  email: string
-  role: string
-  is_confirmed: boolean
-  last_login?: Date
-}
-
-interface IEvent {
-  id: string
-  name: string
-  description: string
-  initials: string
-  year: string
-  edition: string
-  start_date: string
-  end_date: string
-  user: IUser
-}
 
 interface Props {
   event: IEvent
@@ -79,6 +60,14 @@ const EventInfo: React.FC<Props> = ({ event, setEvent }) => {
     }
   }, [addToast, event, router])
 
+  const handleCloseEventModal = useCallback(() => {
+    setOpenEventModal(false)
+  }, [])
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setOpenDeleteModal(false)
+  }, [])
+
   return (
     <Container>
       <div>
@@ -101,18 +90,24 @@ const EventInfo: React.FC<Props> = ({ event, setEvent }) => {
           <b>{event?.edition}</b>
         </Alert>
         <Alert marginBottom="sm" size="sm">
-          Coordenador:
+          Local:
         </Alert>
-        <Alert icon={FiUser} marginBottom="md">
-          <b>{event?.user.name}</b>
+        <Alert icon={FiMapPin} marginBottom="md">
+          <b>{event?.local}</b>
         </Alert>
         <Alert marginBottom="sm" size="sm">
           Período:
         </Alert>
-        <Alert icon={FiCalendar}>
+        <Alert icon={FiCalendar} marginBottom="md">
           <b>
             De {formatData(event?.start_date)} até {formatData(event?.end_date)}
           </b>
+        </Alert>
+        <Alert marginBottom="sm" size="sm">
+          Coordenador:
+        </Alert>
+        <Alert icon={FiUser}>
+          <b>{event?.user.name}</b>
         </Alert>
       </div>
       <ButtonContainer>
@@ -143,13 +138,13 @@ const EventInfo: React.FC<Props> = ({ event, setEvent }) => {
         type="edit"
         event={event}
         openModal={openEventModal}
-        setOpenModal={setOpenEventModal}
+        onClose={handleCloseEventModal}
         setEvent={setEvent}
       />
       <DeleteModal
         name="Evento"
         openModal={openDeleteModal}
-        setOpenModal={setOpenDeleteModal}
+        onClose={handleCloseDeleteModal}
         handleSubmit={handleSubmitDelete}
       >
         <Alert>

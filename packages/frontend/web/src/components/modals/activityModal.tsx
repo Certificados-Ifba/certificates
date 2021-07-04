@@ -1,13 +1,6 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   FiCalendar,
   FiCheck,
@@ -32,10 +25,10 @@ import Select from '../select'
 const EventActivityModal: React.FC<{
   event: any
   openModal: boolean
-  setOpenModal: Dispatch<SetStateAction<boolean>>
+  onClose: () => void
   activitySelected: string
   request: PaginatedRequest<any, any>
-}> = ({ event, openModal, setOpenModal, activitySelected, request }) => {
+}> = ({ event, openModal, onClose, activitySelected, request }) => {
   const [loading, setLoading] = useState(false)
   const formRef = useRef<FormHandles>(null)
 
@@ -44,8 +37,8 @@ const EventActivityModal: React.FC<{
   const handleCloseModal = useCallback(() => {
     formRef.current.reset()
     formRef.current.setErrors({})
-    setOpenModal(false)
-  }, [setOpenModal])
+    onClose()
+  }, [onClose])
 
   useEffect(() => {
     if (activitySelected && openModal) {

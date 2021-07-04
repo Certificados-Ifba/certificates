@@ -2,14 +2,14 @@ import { IconBaseProps } from 'react-icons'
 
 import { Container } from '../styles/components/alert'
 
-export interface AlertProps {
+interface Props {
   type?: 'info' | 'warning' | 'danger' | 'success'
   marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   size?: 'sm' | 'lg' | 'md'
   icon?: React.ComponentType<IconBaseProps>
 }
 
-const Alert: React.FC<AlertProps> = ({
+const Alert: React.FC<Props> = ({
   type,
   marginBottom,
   size,

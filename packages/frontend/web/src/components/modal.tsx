@@ -1,18 +1,13 @@
 import { Container, CloseArea } from '../styles/components/modal'
 import Card from './card'
 
-interface ModalProps {
+interface Props {
   open: boolean
   onClose: () => void
   size?: 'sm' | 'lg'
 }
 
-const Modal: React.FC<ModalProps> = ({
-  open,
-  onClose,
-  children,
-  size = 'sm'
-}) => {
+const Modal: React.FC<Props> = ({ open, onClose, children, size = 'sm' }) => {
   const className = open ? 'show' : ''
   return (
     <Container size={size} className={`${className}`}>

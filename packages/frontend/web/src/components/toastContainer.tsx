@@ -4,11 +4,11 @@ import { ToastMessage } from '../providers/toast'
 import { Container } from '../styles/components/toastContainer'
 import Toast from './toast'
 
-interface ToastContainerProps {
+interface Props {
   messages: ToastMessage[]
 }
 
-const ToastContainer: React.FC<ToastContainerProps> = ({ messages }) => {
+const ToastContainer: React.FC<Props> = ({ messages }) => {
   const messagesWithTransitions = useTransition(
     messages,
     message => message.id,

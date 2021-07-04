@@ -3,7 +3,7 @@ import { IUser } from '../user/user.interface'
 export interface IEvent {
   id?: string
   name: string
-  description: string
+  local: string
   initials: string
   year: string
   edition: string

@@ -35,7 +35,9 @@ interface BaseProps<Multiline = false>
 type InputProps = JSX.IntrinsicElements['input'] & BaseProps<false>
 type TextAreaProps = JSX.IntrinsicElements['textarea'] & BaseProps<true>
 
-const Input: React.FC<InputProps | TextAreaProps> = ({
+type Props = InputProps | TextAreaProps
+
+const Input: React.FC<Props> = ({
   label,
   note,
   name,

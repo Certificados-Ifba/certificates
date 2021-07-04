@@ -114,6 +114,13 @@ const Users: React.FC = () => {
     },
     [column]
   )
+  const handleCloseUserModal = useCallback(() => {
+    setOpenUserModal(false)
+  }, [])
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setOpenDeleteModal(false)
+  }, [])
 
   return (
     <Container>
@@ -268,14 +275,14 @@ const Users: React.FC = () => {
       <UserModal
         request={request}
         openModal={openUserModal}
-        setOpenModal={setOpenUserModal}
+        onClose={handleCloseUserModal}
         type={typeModal}
         user={user}
       />
       <DeleteModal
         name="Usuário"
         openModal={openDeleteModal}
-        setOpenModal={setOpenDeleteModal}
+        onClose={handleCloseDeleteModal}
         handleSubmit={handleSubmitDelete}
       >
         <Alert marginBottom="sm">

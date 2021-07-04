@@ -62,7 +62,6 @@ export class EventsController {
     const eventResponse: IServiceEventGetByIdResponse = await this.eventServiceClient
       .send('event_get_by_id', id)
       .toPromise()
-    console.log(eventResponse)
 
     return {
       message: eventResponse.message,

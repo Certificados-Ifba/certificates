@@ -21,6 +21,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
   const [activitySelected, setActivitySelected] = useState(null)
   const [nameActivitySelected, setNameActivitySelected] = useState(null)
   const [openModal, setOpenModal] = useState(false)
+  const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [filters, setFilters] = useState(null)
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
@@ -58,7 +59,14 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
     [column]
   )
 
-  const [openDeleteModal, setOpenDeleteModal] = useState(false)
+  const handleCloseModal = useCallback(() => {
+    setOpenModal(false)
+  }, [])
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setOpenDeleteModal(false)
+  }, [])
+
   const handleSubmitDelete = useCallback(() => {
     api
       .delete(`event/${event.id}/activity/${activitySelected}`)
@@ -169,13 +177,13 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
         event={event}
         openModal={openModal}
         request={request}
-        setOpenModal={setOpenModal}
+        onClose={handleCloseModal}
       />
       <DeleteModal
         handleSubmit={handleSubmitDelete}
         name="Atividade"
         openModal={openDeleteModal}
-        setOpenModal={setOpenDeleteModal}
+        onClose={handleCloseDeleteModal}
       >
         <Alert>
           Tem certeza que você deseja excluir a atividade{' '}

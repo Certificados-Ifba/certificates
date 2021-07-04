@@ -1,22 +1,29 @@
-export class Debounce<T> {
-  constructor(callback: (data: T) => void, time?: number) {
-    this.callback = callback
-    if (time) {
-      this.time = time
-    } else {
-      this.time = 500
-    }
-  }
+import _ from 'lodash'
 
-  private callback: (data: T) => void
-  private time: number
-
-  private timeout: any
-
-  notify(data: T): void {
-    if (this.timeout) clearTimeout(this.timeout)
-    this.timeout = setTimeout(async () => {
-      this.callback(data)
-    }, this.time)
-  }
+interface DebounceResp<T> {
+  run?: (data: T) => void
 }
+
+const timeouts = {}
+let lastID = 0
+
+export function useDebounce<T>(
+  callback: (data: T) => void,
+  time?: number
+): DebounceResp<T> {
+  if (!time) time = 500
+  const id = lastID + 1
+  lastID = id
+  const run: (data: T) => void = (data: T) => {
+    const timeout = timeouts[id]
+    if (timeout) clearTimeout(timeout)
+    timeouts[id] = setTimeout(() => {
+      callback(data)
+      delete timeouts[id]
+    }, time)
+  }
+  return { run }
+}
+
+// export const debouncedLoadOptions = (loadOptions: any, wait: number) =>
+//   _.debounce(loadOptions, wait)

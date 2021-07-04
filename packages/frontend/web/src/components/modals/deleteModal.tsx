@@ -1,5 +1,5 @@
 import { Form } from '@unform/web'
-import { Dispatch, SetStateAction, useCallback } from 'react'
+import { useCallback } from 'react'
 import { FiTrash2, FiX } from 'react-icons/fi'
 
 import Button from '../button'
@@ -7,13 +7,13 @@ import Modal from '../modal'
 
 const DeleteModal: React.FC<{
   openModal: boolean
-  setOpenModal: Dispatch<SetStateAction<boolean>>
+  onClose: () => void
   name: string
   handleSubmit: (data: any) => void
-}> = ({ openModal, setOpenModal, name, children, handleSubmit }) => {
+}> = ({ openModal, onClose, name, children, handleSubmit }) => {
   const handleCloseSaveModal = useCallback(() => {
-    setOpenModal(false)
-  }, [setOpenModal])
+    onClose()
+  }, [onClose])
   return (
     <Modal open={openModal} onClose={handleCloseSaveModal}>
       <header>
@@ -25,13 +25,7 @@ const DeleteModal: React.FC<{
       <Form onSubmit={handleSubmit}>
         <div className="modal-body">{children}</div>
         <div className="modal-footer">
-          <Button
-            onClick={() => {
-              setOpenModal(false)
-            }}
-            color="secondary"
-            type="button"
-          >
+          <Button onClick={onClose} color="secondary" type="button">
             <FiX size={20} />
             <span>Cancelar</span>
           </Button>

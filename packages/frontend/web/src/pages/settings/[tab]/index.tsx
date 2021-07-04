@@ -1,10 +1,10 @@
 import Head from 'next/head'
 import { FiSettings, FiBriefcase, FiFileText } from 'react-icons/fi'
 
-import Tab from '../components/tab'
-import Generic from '../components/tabs/generic'
-import withAuth from '../hocs/withAuth'
-import { Container } from '../styles/pages/home'
+import Tab from '../../../components/tab'
+import Generic from '../../../components/tabs/generic'
+import withAuth from '../../../hocs/withAuth'
+import { Container } from '../../../styles/pages/home'
 
 const Settings: React.FC = () => {
   return (
@@ -35,7 +35,8 @@ const Settings: React.FC = () => {
                 plural="Funções"
                 url="/functions"
               />
-            )
+            ),
+            path: 'function'
           },
           {
             name: 'Tipo de Atividades',
@@ -47,7 +48,8 @@ const Settings: React.FC = () => {
                 plural="Tipo de Atividades"
                 url="/activities"
               />
-            )
+            ),
+            path: 'activity'
           }
         ]}
       />

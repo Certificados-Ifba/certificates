@@ -11,6 +11,7 @@ export class CreateEventResponseDto {
       event: {
         name: 'V Week-IT',
         initials: 'Week-IT',
+        local: 'Vitória da Conquista',
         year: '2019',
         edition: '5º',
         start_date: new Date('2019-10-01'),

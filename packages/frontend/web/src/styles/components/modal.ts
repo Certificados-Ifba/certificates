@@ -26,6 +26,7 @@ export const Container = styled.div<ModalProps>`
   align-items: center;
   justify-content: center;
   margin: 0 30px;
+  z-index: 1;
   &.show {
     display: flex !important;
   }

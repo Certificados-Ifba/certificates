@@ -1,6 +1,6 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
-import { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import {
   FiCalendar,
   FiClock,
@@ -24,14 +24,14 @@ import Select from '../select'
 interface Props {
   event: any
   openModal: boolean
-  setOpenModal: Dispatch<SetStateAction<boolean>>
+  onClose: () => void
   request: PaginatedRequest<any, any>
 }
 
 const ParticipationModal: React.FC<Props> = ({
   event,
   openModal,
-  setOpenModal,
+  onClose,
   request
 }) => {
   const [loading, setLoading] = useState(false)
@@ -41,8 +41,8 @@ const ParticipationModal: React.FC<Props> = ({
   const handleCloseModal = useCallback(() => {
     formRef.current.reset()
     formRef.current.setErrors({})
-    setOpenModal(false)
-  }, [setOpenModal])
+    onClose()
+  }, [onClose])
 
   const handleSubmit = useCallback(
     data => {

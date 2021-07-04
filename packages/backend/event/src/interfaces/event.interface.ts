@@ -12,6 +12,7 @@ interface IUser extends Document {
 export interface IEvent extends Document {
   user: IUser | string
   name: string
+  local: string
   initials: string
   year: string
   edition: string

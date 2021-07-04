@@ -95,11 +95,11 @@ export class EventController {
       try {
         const event = await this.eventService.findEventById(params.id)
         if (event) {
-          console.log(event)
-
           if (event.user === params.user.id || params.user.role === 'ADMIN') {
-            const updatedEvent = Object.assign(event, params.event)
-            await updatedEvent.save()
+            const updatedEvent = await this.eventService.updateEventById(
+              params.id,
+              params.event
+            )
             result = {
               status: HttpStatus.OK,
               message: 'event_update_by_id_success',

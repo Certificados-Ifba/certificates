@@ -30,7 +30,8 @@ const Sidebar: React.FC = () => {
     {
       name: 'Eventos',
       link: '/events',
-      icon: FiCalendar
+      icon: FiCalendar,
+      activeLinks: ['/events', '/events/[tab]/[id]']
     },
     {
       name: 'Participantes',
@@ -44,8 +45,9 @@ const Sidebar: React.FC = () => {
     },
     {
       name: 'Configurações',
-      link: '/settings',
-      icon: FiSettings
+      link: '/settings/function',
+      icon: FiSettings,
+      activeLinks: ['/settings/[tab]']
     }
   ]
   const active = isActive ? 'active' : ''
@@ -58,9 +60,9 @@ const Sidebar: React.FC = () => {
       </LogoArea>
       <Buttons>
         <ScrollBar>
-          {items.map(({ name, link, icon: Icon }, key) => (
+          {items.map(({ name, link, icon: Icon, activeLinks }, key) => (
             <li key={key} onClick={hideSidebar}>
-              <ActiveLink href={link}>
+              <ActiveLink href={link} activeLinks={activeLinks}>
                 <a>
                   <Icon size={24} />
                   <span>{name}</span>

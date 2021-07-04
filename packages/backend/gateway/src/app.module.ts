@@ -22,10 +22,10 @@ import { PermissionGuard } from './services/guards/permission.guard'
 
 @Module({
   imports: [
-    TerminusModule,
-    ThrottlerModule.forRootAsync({
-      useClass: ThrottlerConfigService
-    })
+    TerminusModule
+    // ThrottlerModule.forRootAsync({
+    //   useClass: ThrottlerConfigService
+    // })
   ],
   controllers: [
     ActivitiesController,
@@ -87,11 +87,11 @@ import { PermissionGuard } from './services/guards/permission.guard'
     {
       provide: APP_GUARD,
       useClass: PermissionGuard
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard
     }
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ThrottlerGuard
+    // }
   ]
 })
 export class AppModule {}

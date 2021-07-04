@@ -10,16 +10,17 @@ import {
   FiUsers
 } from 'react-icons/fi'
 
-import Button from '../../../components/button'
-import Tab from '../../../components/tab'
-import EventActivity from '../../../components/tabs/eventActivity'
-import EventInfo from '../../../components/tabs/eventInfo'
-import EventParticipant from '../../../components/tabs/eventParticipant'
-import withAuth from '../../../hocs/withAuth'
-import { useToast } from '../../../providers/toast'
-import api from '../../../services/axios'
-import { Container } from '../../../styles/pages/home'
-import { formatData } from '../../../utils/formatters'
+import Button from '../../../../components/button'
+import Tab from '../../../../components/tab'
+import EventActivity from '../../../../components/tabs/eventActivity'
+import EventCertificate from '../../../../components/tabs/eventCertificate'
+import EventInfo from '../../../../components/tabs/eventInfo'
+import EventParticipant from '../../../../components/tabs/eventParticipant'
+import withAuth from '../../../../hocs/withAuth'
+import { useToast } from '../../../../providers/toast'
+import api from '../../../../services/axios'
+import { Container } from '../../../../styles/pages/home'
+import { formatData } from '../../../../utils/formatters'
 
 const EventDetail: React.FC = () => {
   const router = useRouter()
@@ -35,6 +36,8 @@ const EventDetail: React.FC = () => {
         const event = response?.data?.data
 
         if (event) {
+          console.log('Load', event)
+
           setEvent(event)
         }
       } catch (err) {
@@ -82,22 +85,26 @@ const EventDetail: React.FC = () => {
           {
             name: 'Informações',
             icon: FiInfo,
-            children: <EventInfo event={event} setEvent={setEvent} />
+            children: <EventInfo event={event} setEvent={setEvent} />,
+            path: 'info'
           },
           {
             name: 'Atividades',
             icon: FiFileText,
-            children: <EventActivity event={event} />
+            children: <EventActivity event={event} />,
+            path: 'activities'
           },
           {
             name: 'Participantes',
             icon: FiUsers,
-            children: <EventParticipant event={event} />
+            children: <EventParticipant event={event} />,
+            path: 'participants'
           },
           {
             name: 'Certificados',
             icon: FiAward,
-            children: <>2</>
+            children: <EventCertificate event={event} />,
+            path: 'certificates'
           }
         ]}
       />

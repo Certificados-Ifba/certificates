@@ -1,7 +1,8 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import {
+  FiBook,
   FiCalendar,
   FiCheck,
   FiCreditCard,
@@ -15,6 +16,7 @@ import {
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
+import IParticipant from '../../dtos/IParticipant'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import { PaginatedRequest } from '../../services/usePaginatedRequest'
@@ -25,30 +27,18 @@ import Input from '../input'
 import Modal from '../modal'
 import Select from '../select'
 
-interface Participant {
-  id: string
-  name: string
-  email: string
-  personal_data: {
-    cpf: string
-    dob: Date
-    phone: string
-    institution: boolean
-  }
-}
-
 interface Props {
   type: 'add' | 'update'
   openModal: boolean
-  setOpenModal: Dispatch<SetStateAction<boolean>>
-  participant?: Participant
+  onClose: () => void
+  participant?: IParticipant
   request: PaginatedRequest<any, any>
 }
 
 const ParticipantModal: React.FC<Props> = ({
   type,
   openModal,
-  setOpenModal,
+  onClose,
   participant,
   request
 }) => {
@@ -59,8 +49,8 @@ const ParticipantModal: React.FC<Props> = ({
   const handleCloseSaveModal = useCallback(() => {
     formRef.current.reset()
     formRef.current.setErrors({})
-    setOpenModal(false)
-  }, [setOpenModal])
+    onClose()
+  }, [onClose])
 
   const handleSubmit = useCallback(
     async data => {
@@ -195,6 +185,7 @@ const ParticipantModal: React.FC<Props> = ({
             label="É da Instituição?"
             name="institution"
             isSearchable={false}
+            icon={FiBook}
             options={[
               {
                 value: true,

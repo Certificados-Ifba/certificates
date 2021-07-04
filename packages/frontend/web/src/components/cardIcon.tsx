@@ -6,13 +6,13 @@ import {
   IconArea
 } from '../styles/components/cardIcon'
 
-interface CardIconProps extends CardIconElement {
+interface Props extends CardIconElement {
   title?: string
   value?: number
   icon?: ReactNode
 }
 
-const CardIcon: React.FC<CardIconProps> = ({ icon, value, title, ...rest }) => {
+const CardIcon: React.FC<Props> = ({ icon, value, title, ...rest }) => {
   return (
     <Container>
       <IconArea {...rest}>{icon}</IconArea>

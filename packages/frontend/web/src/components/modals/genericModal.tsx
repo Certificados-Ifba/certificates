@@ -1,10 +1,11 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { IconBaseProps } from 'react-icons'
 import { FiCheck, FiEdit, FiPlus, FiUserPlus, FiX } from 'react-icons/fi'
 import * as Yup from 'yup'
 
+import IGeneric from '../../dtos/IGeneric'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import { PaginatedRequest } from '../../services/usePaginatedRequest'
@@ -13,19 +14,13 @@ import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
 
-interface Generic {
-  id: string
-  type: string
-  name: string
-}
-
 interface Props {
   type: 'add' | 'update'
   name: string
   url: string
   openModal: boolean
-  setOpenModal: Dispatch<SetStateAction<boolean>>
-  generic?: Generic
+  onClose: () => void
+  generic?: IGeneric
   request: PaginatedRequest<any, any>
   icon: React.ComponentType<IconBaseProps>
 }
@@ -33,7 +28,7 @@ interface Props {
 const GenericModal: React.FC<Props> = ({
   type,
   openModal,
-  setOpenModal,
+  onClose,
   generic,
   request,
   icon,
@@ -47,8 +42,8 @@ const GenericModal: React.FC<Props> = ({
   const handleCloseModal = useCallback(() => {
     formRef.current.reset()
     formRef.current.setErrors({})
-    setOpenModal(false)
-  }, [setOpenModal])
+    onClose()
+  }, [onClose])
 
   const handleSubmit = useCallback(
     async data => {

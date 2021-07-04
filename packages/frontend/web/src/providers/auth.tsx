@@ -1,19 +1,12 @@
 import { decode } from 'jsonwebtoken'
 import { createContext, useCallback, useContext, useState } from 'react'
 
+import IUser from '../dtos/IUser'
 import useStickyState from '../hooks/useStickyState'
 import api from '../services/axios'
 
-interface User {
-  id?: string
-  name: string
-  email: string
-  role: string
-  is_confirmed: boolean
-}
-
 interface AuthState {
-  user: User
+  user: IUser
   token: string
 }
 
@@ -29,7 +22,7 @@ interface ResetCredentials {
 }
 
 export interface AuthContextData {
-  user: User
+  user: IUser
   resetPassword(data: ResetCredentials): Promise<void>
   signIn(data: SignInCredentials): Promise<void>
   signOut(): void

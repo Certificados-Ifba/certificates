@@ -14,31 +14,33 @@ export class EventService {
   ) {}
 
   public async getEventsByUserId(userId: string): Promise<IEvent[]> {
-    return this.EventModel.find({ user: userId }).exec()
+    return this.EventModel.find({ user: userId })
   }
 
   public async searchEventById(id: string): Promise<IEvent> {
-    return this.EventModel.findById(id).populate('user').exec()
+    return this.EventModel.findById(id).populate('user')
   }
 
   public async createEvent(eventBody: IEvent): Promise<IEvent> {
     const EventModel = new this.EventModel(eventBody)
-    return await EventModel.save()
+    return EventModel.save()
   }
 
   public async findEventById(id: string): Promise<IEvent> {
-    return this.EventModel.findById(id).exec()
+    return this.EventModel.findById(id)
   }
 
   public async removeEventById(id: string): Promise<IEvent> {
-    return await this.EventModel.findOneAndDelete({ _id: id })
+    return this.EventModel.findOneAndDelete({ _id: id })
   }
 
   public async updateEventById(
     id: string,
     params: IEventUpdateParams
   ): Promise<IEvent> {
-    return await this.EventModel.updateOne({ _id: id }, params)
+    return this.EventModel.findOneAndUpdate({ _id: id }, params, {
+      new: true
+    }).populate('user')
   }
 
   public async listEvents({

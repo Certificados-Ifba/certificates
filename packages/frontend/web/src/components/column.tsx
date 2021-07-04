@@ -2,12 +2,12 @@ import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa'
 
 import { Container } from '../styles/components/column'
 
-interface ColumnProps {
+interface Props {
   selected: boolean
   order: '' | 'ASC' | 'DESC'
 }
 
-const Column: React.FC<ColumnProps> = ({ selected, order, children }) => {
+const Column: React.FC<Props> = ({ selected, order, children }) => {
   return (
     <Container>
       {children}

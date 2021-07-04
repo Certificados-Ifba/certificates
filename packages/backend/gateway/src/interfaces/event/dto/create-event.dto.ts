@@ -7,6 +7,9 @@ export class CreateEventDto {
   @ApiProperty({ example: 'Week-IT' })
   initials: string
 
+  @ApiProperty({ example: 'Vitória da Conquista' })
+  local: string
+
   @ApiProperty({ example: '5º' })
   edition: string
 

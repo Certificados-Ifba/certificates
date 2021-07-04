@@ -2,7 +2,7 @@ import { Form } from '@unform/web'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
-import { FiCalendar, FiPlus, FiSearch } from 'react-icons/fi'
+import { FiCalendar, FiInfo, FiPlus, FiSearch } from 'react-icons/fi'
 
 import Button from '../components/button'
 import Card from '../components/card'
@@ -12,7 +12,7 @@ import EventModal from '../components/modals/eventModal'
 import PaginatedTable from '../components/paginatedTable'
 import withAuth from '../hocs/withAuth'
 import usePaginatedRequest from '../services/usePaginatedRequest'
-import { Container } from '../styles/pages/home'
+import { Container, TableRow } from '../styles/pages/home'
 import { formatData } from '../utils/formatters'
 
 const Events: React.FC = () => {
@@ -54,6 +54,10 @@ const Events: React.FC = () => {
     },
     [column]
   )
+
+  const handleCloseEventModal = useCallback(() => {
+    setOpenEventModal(false)
+  }, [])
 
   return (
     <Container>
@@ -101,6 +105,11 @@ const Events: React.FC = () => {
                   Ano
                 </Column>
               </th>
+              <th onClick={() => handleOrder('local')}>
+                <Column order={order} selected={column === 'local'}>
+                  Local
+                </Column>
+              </th>
               <th onClick={() => handleOrder('start_date')}>
                 <Column order={order} selected={column === 'start_date'}>
                   Data Inicial
@@ -116,22 +125,40 @@ const Events: React.FC = () => {
                   Coordenador
                 </Column>
               </th>
+              <th style={{ width: 32 }} />
             </tr>
           </thead>
           <tbody>
             {request.data?.data?.map(event => (
               <tr
-                key={event.initials}
+                key={event.id}
                 onClick={() => {
-                  router.push(`events/${event.id}`)
+                  router.push(`events/info/${event.id}`)
                 }}
               >
                 <td>{`${event.name} (${event.initials})`}</td>
                 <td>{event.edition}</td>
                 <td>{event.year}</td>
+                <td>{event.local}</td>
                 <td>{formatData(event.start_date)}</td>
                 <td>{formatData(event.end_date)}</td>
                 <td>{event?.user?.name}</td>
+                <td>
+                  <TableRow>
+                    <Button
+                      inline
+                      ghost
+                      square
+                      color="secondary"
+                      size="small"
+                      onClick={() => {
+                        router.push(`events/info/${event.id}`)
+                      }}
+                    >
+                      <FiInfo size={20} />
+                    </Button>
+                  </TableRow>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -140,7 +167,7 @@ const Events: React.FC = () => {
       <EventModal
         type="add"
         openModal={openEventModal}
-        setOpenModal={setOpenEventModal}
+        onClose={handleCloseEventModal}
       />
     </Container>
   )

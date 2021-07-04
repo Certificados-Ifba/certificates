@@ -15,6 +15,10 @@ export const EventSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Name can not be empty']
     },
+    local: {
+      type: String,
+      required: [true, 'Local can not be empty']
+    },
     initials: String,
     year: {
       type: String,

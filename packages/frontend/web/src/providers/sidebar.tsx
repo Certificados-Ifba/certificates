@@ -7,13 +7,9 @@ export interface SidebarContextData {
   hideSidebar: () => void
 }
 
-interface SidebarProviderProps {
-  children: ReactNode
-}
-
 export const SidebarContext = createContext({} as SidebarContextData)
 
-const SidebarProvider = ({ children }: SidebarProviderProps): JSX.Element => {
+const SidebarProvider: React.FC = ({ children }): JSX.Element => {
   const [isActive, setIsActive] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 

@@ -79,6 +79,13 @@ const Participants: React.FC = () => {
     [column]
   )
 
+  const handleCloseParticipantModal = useCallback(() => {
+    setOpenParticipantModal(false)
+  }, [])
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setOpenDeleteModal(false)
+  }, [])
   return (
     <Container>
       <Head>
@@ -214,7 +221,7 @@ const Participants: React.FC = () => {
       </Card>
       <ParticipantModal
         openModal={openParticipantModal}
-        setOpenModal={setOpenParticipantModal}
+        onClose={handleCloseParticipantModal}
         type={typeModal}
         participant={participant}
         request={request}
@@ -222,7 +229,7 @@ const Participants: React.FC = () => {
       <DeleteModal
         name="Participante"
         openModal={openDeleteModal}
-        setOpenModal={setOpenDeleteModal}
+        onClose={handleCloseDeleteModal}
         handleSubmit={handleSubmitDelete}
       >
         <>

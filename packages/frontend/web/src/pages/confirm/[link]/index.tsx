@@ -2,7 +2,7 @@ import { FormHandles } from '@unform/core'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { FiLock, FiUserCheck, FiRefreshCw, FiCheck } from 'react-icons/fi'
+import { FiLock, FiCheck } from 'react-icons/fi'
 import * as Yup from 'yup'
 
 import Logo from '../../../assets/logo-full.svg'

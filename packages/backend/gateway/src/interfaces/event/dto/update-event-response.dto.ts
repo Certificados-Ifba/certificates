@@ -10,6 +10,7 @@ export class UpdateEventResponseDto {
     example: {
       event: {
         name: 'V Week-IT',
+        local: 'Vitória da Conquista',
         initials: 'Week-IT',
         year: '2019',
         edition: '5º',

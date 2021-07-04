@@ -9,10 +9,13 @@ import {
   FiX,
   FiPlus,
   FiCheck,
-  FiHash
+  FiHash,
+  FiUser,
+  FiMapPin
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
+import IEvent from '../../dtos/IEvent'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import getValidationErrors from '../../utils/getValidationErrors'
@@ -21,31 +24,10 @@ import Input from '../input'
 import Modal from '../modal'
 import Select from '../select'
 
-interface IUser {
-  id: string
-  name: string
-  email: string
-  role: string
-  is_confirmed: boolean
-  last_login?: Date
-}
-
-interface IEvent {
-  id: string
-  name: string
-  description: string
-  initials: string
-  year: string
-  edition: string
-  start_date: string
-  end_date: string
-  user: IUser
-}
-
 interface Props {
   type: 'add' | 'edit'
   openModal: boolean
-  setOpenModal: Dispatch<SetStateAction<boolean>>
+  onClose: () => void
   setEvent?: Dispatch<SetStateAction<IEvent>>
   event?: IEvent
 }
@@ -53,7 +35,7 @@ interface Props {
 const EventModal: React.FC<Props> = ({
   type,
   openModal,
-  setOpenModal,
+  onClose,
   setEvent,
   event
 }) => {
@@ -66,8 +48,8 @@ const EventModal: React.FC<Props> = ({
   const handleCloseSaveModal = useCallback(() => {
     formRef.current.reset()
     formRef.current.setErrors({})
-    setOpenModal(false)
-  }, [setOpenModal])
+    onClose()
+  }, [onClose])
 
   useEffect(() => {
     if (event) {
@@ -81,12 +63,18 @@ const EventModal: React.FC<Props> = ({
     async data => {
       const schema = Yup.object().shape({
         name: Yup.string().required('O evento precisa ter um nome'),
-        initials: Yup.string().required('Por favor, digite a sigla do projeto'),
+        initials: Yup.string().required('Por favor, digite a sigla do evento'),
+        local: Yup.string().required('Por favor, digite o local do evento'),
         user: Yup.string().required(
           'Você precisa selecionar um coordenador para o evento'
         ),
         start_date: Yup.date().required('Selecione a data de início'),
-        end_date: Yup.date().required('Selecione a data do fim')
+        end_date: Yup.date()
+          .required('Selecione a data do fim')
+          .min(
+            data.start_date,
+            'A data final precisa ser maior que a data inicial'
+          )
       })
 
       try {
@@ -165,6 +153,14 @@ const EventModal: React.FC<Props> = ({
           <Input
             formRef={formRef}
             marginBottom="sm"
+            name="local"
+            label="Local"
+            placeholder="Local"
+            icon={FiMapPin}
+          />
+          <Input
+            formRef={formRef}
+            marginBottom="sm"
             name="start_date"
             label="Data Inicial"
             placeholder="Data Inicial"
@@ -187,6 +183,7 @@ const EventModal: React.FC<Props> = ({
             label="Coordenador"
             name="user"
             isSearchable={true}
+            icon={FiUser}
           />
         </div>
         <div className="modal-footer">
