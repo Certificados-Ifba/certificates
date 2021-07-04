@@ -36,8 +36,6 @@ const EventDetail: React.FC = () => {
         const event = response?.data?.data
 
         if (event) {
-          console.log('Load', event)
-
           setEvent(event)
         }
       } catch (err) {

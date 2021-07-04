@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { ReactNode, useCallback, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { IconBaseProps } from 'react-icons'
 
 import { Container } from '../styles/components/tab'
@@ -18,52 +18,33 @@ interface Props {
 
 const Tab: React.FC<Props> = ({ tabs }) => {
   const router = useRouter()
-  const query: any = router.query
+  const query: any = router?.query
+  const [selectedTab, setSelectedTab] = useState(0)
 
   if (!tabs || tabs.length === 0)
     throw new Error('A tab component must have at least 1 tab')
-  const getIndexTabByPath: (path: string) => number = useCallback(
-    (path: string) => {
-      let selectedTabIndex = 0
-      if (path) {
-        let index = 0
-        for (const tab of tabs) {
-          if (tab.path === query.tab) {
-            selectedTabIndex = index
-            break
-          }
-          index++
-        }
-      }
-      return selectedTabIndex
-    },
-    [query?.tab, tabs]
-  )
 
-  const [selectedTab, setSelectedTab] = useState(getIndexTabByPath(query.tab))
-  const [byClick, setByClick] = useState(true)
   const handleTabChange = useCallback(
     index => {
       if (query.tab) {
-        let path: string = router.pathname
+        let path = router.pathname
         for (const key of Object.keys(query)) {
-          if (key !== 'tab')
-            path = path.replaceAll(
-              new RegExp('\\[' + key + '\\]', 'g'),
-              query[key]
-            )
+          path = path.replaceAll(
+            new RegExp('\\[' + key + '\\]', 'g'),
+            key !== 'tab' ? query[key] : tabs[index].path
+          )
         }
-        path = path.replaceAll(/\[tab\]/g, tabs[index].path)
         router.push(path)
-        setSelectedTab(index)
-        setByClick(true)
-      } else {
-        setSelectedTab(index)
-        setByClick(true)
       }
+      setSelectedTab(index)
     },
-    [query, router, tabs]
+    [query, tabs, router]
   )
+
+  useEffect(() => {
+    const index = tabs.findIndex(tab => tab.path === query?.tab)
+    setSelectedTab(index !== -1 ? index : 0)
+  }, [tabs, query])
 
   return (
     <>
@@ -75,7 +56,7 @@ const Tab: React.FC<Props> = ({ tabs }) => {
               type="radio"
               id={'tab' + index + '_' + name.replace(' ', '_')}
               name="tabs"
-              onChange={() => handleTabChange(index)}
+              onClick={() => handleTabChange(index)}
             />
             <label htmlFor={'tab' + index + '_' + name.replace(' ', '_')}>
               <Icon size={18} />

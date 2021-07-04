@@ -4,7 +4,7 @@ dev.build:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache --force-rm
 
 dev.up:
-	make dev.build && docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans && docker system prune -a
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans && docker system prune -a
 
 dev.down:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
