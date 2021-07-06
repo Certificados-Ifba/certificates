@@ -296,4 +296,4 @@ const Users: React.FC = () => {
   )
 }
 
-export default withAuth(Users)
+export default withAuth(Users, true)

@@ -1,7 +1,7 @@
 import { Form } from '@unform/web'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FiCalendar, FiInfo, FiPlus, FiSearch } from 'react-icons/fi'
 
 import Button from '../components/button'
@@ -11,15 +11,18 @@ import Input from '../components/input'
 import EventModal from '../components/modals/eventModal'
 import PaginatedTable from '../components/paginatedTable'
 import withAuth from '../hocs/withAuth'
+import { useAuth } from '../providers/auth'
 import usePaginatedRequest from '../services/usePaginatedRequest'
 import { Container, TableRow } from '../styles/pages/home'
 import { formatData } from '../utils/formatters'
 
 const Events: React.FC = () => {
+  const [show, setShow] = useState(false)
   const [filters, setFilters] = useState(null)
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const [openEventModal, setOpenEventModal] = useState(false)
+  const { isAdmin } = useAuth()
   const router = useRouter()
 
   const request = usePaginatedRequest<any>({
@@ -59,6 +62,12 @@ const Events: React.FC = () => {
     setOpenEventModal(false)
   }, [])
 
+  useEffect(() => {
+    if (!show) {
+      setShow(isAdmin)
+    }
+  }, [show, isAdmin])
+
   return (
     <Container>
       <Head>
@@ -74,10 +83,12 @@ const Events: React.FC = () => {
           </h2>
         </div>
         <nav>
-          <Button onClick={() => setOpenEventModal(true)}>
-            <FiPlus size={20} />
-            <span className="hide-md-down">Adicionar Evento</span>
-          </Button>
+          {show && (
+            <Button onClick={() => setOpenEventModal(true)}>
+              <FiPlus size={20} />
+              <span className="hide-md-down">Adicionar Evento</span>
+            </Button>
+          )}
         </nav>
       </header>
       <Card>

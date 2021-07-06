@@ -1,6 +1,6 @@
 import { Form } from '@unform/web'
 import Head from 'next/head'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FiEdit, FiPlus, FiSearch, FiTrash2, FiUserCheck } from 'react-icons/fi'
 
 import Alert from '../components/alert'
@@ -12,12 +12,14 @@ import DeleteModal from '../components/modals/deleteModal'
 import ParticipantModal from '../components/modals/participantModal'
 import PaginatedTable from '../components/paginatedTable'
 import withAuth from '../hocs/withAuth'
+import { useAuth } from '../providers/auth'
 import { useToast } from '../providers/toast'
 import api from '../services/axios'
 import usePaginatedRequest from '../services/usePaginatedRequest'
 import { Container, TableRow } from '../styles/pages/home'
 
 const Participants: React.FC = () => {
+  const [show, setShow] = useState(false)
   const [participant, setParticipant] = useState(null)
   const [filters, setFilters] = useState(null)
   const [openParticipantModal, setOpenParticipantModal] = useState(false)
@@ -26,6 +28,7 @@ const Participants: React.FC = () => {
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const [typeModal, setTypeModal] = useState<'update' | 'add'>(null)
   const { addToast } = useToast()
+  const { isAdmin } = useAuth()
 
   const request = usePaginatedRequest<any>({
     url: 'participants',
@@ -86,6 +89,13 @@ const Participants: React.FC = () => {
   const handleCloseDeleteModal = useCallback(() => {
     setOpenDeleteModal(false)
   }, [])
+
+  useEffect(() => {
+    if (!show) {
+      setShow(isAdmin)
+    }
+  }, [show, isAdmin])
+
   return (
     <Container>
       <Head>
@@ -168,7 +178,7 @@ const Participants: React.FC = () => {
                   Atualizado em
                 </Column>
               </th>
-              <th style={{ width: 32 }} />
+              {show && <th style={{ width: 32 }} />}
             </tr>
           </thead>
           <tbody>
@@ -176,44 +186,44 @@ const Participants: React.FC = () => {
               <tr key={participant.id}>
                 <td>{participant.name}</td>
                 <td>{participant.personal_data.cpf}</td>
-                <td>
-                  {new Date(participant.personal_data.dob).toLocaleDateString()}
-                </td>
+                <td>{participant.personal_data.dob}</td>
                 <td>{participant.email}</td>
                 <td>{participant.personal_data.phone}</td>
                 <td>{participant.personal_data.institution ? 'Sim' : 'Não'}</td>
                 <td>{new Date(participant.updated_at).toLocaleString()}</td>
-                <td>
-                  <TableRow>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="secondary"
-                      size="small"
-                      onClick={() => {
-                        setParticipant(participant)
-                        setTypeModal('update')
-                        setOpenParticipantModal(true)
-                      }}
-                    >
-                      <FiEdit size={20} />
-                    </Button>
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="danger"
-                      size="small"
-                      onClick={() => {
-                        setParticipant(participant)
-                        setOpenDeleteModal(true)
-                      }}
-                    >
-                      <FiTrash2 size={20} />
-                    </Button>
-                  </TableRow>
-                </td>
+                {show && (
+                  <td>
+                    <TableRow>
+                      <Button
+                        inline
+                        ghost
+                        square
+                        color="secondary"
+                        size="small"
+                        onClick={() => {
+                          setParticipant(participant)
+                          setTypeModal('update')
+                          setOpenParticipantModal(true)
+                        }}
+                      >
+                        <FiEdit size={20} />
+                      </Button>
+                      <Button
+                        inline
+                        ghost
+                        square
+                        color="danger"
+                        size="small"
+                        onClick={() => {
+                          setParticipant(participant)
+                          setOpenDeleteModal(true)
+                        }}
+                      >
+                        <FiTrash2 size={20} />
+                      </Button>
+                    </TableRow>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

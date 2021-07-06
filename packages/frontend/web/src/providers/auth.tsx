@@ -26,6 +26,7 @@ export interface AuthContextData {
   resetPassword(data: ResetCredentials): Promise<void>
   signIn(data: SignInCredentials): Promise<void>
   signOut(): void
+  isAdmin: boolean
 }
 
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData)
@@ -93,7 +94,8 @@ const AuthProvider: React.FC = ({ children }) => {
         user: data.user,
         resetPassword,
         signIn,
-        signOut
+        signOut,
+        isAdmin: data?.user?.role === 'ADMIN'
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import { Form } from '@unform/web'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { IconBaseProps } from 'react-icons'
 import { FiEdit, FiPlus, FiSearch, FiTrash2 } from 'react-icons/fi'
 
@@ -7,6 +7,8 @@ import Alert from '../../components/alert'
 import Button from '../../components/button'
 import Input from '../../components/input'
 import PaginatedTable from '../../components/paginatedTable'
+import IGeneric from '../../dtos/IGeneric'
+import { useAuth } from '../../providers/auth'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import usePaginatedRequest from '../../services/usePaginatedRequest'
@@ -16,26 +18,16 @@ import DeleteModal from '../modals/deleteModal'
 import GenericModal from '../modals/genericModal'
 import Tooltip from '../tooltip'
 
-interface GenericProps {
+interface Props {
   name: string
   plural: string
   url: string
   icon: React.ComponentType<IconBaseProps>
 }
 
-interface Generic {
-  id: string
-  type: string
-  name: string
-}
-
-interface IResponse {
-  message: string
-  data: Generic
-}
-
-const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
-  const [generic, setGeneric] = useState<Generic>(null)
+const Generic: React.FC<Props> = ({ name, plural, url, icon }) => {
+  const [show, setShow] = useState(false)
+  const [generic, setGeneric] = useState<IGeneric>(null)
   const [filters, setFilters] = useState(null)
   const [openGenericModal, setOpenGenericModal] = useState(false)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
@@ -43,6 +35,7 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const [typeModal, setTypeModal] = useState<'update' | 'add'>(null)
   const { addToast } = useToast()
+  const { isAdmin } = useAuth()
 
   const request = usePaginatedRequest<any>({
     url,
@@ -104,6 +97,12 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
     setOpenDeleteModal(false)
   }, [])
 
+  useEffect(() => {
+    if (!show) {
+      setShow(isAdmin)
+    }
+  }, [show, isAdmin])
+
   return (
     <>
       <header>
@@ -115,18 +114,20 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
             icon={FiSearch}
           />
         </Form>
-        <Button
-          size="small"
-          inline
-          onClick={() => {
-            setGeneric(null)
-            setTypeModal('add')
-            setOpenGenericModal(true)
-          }}
-        >
-          <FiPlus size={20} />
-          <span>Adicionar {name}</span>
-        </Button>
+        {show && (
+          <Button
+            size="small"
+            inline
+            onClick={() => {
+              setGeneric(null)
+              setTypeModal('add')
+              setOpenGenericModal(true)
+            }}
+          >
+            <FiPlus size={20} />
+            <span>Adicionar {name}</span>
+          </Button>
+        )}
       </header>
       <PaginatedTable request={request}>
         <thead>
@@ -136,48 +137,50 @@ const Generic: React.FC<GenericProps> = ({ name, plural, url, icon }) => {
                 Nome
               </Column>
             </th>
-            <th style={{ width: 32 }} />
+            {show && <th style={{ width: 32 }} />}
           </tr>
         </thead>
         <tbody>
           {request.data?.data?.map(generic => (
             <tr key={generic.id}>
               <td>{generic.name}</td>
-              <td>
-                <TableRow>
-                  <Tooltip title="Editar">
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="secondary"
-                      size="small"
-                      onClick={() => {
-                        setGeneric(generic)
-                        setTypeModal('update')
-                        setOpenGenericModal(true)
-                      }}
-                    >
-                      <FiEdit size={20} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="Excluir">
-                    <Button
-                      inline
-                      ghost
-                      square
-                      color="danger"
-                      size="small"
-                      onClick={() => {
-                        setGeneric(generic)
-                        setOpenDeleteModal(true)
-                      }}
-                    >
-                      <FiTrash2 size={20} />
-                    </Button>
-                  </Tooltip>
-                </TableRow>
-              </td>
+              {show && (
+                <td>
+                  <TableRow>
+                    <Tooltip title="Editar">
+                      <Button
+                        inline
+                        ghost
+                        square
+                        color="secondary"
+                        size="small"
+                        onClick={() => {
+                          setGeneric(generic)
+                          setTypeModal('update')
+                          setOpenGenericModal(true)
+                        }}
+                      >
+                        <FiEdit size={20} />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Excluir">
+                      <Button
+                        inline
+                        ghost
+                        square
+                        color="danger"
+                        size="small"
+                        onClick={() => {
+                          setGeneric(generic)
+                          setOpenDeleteModal(true)
+                        }}
+                      >
+                        <FiTrash2 size={20} />
+                      </Button>
+                    </Tooltip>
+                  </TableRow>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

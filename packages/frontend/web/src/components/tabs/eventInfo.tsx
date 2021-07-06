@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fi'
 
 import IEvent from '../../dtos/IEvent'
+import { useAuth } from '../../providers/auth'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import {
@@ -36,9 +37,11 @@ interface Props {
 }
 
 const EventInfo: React.FC<Props> = ({ event, setEvent }) => {
+  const [show, setShow] = useState(false)
   const [openEventModal, setOpenEventModal] = useState(false)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const { addToast } = useToast()
+  const { isAdmin } = useAuth()
   const router = useRouter()
 
   const handleSubmitDelete = useCallback(async () => {
@@ -67,6 +70,12 @@ const EventInfo: React.FC<Props> = ({ event, setEvent }) => {
   const handleCloseDeleteModal = useCallback(() => {
     setOpenDeleteModal(false)
   }, [])
+
+  useEffect(() => {
+    if (!show) {
+      setShow(isAdmin)
+    }
+  }, [show, isAdmin])
 
   return (
     <Container>
@@ -110,30 +119,32 @@ const EventInfo: React.FC<Props> = ({ event, setEvent }) => {
           <b>{event?.user.name}</b>
         </Alert>
       </div>
-      <ButtonContainer>
-        <Button
-          marginBottom="xs"
-          size="small"
-          color="secondary"
-          onClick={() => {
-            setOpenEventModal(true)
-          }}
-        >
-          <FiEdit size={20} />
-          <span>Editar</span>
-        </Button>
-        <Button
-          size="small"
-          color="danger"
-          outline
-          onClick={() => {
-            setOpenDeleteModal(true)
-          }}
-        >
-          <FiTrash2 size={20} />
-          <span>Excluir</span>
-        </Button>
-      </ButtonContainer>
+      {show && (
+        <ButtonContainer>
+          <Button
+            marginBottom="xs"
+            size="small"
+            color="secondary"
+            onClick={() => {
+              setOpenEventModal(true)
+            }}
+          >
+            <FiEdit size={20} />
+            <span>Editar</span>
+          </Button>
+          <Button
+            size="small"
+            color="danger"
+            outline
+            onClick={() => {
+              setOpenDeleteModal(true)
+            }}
+          >
+            <FiTrash2 size={20} />
+            <span>Excluir</span>
+          </Button>
+        </ButtonContainer>
+      )}
       <EventModal
         type="edit"
         event={event}
