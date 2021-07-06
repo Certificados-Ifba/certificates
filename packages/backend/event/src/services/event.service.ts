@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { model, Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { IEventListParams } from 'src/interfaces/event-list-params.interface'
 import { DataResponse } from 'src/interfaces/event-list-response.interface'
 
@@ -44,27 +44,32 @@ export class EventService {
   }
 
   public async listEvents({
+    user,
     name,
     page,
     perPage,
     sortBy = 'created_at',
     orderBy = 'ASC'
   }: IEventListParams): Promise<DataResponse> {
-    const pattern = name ? '.*' + name + '.*' : '.*'
+    const query: any = {}
+
+    query.$or = [
+      { name: new RegExp(name ? '.*' + name + '.*' : '.*', 'i') },
+      { initials: new RegExp(name ? '.*' + name + '.*' : '.*', 'i') }
+    ]
+
+    if (user.role !== 'ADMIN') query.user = new Types.ObjectId(user.id)
+
     const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
 
-    const events = await this.EventModel.find({
-      name: new RegExp(pattern, 'i')
-    })
+    const events = await this.EventModel.find(query)
       .populate('user')
       .skip(perPage * (page - 1))
       .limit(perPage)
       .sort(sort)
       .exec()
 
-    const count = await this.EventModel.countDocuments({
-      name: new RegExp(pattern, 'i')
-    })
+    const count = await this.EventModel.countDocuments(query)
 
     return {
       events,

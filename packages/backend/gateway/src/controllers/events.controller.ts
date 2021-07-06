@@ -55,12 +55,13 @@ export class EventsController {
     description: 'Find event by id'
   })
   public async getEventById(
+    @Req() request: IAuthorizedRequest,
     @Param() params: EventIdDto
   ): Promise<GetEventByIdResponseDto> {
     const { id } = params
 
     const eventResponse: IServiceEventGetByIdResponse = await this.eventServiceClient
-      .send('event_get_by_id', id)
+      .send('event_get_by_id', { id, user: request?.user })
       .toPromise()
 
     return {
@@ -77,6 +78,7 @@ export class EventsController {
     description: 'List of events'
   })
   public async getEvents(
+    @Req() request: IAuthorizedRequest,
     @Res({ passthrough: true }) res: Response,
     @Query() query: ListEventDto
   ): Promise<GetEventsResponseDto> {
@@ -84,6 +86,7 @@ export class EventsController {
     const eventsResponse: IServiceEventListResponse = await this.eventServiceClient
       .send('event_list', {
         name: search,
+        user: request.user,
         page: Number(page),
         perPage: Number(per_page),
         sortBy: sort_by,

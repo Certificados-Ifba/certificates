@@ -31,16 +31,29 @@ export class EventController {
   }
 
   @MessagePattern('event_get_by_id')
-  public async getEventById(id: string): Promise<IEventByIdResponse> {
+  public async getEventById(params: {
+    id: string
+    user: IUser
+  }): Promise<IEventByIdResponse> {
     let result: IEventByIdResponse
 
-    if (id) {
-      const event = await this.eventService.searchEventById(id)
+    if (params?.id && params?.user) {
+      const event = await this.eventService.searchEventById(params.id)
       if (event) {
-        result = {
-          status: HttpStatus.OK,
-          message: 'event_get_by_id_success',
-          data: { event }
+        console.log(event.user)
+
+        if (params.user.role !== 'ADMIN' && event.user?.id !== params.user.id) {
+          result = {
+            status: HttpStatus.FORBIDDEN,
+            message: 'event_get_by_id_forbidden',
+            data: null
+          }
+        } else {
+          result = {
+            status: HttpStatus.OK,
+            message: 'event_get_by_id_success',
+            data: { event }
+          }
         }
       } else {
         result = {
