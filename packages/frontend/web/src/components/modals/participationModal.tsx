@@ -100,7 +100,7 @@ const ParticipationModal: React.FC<Props> = ({
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <div className="modal-body">
+        <main>
           <Row cols={2}>
             <div>
               <Input
@@ -153,8 +153,8 @@ const ParticipationModal: React.FC<Props> = ({
             </div>
             <div></div>
           </Row>
-        </div>
-        <div className="modal-footer">
+        </main>
+        <footer>
           <Button
             onClick={() => {
               handleCloseModal()
@@ -170,7 +170,7 @@ const ParticipationModal: React.FC<Props> = ({
           <Button inline color="primary" type="submit" loading={loading}>
             <FiPlus size={20} /> <span>Adicionar</span>
           </Button>
-        </div>
+        </footer>
       </Form>
     </Modal>
   )

@@ -30,8 +30,8 @@ const VariableModal: React.FC<Props> = ({ openModal, onClose }) => {
         <h2>Qual variável?</h2>
       </header>
       <Form onSubmit={handleSubmit}>
-        <div className="modal-body"></div>
-        <div className="modal-footer">
+        <main></main>
+        <footer>
           <Button onClick={onClose} color="secondary" type="button" outline>
             <FiX size={20} />
             <span>Cancelar</span>
@@ -39,7 +39,7 @@ const VariableModal: React.FC<Props> = ({ openModal, onClose }) => {
           <Button color="success" type="submit">
             <FiPlus size={20} /> <span>Adicionar</span>
           </Button>
-        </div>
+        </footer>
       </Form>
     </Modal>
   )

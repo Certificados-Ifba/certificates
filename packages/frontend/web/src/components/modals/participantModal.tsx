@@ -152,7 +152,7 @@ const ParticipantModal: React.FC<Props> = ({
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <div className="modal-body">
+        <main>
           <Input
             formRef={formRef}
             marginBottom="sm"
@@ -215,8 +215,8 @@ const ParticipantModal: React.FC<Props> = ({
             type="phone"
             icon={FiPhoneCall}
           />
-        </div>
-        <div className="modal-footer">
+        </main>
+        <footer>
           <Button
             onClick={() => {
               handleCloseSaveModal()
@@ -242,7 +242,7 @@ const ParticipantModal: React.FC<Props> = ({
               </>
             )}
           </Button>
-        </div>
+        </footer>
       </Form>
     </Modal>
   )

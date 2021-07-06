@@ -125,7 +125,7 @@ const EventModal: React.FC<Props> = ({
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <div className="modal-body">
+        <main>
           <Input
             formRef={formRef}
             marginBottom="sm"
@@ -185,8 +185,8 @@ const EventModal: React.FC<Props> = ({
             isSearchable={true}
             icon={FiUser}
           />
-        </div>
-        <div className="modal-footer">
+        </main>
+        <footer>
           <Button
             onClick={() => {
               handleCloseSaveModal()
@@ -209,7 +209,7 @@ const EventModal: React.FC<Props> = ({
               </>
             )}
           </Button>
-        </div>
+        </footer>
       </Form>
     </Modal>
   )

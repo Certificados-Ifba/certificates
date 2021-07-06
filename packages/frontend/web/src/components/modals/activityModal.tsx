@@ -130,7 +130,7 @@ const EventActivityModal: React.FC<{
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <div className="modal-body">
+        <main>
           <Input
             formRef={formRef}
             name="name"
@@ -178,8 +178,8 @@ const EventActivityModal: React.FC<{
             icon={FiCalendar}
             disabled={loading}
           />
-        </div>
-        <div className="modal-footer">
+        </main>
+        <footer>
           <Button
             onClick={() => {
               handleCloseModal()
@@ -206,7 +206,7 @@ const EventActivityModal: React.FC<{
               </>
             )}
           </Button>
-        </div>
+        </footer>
       </Form>
     </Modal>
   )

@@ -23,8 +23,8 @@ const DeleteModal: React.FC<{
         </h2>
       </header>
       <Form onSubmit={handleSubmit}>
-        <div className="modal-body">{children}</div>
-        <div className="modal-footer">
+        <main>{children}</main>
+        <footer>
           <Button onClick={onClose} color="secondary" type="button">
             <FiX size={20} />
             <span>Cancelar</span>
@@ -32,7 +32,7 @@ const DeleteModal: React.FC<{
           <Button color="danger" type="submit" outline>
             <FiTrash2 size={20} /> <span>Excluir</span>
           </Button>
-        </div>
+        </footer>
       </Form>
     </Modal>
   )

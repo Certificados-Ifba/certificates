@@ -113,7 +113,7 @@ const GenericModal: React.FC<Props> = ({
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <div className="modal-body">
+        <main>
           <Input
             formRef={formRef}
             name="name"
@@ -121,8 +121,8 @@ const GenericModal: React.FC<Props> = ({
             placeholder="Nome"
             icon={icon}
           />
-        </div>
-        <div className="modal-footer">
+        </main>
+        <footer>
           <Button
             onClick={() => {
               handleCloseModal()
@@ -148,7 +148,7 @@ const GenericModal: React.FC<Props> = ({
               </>
             )}
           </Button>
-        </div>
+        </footer>
       </Form>
     </Modal>
   )

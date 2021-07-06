@@ -156,7 +156,7 @@ const UserModal: React.FC<Props> = ({
         </h2>
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <div className="modal-body">
+        <main>
           {type === 'update-email' && (
             <>
               <Alert size="sm" marginBottom="xs">
@@ -247,8 +247,8 @@ const UserModal: React.FC<Props> = ({
               />
             </>
           )}
-        </div>
-        <div className="modal-footer">
+        </main>
+        <footer>
           <Button
             onClick={() => {
               handleCloseSaveModal()
@@ -274,7 +274,7 @@ const UserModal: React.FC<Props> = ({
               </>
             )}
           </Button>
-        </div>
+        </footer>
       </Form>
     </Modal>
   )
