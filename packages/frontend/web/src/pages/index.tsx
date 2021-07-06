@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import { useEffect, useState } from 'react'
 import {
   FiCalendar,
   FiHome,
@@ -10,12 +11,20 @@ import {
 
 import Button from '../components/button'
 import CardIcon from '../components/cardIcon'
+import IUser from '../dtos/IUser'
 import withAuth from '../hocs/withAuth'
 import { useAuth } from '../providers/auth'
 import { Container, ListCards } from '../styles/pages/home'
 
 const Home: React.FC = () => {
-  const { user } = useAuth()
+  const [user, setUser] = useState<IUser>()
+  const { user: userAuth } = useAuth()
+
+  useEffect(() => {
+    if (!user) {
+      setUser(userAuth)
+    }
+  }, [user, userAuth])
 
   const firstName = user?.name.split(' ')[0]
 

@@ -102,6 +102,7 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
         <div>
           <span className="hide-md-down">Linhas por página</span>
           <Select
+            instanceId="perPage"
             isSearchable={false}
             pageSize={2}
             onChange={handlePerPage}

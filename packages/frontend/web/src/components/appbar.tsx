@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router'
-import { useCallback, useContext, useState } from 'react'
+import { useEffect, useCallback, useContext, useState } from 'react'
 import { FiLogOut, FiMenu } from 'react-icons/fi'
 
+import IUser from '../dtos/IUser'
 import { useAuth } from '../providers/auth'
 import { SidebarContext } from '../providers/sidebar'
 import {
@@ -17,7 +18,8 @@ import getRole from '../utils/getRole'
 const Appbar: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { user, signOut } = useAuth()
+  const [user, setUser] = useState<IUser>()
+  const { user: userAuth, signOut } = useAuth()
 
   const { toggleActive } = useContext(SidebarContext)
 
@@ -27,6 +29,12 @@ const Appbar: React.FC = () => {
     setLoading(false)
     router.replace('/login')
   }, [router, signOut])
+
+  useEffect(() => {
+    if (!user) {
+      setUser(userAuth)
+    }
+  }, [user, userAuth])
 
   return (
     <Container>
