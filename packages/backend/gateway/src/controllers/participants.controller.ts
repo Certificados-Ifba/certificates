@@ -10,7 +10,8 @@ import {
   Param,
   Res,
   Query,
-  Delete
+  Delete,
+  Req
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import {
@@ -20,28 +21,25 @@ import {
   ApiBearerAuth
 } from '@nestjs/swagger'
 import { Response } from 'express'
-import { Permission } from 'src/decorators/permission.decorator'
-import { CreateParticipantResponseDto } from 'src/interfaces/participant/dto/create-participant-response.dto'
-import { CreateParticipantDto } from 'src/interfaces/participant/dto/create-participant.dto'
-import { GetParticipantByIdResponseDto } from 'src/interfaces/participant/dto/get-participant-by-id-response.dto'
-import { GetParticipantsResponseDto } from 'src/interfaces/participant/dto/get-participant-response.dto'
-import { ListParticipantDto } from 'src/interfaces/participant/dto/list-participant.dto'
-import { UpdateParticipantResponseDto } from 'src/interfaces/participant/dto/update-participant-response.dto'
-import { UpdateParticipantDto } from 'src/interfaces/participant/dto/update-participant.dto'
-import { IServiceParticipantCreateResponse } from 'src/interfaces/participant/service-participant-create-response.interface'
-import { IServiceParticipantGetByIdResponse } from 'src/interfaces/participant/service-participant-get-by-id-response.interface'
-import { IServiceParticipantListResponse } from 'src/interfaces/participant/service-participant-list-response.interface'
-import { IServiceParticipantUpdateByIdResponse } from 'src/interfaces/participant/service-participant-update-by-id-response.interface'
-import { DeleteUserResponseDto } from 'src/interfaces/user/dto/delete-user-response.dto'
-import { GetUserByIdResponseDto } from 'src/interfaces/user/dto/get-user-by-id-response.dto'
-import { UpdateUserResponseDto } from 'src/interfaces/user/dto/update-user-response.dto'
-import { UpdateUserDto } from 'src/interfaces/user/dto/update-user.dto'
-import { UserIdDto } from 'src/interfaces/user/dto/user-id.dto'
-import { IServiceUserDeleteResponse } from 'src/interfaces/user/service-user-delete-response.interface'
-import { IServiceUserUpdateByIdResponse } from 'src/interfaces/user/service-user-update-by-id-response.interface'
 
 import { Authorization } from '../decorators/authorization.decorator'
-import { IServiceUserGetByIdResponse } from '../interfaces/user/service-user-get-by-id-response.interface'
+import { Permission } from '../decorators/permission.decorator'
+import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
+import { CreateParticipantResponseDto } from '../interfaces/participant/dto/create-participant-response.dto'
+import { CreateParticipantDto } from '../interfaces/participant/dto/create-participant.dto'
+import { GetParticipantByIdResponseDto } from '../interfaces/participant/dto/get-participant-by-id-response.dto'
+import { GetParticipantsResponseDto } from '../interfaces/participant/dto/get-participant-response.dto'
+import { ListParticipantDto } from '../interfaces/participant/dto/list-participant.dto'
+import { UpdateParticipantResponseDto } from '../interfaces/participant/dto/update-participant-response.dto'
+import { UpdateParticipantDto } from '../interfaces/participant/dto/update-participant.dto'
+import { IServiceParticipantCreateResponse } from '../interfaces/participant/service-participant-create-response.interface'
+import { IServiceParticipantGetByIdResponse } from '../interfaces/participant/service-participant-get-by-id-response.interface'
+import { IServiceParticipantListResponse } from '../interfaces/participant/service-participant-list-response.interface'
+import { IServiceParticipantUpdateByIdResponse } from '../interfaces/participant/service-participant-update-by-id-response.interface'
+import { DeleteUserResponseDto } from '../interfaces/user/dto/delete-user-response.dto'
+import { UserIdDto } from '../interfaces/user/dto/user-id.dto'
+import { IServiceUserDeleteResponse } from '../interfaces/user/service-user-delete-response.interface'
+import capitalize from '../utils/capitalize'
 import { ParticipantIdDto } from './../interfaces/participant/dto/participant-id.dto'
 
 @Controller('participants')
@@ -60,6 +58,7 @@ export class ParticipantsController {
     description: 'List of participant'
   })
   public async getParticipants(
+    @Req() request: IAuthorizedRequest,
     @Res({ passthrough: true }) res: Response,
     @Query() query: ListParticipantDto
   ): Promise<GetParticipantsResponseDto> {
@@ -78,9 +77,19 @@ export class ParticipantsController {
     res.header('x-total-count', String(participantsResponse?.data.totalCount))
     res.header('x-total-page', String(participantsResponse?.data.totalPages))
 
+    const data = participantsResponse?.data?.users
+
+    if (request?.user?.role !== 'ADMIN') {
+      data.map(user => {
+        user.personal_data.cpf = `***.${user.personal_data.cpf.substr(4, 7)}-**`
+        user.personal_data.dob = user.personal_data.dob.substr(0, 6) + '****'
+        return user
+      })
+    }
+
     return {
       message: participantsResponse.message,
-      data: participantsResponse?.data?.users
+      data
     }
   }
 
@@ -98,8 +107,8 @@ export class ParticipantsController {
 
     const createParticipantResponse: IServiceParticipantCreateResponse = await this.userServiceClient
       .send('user_create', {
-        name: name,
-        email: email,
+        name: capitalize(name.trim()),
+        email: email.toLowerCase().trim(),
         role: 'PARTICIPANT',
         personal_data: {
           cpf: cpf.replace(/[^\d]+/g, ''),
@@ -165,8 +174,8 @@ export class ParticipantsController {
     const updateParticipantResponse: IServiceParticipantUpdateByIdResponse = await this.userServiceClient
       .send('user_update_by_id', {
         user: {
-          name: name,
-          email: email,
+          name: capitalize(name.trim()),
+          email: email.toLowerCase().trim(),
           personal_data: {
             dob: dob,
             phone: phone,

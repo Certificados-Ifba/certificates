@@ -1,3 +1,5 @@
+import { IUser } from './user.interface'
+
 export interface IUserListParams {
   name: string
   participant?: boolean

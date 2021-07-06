@@ -1,15 +1,27 @@
 import * as mongoose from 'mongoose'
 
+const formatCpf = (cpf: string): string =>
+  cpf
+    .replace(/\D/g, '')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+    .replace(/(-\d{2})\d+?$/, '$1')
+
+const formatData = (value: string): string => {
+  if (!value) return ''
+  const data = new Date(value)
+  const diaF = data.toISOString().substr(8, 2)
+  const mesF = data.toISOString().substr(5, 2)
+  const anoF = data.toISOString().substr(0, 4)
+  return `${diaF}/${mesF}/${anoF}`
+}
+
 function transformValue(doc, ret: { [key: string]: any }) {
   if (ret?.personal_data?.cpf)
-    ret.personal_data.cpf = ret.personal_data.cpf
-      .replace(/\D/g, '')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-      .replace(/(-\d{2})\d+?$/, '$1')
+    ret.personal_data.cpf = formatCpf(ret.personal_data.cpf)
   if (ret?.personal_data?.dob)
-    ret.personal_data.dob = new Date(ret.personal_data.dob).toLocaleDateString()
+    ret.personal_data.dob = formatData(ret.personal_data.dob)
   delete ret._id
   delete ret.password
 }
