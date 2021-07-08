@@ -117,13 +117,18 @@ export const Pagination = styled.footer`
   padding: 20px 30px;
 
   > div > span,
-  > nav > span {
+  > span {
     color: ${props => props.theme.colors.darkShade};
     font-size: 12px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
     margin-right: 20px;
+  }
+
+  > span {
+    flex: 1;
+    flex-direction: row-reverse;
   }
 
   > div {

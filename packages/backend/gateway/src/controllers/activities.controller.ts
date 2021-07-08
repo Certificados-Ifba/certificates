@@ -93,7 +93,7 @@ export class ActivitiesController {
     const createActivityResponse: IServiceGenericCreateResponse = await this.genericServiceClient
       .send('generic_create', {
         type: 'activity',
-        name: capitalize(genericRequest.name)
+        name: capitalize(genericRequest.name.trim())
       })
       .toPromise()
 
@@ -183,7 +183,7 @@ export class ActivitiesController {
       .send('generic_update_by_id', {
         id: params.id,
         generic: {
-          name: capitalize(genericRequest.name)
+          name: capitalize(genericRequest.name.trim())
         }
       })
       .toPromise()

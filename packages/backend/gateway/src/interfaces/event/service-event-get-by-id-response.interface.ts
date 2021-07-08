@@ -4,6 +4,6 @@ export interface IServiceEventGetByIdResponse {
   status: number
   message: string
   data: {
-    user: IEvent | null
+    event: IEvent | null
   }
 }

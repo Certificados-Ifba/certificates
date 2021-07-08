@@ -17,8 +17,16 @@ export class UserService {
     private readonly configService: ConfigService
   ) {}
 
-  public async searchUser(params: { email: string }): Promise<IUser> {
-    return this.UserModel.findOne(params).exec()
+  public async searchUserByEmail(email: string): Promise<IUser> {
+    return this.UserModel.findOne({
+      email
+    }).exec()
+  }
+
+  public async searchUserByCPF(cpf: String): Promise<IUser> {
+    return this.UserModel.findOne({
+      'personal_data.cpf': cpf
+    }).exec()
   }
 
   public async searchUserById(id: string): Promise<IUser> {
@@ -27,6 +35,7 @@ export class UserService {
 
   public async listUsers({
     name,
+    participant,
     page,
     perPage,
     sortBy = 'created_at',
@@ -36,7 +45,8 @@ export class UserService {
     const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
 
     const users = await this.UserModel.find({
-      name: new RegExp(pattern, 'i')
+      name: new RegExp(pattern, 'i'),
+      role: participant ? 'PARTICIPANT' : { $ne: 'PARTICIPANT' }
     })
       .skip(perPage * (page - 1))
       .limit(perPage)
@@ -44,7 +54,8 @@ export class UserService {
       .exec()
 
     const count = await this.UserModel.countDocuments({
-      name: new RegExp(pattern, 'i')
+      name: new RegExp(pattern, 'i'),
+      role: participant ? 'PARTICIPANT' : { $ne: 'PARTICIPANT' }
     })
 
     return {
@@ -59,6 +70,7 @@ export class UserService {
     userParams: IUserUpdateParams
   ): Promise<IUser> {
     const UserModel = await this.UserModel.findById(id)
+
     if (userParams.name) UserModel.name = userParams.name
     if (userParams.password) UserModel.password = userParams.password
     if (userParams.is_confirmed)
@@ -68,8 +80,8 @@ export class UserService {
       UserModel.personal_data.cpf = userParams.personal_data.cpf
     if (userParams?.personal_data?.dob)
       UserModel.personal_data.dob = userParams.personal_data.dob
-    if (userParams?.personal_data?.is_student)
-      UserModel.personal_data.is_student = userParams.personal_data.is_student
+    if (userParams?.personal_data?.institution)
+      UserModel.personal_data.institution = userParams.personal_data.institution
 
     return UserModel.save()
   }
@@ -83,15 +95,27 @@ export class UserService {
     return await this.UserModel.findOneAndDelete({ _id: id })
   }
 
-  public async createUserLink(id: string): Promise<IUserLink> {
+  public async createUserLink(
+    id: string,
+    expired?: number
+  ): Promise<IUserLink> {
     const UserLinkModel = new this.UserLinkModel({
-      user_id: id
+      user: id,
+      expired
     })
     return await UserLinkModel.save()
   }
 
   public async getUserLink(link: string): Promise<IUserLink> {
     return this.UserLinkModel.findOne({ link, is_used: false }).exec()
+  }
+
+  public async getUserLinkByUser(userId: string): Promise<IUserLink> {
+    return this.UserLinkModel.findOne({
+      user: userId,
+      is_used: false,
+      expired: null
+    }).exec()
   }
 
   public async updateUserLinkById(
@@ -103,5 +127,9 @@ export class UserService {
 
   public getConfirmationLink(link: string): string {
     return `${this.configService.get('webUrl')}/confirm/${link}`
+  }
+
+  public getWebUrl(): string {
+    return this.configService.get('webUrl')
   }
 }

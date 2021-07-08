@@ -1,7 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer'
 import { Controller, HttpStatus } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
-import nodemailer from 'nodemailer'
 
 import { IEmailData } from './interfaces/email-data.interface'
 import { IMailSendResponse } from './interfaces/mail-send-response.interface'
@@ -16,8 +15,8 @@ export class MailerController {
 
   @MessagePattern('mail_send')
   mailSend(data: IEmailData): IMailSendResponse {
-    data.template = __dirname + data.template
-    console.log('Credentials obtained, sending message...')
+    data.template = process.cwd() + data.template
+    console.log('Credentials obtained, sending message...', data.template)
 
     if (!this.configService.get('emailsDisabled')) {
       this.mailerService

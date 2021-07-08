@@ -13,6 +13,7 @@ import Input from '../components/input'
 import withoutAuth from '../hocs/withoutAuth'
 import { useAuth } from '../providers/auth'
 import { useToast } from '../providers/toast'
+import api from '../services/axios'
 import Row from '../styles/components/row'
 import {
   Container,
@@ -61,8 +62,8 @@ const FormForgotPassword: React.FC<{
         setLoading(true)
         formRef.current?.setErrors({})
         const schema = Yup.object().shape({
-          login: Yup.string()
-            .required('Por favor, digite o seu login')
+          email: Yup.string()
+            .required('Por favor, digite o seu e-mail')
             .email('Por favor, digite um e-mail válido')
         })
 
@@ -70,6 +71,14 @@ const FormForgotPassword: React.FC<{
           abortEarly: false
         })
 
+        await api.post('/password/forgot', data)
+
+        addToast({
+          type: 'success',
+          title: 'E-mail de recuperação enviado',
+          description: 'Verifique sua caixa de entrada para recuperar a senha.'
+        })
+        setForgotPassword(false)
         setLoading(false)
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -85,12 +94,12 @@ const FormForgotPassword: React.FC<{
 
         addToast({
           type: 'error',
-          title: 'Erro desconhecido',
-          description: 'Não foi possível redefinir sua senha.'
+          title: 'Erro na solicitação',
+          description: err
         })
       }
     },
-    [addToast]
+    [addToast, setForgotPassword]
   )
   const [loading, setLoading] = useState(false)
   return (
@@ -118,13 +127,13 @@ const FormForgotPassword: React.FC<{
             Esqueceu sua senha? <b>Não se preocupe.</b>
           </Alert>
           <Alert marginBottom="md">
-            É só nos dizer seu email que enviaremos um link para você cadastrar
+            É só nos dizer seu e-mail que enviaremos um link para você cadastrar
             uma <b>nova senha</b>.
           </Alert>
           <Input
             formRef={formRef}
             label="E-mail"
-            name="login"
+            name="email"
             icon={FiMail}
             placeholder="email@exemplo.com"
             autoComplete="username"
@@ -132,7 +141,7 @@ const FormForgotPassword: React.FC<{
           />
           <Row>
             <Button size="big" loading={loading} color="primary" type="submit">
-              <FiSend size={20} /> <span>Enviar email</span>
+              <FiSend size={20} /> <span>Enviar e-mail</span>
             </Button>
           </Row>
         </FormContainer>
@@ -203,11 +212,11 @@ const FormLogin: React.FC<{
         <FormContainer>
           <Input
             formRef={formRef}
-            label="Email"
+            label="E-mail"
             name="login"
             icon={FiMail}
             type="email"
-            placeholder="Digite seu email"
+            placeholder="Digite seu e-mail"
             autoComplete="username"
             marginBottom="sm"
           />

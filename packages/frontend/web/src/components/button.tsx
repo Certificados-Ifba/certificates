@@ -1,8 +1,8 @@
-import { ButtonProps, Container } from '../styles/components/button'
+import { ButtonProps as Props, Container } from '../styles/components/button'
 import theme from '../styles/theme'
 import Spinner from './spinner'
 
-const Button: React.FC<ButtonProps> = ({ children, loading, ...rest }) => {
+const Button: React.FC<Props> = ({ children, loading, ...rest }) => {
   return (
     <Container {...rest}>
       {loading ? (

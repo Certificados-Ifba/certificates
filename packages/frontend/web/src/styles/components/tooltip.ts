@@ -13,7 +13,6 @@ export const Container = styled.div`
     visibility: hidden;
     position: absolute;
     bottom: calc(100% + 12px);
-    width: 200px;
     left: 50%;
     transform: translateX(-50%);
     color: ${props => props.theme.colors.light};
@@ -31,5 +30,6 @@ export const Container = styled.div`
   &:hover span {
     opacity: 1;
     visibility: visible;
+    text-align: center;
   }
 `

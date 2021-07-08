@@ -26,6 +26,7 @@ export const Container = styled.div<ModalProps>`
   align-items: center;
   justify-content: center;
   margin: 0 30px;
+  z-index: 1;
   &.show {
     display: flex !important;
   }
@@ -53,7 +54,7 @@ export const Container = styled.div<ModalProps>`
     }
   }
 
-  .modal-body {
+  main {
     display: flex;
     flex-direction: column;
     padding: 25px 30px;
@@ -65,21 +66,24 @@ export const Container = styled.div<ModalProps>`
     overflow-y: auto;
   }
 
-  .modal-footer {
+  footer {
     border-top: 2px solid ${props => props.theme.colors.lightShade};
     padding: 20px 30px;
     display: flex;
 
     ${props => props.size === 'sm' && 'justify-content: space-between;'}
     ${props => props.size === 'lg' && 'justify-content: flex-end;'}
- > button {
+
+    > button {
       ${props => props.size === 'lg' && 'margin-left: 8px;'}
     }
+
     ${props =>
       props.reverse &&
       css`
         flex-direction: row-reverse;
       `}
+
     > * {
       ${props =>
         props.size === 'sm' && 'flex: 1; margin-left: 8px; margin-right: 8px;'}

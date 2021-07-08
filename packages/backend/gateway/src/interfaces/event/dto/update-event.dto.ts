@@ -5,9 +5,9 @@ export class UpdateEventDto {
   name: string
 
   @ApiProperty({
-    example: 'Cidades Inteligentes: Práticas Colaborativas no Sudoeste da Bahia'
+    example: 'Vitória da Conquista'
   })
-  description: string
+  local: string
 
   @ApiProperty({ example: 'Week-IT' })
   initials: string

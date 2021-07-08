@@ -48,6 +48,19 @@ fieldset {
         border-color: ${props => props.theme.colors.secondary};
         color: ${props => props.theme.colors.secondary};
       `}
+
+    ${props =>
+      props.isDisabled &&
+      css`
+        border-color: ${props => props.theme.colors.lightShade};
+        color: ${props => props.theme.colors.mediumShade};
+        background-color: ${props => props.theme.colors.lightShade};
+        input {
+          color: ${props => props.theme.colors.mediumShade} !important;
+          background-color: ${props =>
+            props.theme.colors.lightShade} !important;
+        }
+      `}
     ${props => props.hidden && 'display: none;'}
     div {
       display: inline-flex;

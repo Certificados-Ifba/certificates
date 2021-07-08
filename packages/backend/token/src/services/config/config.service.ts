@@ -3,7 +3,8 @@ export class ConfigService {
 
   constructor() {
     this.envConfig = {
-      port: process.env.TOKEN_SERVICE_PORT
+      port: process.env.TOKEN_SERVICE_PORT,
+      expiresIn: process.env.TOKEN_EXPIRES_IN || '1d'
     }
   }
 

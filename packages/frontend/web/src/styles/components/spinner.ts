@@ -13,7 +13,7 @@ export const Container = styled.i<Props>`
   margin: 0 auto;
 `
 
-const skbounce = keyframes`
+const skBounce = keyframes`
   0%, 100% { -webkit-transform: scale(0.0) }
   50% { -webkit-transform: scale(1.0) }
 `
@@ -29,7 +29,7 @@ export const Bounce1 = styled.i`
   top: 0;
   left: 0;
   ${css`
-    animation: ${skbounce} 2s infinite ease-in-out;
+    animation: ${skBounce} 2s infinite ease-in-out;
   `}
 `
 
@@ -44,7 +44,7 @@ export const Bounce2 = styled.i`
   top: 0;
   left: 0;
   ${css`
-    animation: ${skbounce} 2s infinite ease-in-out;
+    animation: ${skBounce} 2s infinite ease-in-out;
     animation-delay: -1s;
   `}
 `

@@ -17,7 +17,7 @@ export class CreateParticipantResponseDto {
         personal_data: {
           cpf: '36199705050',
           dob: '1999-01-01',
-          is_student: true
+          institution: true
         },
         id: '5d987c3bfb881ec86b476bcc'
       }

@@ -11,12 +11,9 @@ function generateLink() {
 
 export const UserLinkSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: uuidv4
-    },
-    user_id: {
-      type: String,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: [true, 'User can not be empty']
     },
     is_used: {
@@ -26,6 +23,10 @@ export const UserLinkSchema = new mongoose.Schema(
     link: {
       type: String,
       default: generateLink()
+    },
+    expired: {
+      type: Number,
+      default: null
     }
   },
   {

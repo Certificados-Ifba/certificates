@@ -6,15 +6,20 @@ import {
   MutableRefObject,
   useCallback
 } from 'react'
+import { IconBaseProps } from 'react-icons'
 import { FiAlertCircle } from 'react-icons/fi'
-import ReactSelect, { OptionTypeBase, Props as SelectProps } from 'react-select'
+import ReactSelect, {
+  components,
+  OptionTypeBase,
+  Props as SelectProps
+} from 'react-select'
 import AsyncSelect from 'react-select/async'
 
 import api from '../services/axios'
 import { Label, Error } from '../styles/components/input'
 import { Container } from '../styles/components/select'
 import theme from '../styles/theme'
-import { Debounce } from '../utils/debounce'
+import { useDebounce } from '../utils/debounce'
 
 interface Props extends SelectProps<OptionTypeBase> {
   name?: string
@@ -24,11 +29,16 @@ interface Props extends SelectProps<OptionTypeBase> {
   hidden?: boolean
   async?: boolean
   url?: string
+  handleOnSelect?: (value: { label: string; value: any }) => void
+  icon?: React.ComponentType<IconBaseProps>
+  optionContent?: React.FC<{ props: any }>
+  initialValue?: string
 }
 
 const normalStyle = {
   control: base => ({
     ...base,
+    'font-size': '0.875rem',
     'border-radius': '5px',
     border: `2px solid ${theme.colors.mediumTint}`,
     color: `${theme.colors.mediumTint}`
@@ -38,6 +48,7 @@ const normalStyle = {
 const errorStyle = {
   control: base => ({
     ...base,
+    'font-size': '0.875rem',
     'border-radius': '5px',
     border: `2px solid ${theme.colors.danger}`,
     color: `${theme.colors.danger}`
@@ -47,10 +58,25 @@ const errorStyle = {
 const filledStyle = {
   control: base => ({
     ...base,
+    'font-size': '0.875rem',
     'border-radius': '5px',
     border: `2px solid ${theme.colors.primary}`,
     color: `${theme.colors.primary}`
   })
+}
+
+interface ContentProps {
+  icon?: React.ComponentType<IconBaseProps>
+  content: any
+}
+
+const SelectContent: React.FC<ContentProps> = ({ content, icon: Icon }) => {
+  return (
+    <>
+      {Icon && <Icon style={{ marginLeft: '10px' }} size={20}></Icon>}
+      {content}
+    </>
+  )
 }
 
 const Select: React.FC<Props> = ({
@@ -61,42 +87,51 @@ const Select: React.FC<Props> = ({
   hidden,
   async,
   url,
+  handleOnSelect,
+  icon,
+  optionContent: OptionContent,
+  initialValue = '',
   ...rest
 }) => {
   const [isFilled, setIsFilled] = useState(false)
   const selectRef = useRef(null)
 
-  const handleOnChangeSelect = useCallback(() => {
-    if (formRef) {
-      try {
-        const err = formRef.current.getErrors()
-        delete err[name]
-        formRef.current.setErrors(err)
-      } catch (err) {}
-    }
-  }, [formRef, name])
+  const handleOnChangeSelect = useCallback(
+    data => {
+      if (formRef) {
+        try {
+          const err = formRef.current.getErrors()
+          delete err[name]
+          formRef.current.setErrors(err)
+        } catch (err) {}
+      }
+      if (handleOnSelect) {
+        if (async) {
+          handleOnSelect(data)
+        } else {
+          handleOnSelect(data)
+        }
+      }
+      setIsFilled(!!data)
+    },
+    [formRef, handleOnSelect, name, async]
+  )
 
-  const handleOnBlurSelect = useCallback(() => {
-    if (async) {
-      setIsFilled(!!selectRef.current?.select?.state.value)
-    } else {
-      setIsFilled(!!selectRef.current?.state.value)
-    }
-  }, [async])
+  const selectOpt = useCallback(data => {
+    console.log(data)
+  }, [])
 
   const props = {
     ref: selectRef,
     classNamePrefix: 'react-select',
     placeholder: 'Selecione',
     menuPosition: 'fixed',
-    defaultValue: '',
+    defaultValue: initialValue,
     inputId: name,
+    selectOption: selectOpt,
     onChange: handleOnChangeSelect,
-    onBlur: handleOnBlurSelect,
     ...rest
   }
-
-  const [selectStyle, setSelectStyle] = useState(normalStyle)
 
   let fieldName: string
   let defaultValue: string
@@ -124,7 +159,12 @@ const Select: React.FC<Props> = ({
     }
   }, [name, error, isFilled])
 
-  props.defaultValue = defaultValue
+  let initialStyle = normalStyle
+
+  props.defaultValue = rest.options?.find(data => data.value === defaultValue)
+  if (props.defaultValue) initialStyle = filledStyle
+
+  const [selectStyle, setSelectStyle] = useState(initialStyle)
 
   useEffect(() => {
     if (name) {
@@ -144,7 +184,7 @@ const Select: React.FC<Props> = ({
           }
           if (value) {
             if (value.id) {
-              const opt = { label: value.name, value: value.id }
+              const opt = { label: value.name, value: value.id, ...value }
               setDefaultOptions([opt])
               setFocusLoaded(false)
               selected = [opt]
@@ -200,7 +240,7 @@ const Select: React.FC<Props> = ({
   const [defaultOptions, setDefaultOptions] = useState([])
   const [focusLoaded, setFocusLoaded] = useState(false)
 
-  const debounceFocus: Debounce<void> = new Debounce(async () => {
+  const debounceFocus = useDebounce<void>(async () => {
     const respApi = await api.get(url, {
       params: { search: '' }
     })
@@ -209,23 +249,24 @@ const Select: React.FC<Props> = ({
     if (respApi?.data?.data) {
       const list = respApi?.data?.data
       for (const obj of list) {
-        listOpt.push({ value: obj.id, label: obj.name })
+        listOpt.push({ value: obj.id, label: obj.name, ...obj })
       }
     }
     setDefaultOptions(listOpt)
+    selectRef?.current?.select.focus()
   })
 
   const onFocus = () => {
     if (!focusLoaded) {
       setFocusLoaded(true)
-      debounceFocus.notify()
+      debounceFocus.run()
     }
   }
 
-  const debounceLoad: Debounce<{
+  const debounceLoad = useDebounce<{
     inputValue: string
     callback: any
-  }> = new Debounce(async ({ inputValue, callback }) => {
+  }>(async ({ inputValue, callback }) => {
     const resp = []
 
     const filter = (inputValue: string) => {
@@ -240,7 +281,7 @@ const Select: React.FC<Props> = ({
       if (respApi?.data?.data) {
         const list = respApi?.data?.data
         for (const obj of list) {
-          resp.push({ value: obj.id, label: obj.name })
+          resp.push({ value: obj.id, label: obj.name, ...obj })
         }
       }
       callback(filter(inputValue))
@@ -252,7 +293,7 @@ const Select: React.FC<Props> = ({
   })
 
   const loadOptions = (inputValue, callback) => {
-    debounceLoad.notify({ inputValue, callback })
+    debounceLoad.run({ inputValue, callback })
   }
 
   return (
@@ -264,6 +305,23 @@ const Select: React.FC<Props> = ({
             styles={selectStyle}
             defaultValue={''}
             {...(props as Props)}
+            components={{
+              // eslint-disable-next-line react/display-name
+              Option: props => {
+                return (
+                  <components.Option {...props}>
+                    {OptionContent && <OptionContent props={props} />}
+                    {!OptionContent && <>{props.children}</>}
+                  </components.Option>
+                )
+              },
+              // eslint-disable-next-line react/display-name
+              Control: ({ children, ...rest }) => (
+                <components.Control {...rest}>
+                  <SelectContent content={children} icon={icon}></SelectContent>
+                </components.Control>
+              )
+            }}
           />
         )}
         {async && (
@@ -273,6 +331,23 @@ const Select: React.FC<Props> = ({
             defaultOptions={defaultOptions}
             styles={selectStyle}
             {...(props as Props)}
+            components={{
+              // eslint-disable-next-line react/display-name
+              Control: ({ children, ...rest }) => (
+                <components.Control {...rest}>
+                  <SelectContent content={children} icon={icon}></SelectContent>
+                </components.Control>
+              ),
+              // eslint-disable-next-line react/display-name
+              Option: props => {
+                return (
+                  <components.Option {...props}>
+                    {OptionContent && <OptionContent props={props} />}
+                    {!OptionContent && <>{props.children}</>}
+                  </components.Option>
+                )
+              }
+            }}
           />
         )}
         {error && (

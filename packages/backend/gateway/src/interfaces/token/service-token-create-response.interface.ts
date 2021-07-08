@@ -1,4 +1,4 @@
-export interface IServiveTokenCreateResponse {
+export interface IServiceTokenCreateResponse {
   status: number
   token: string | null
   message: string

@@ -4,11 +4,10 @@
   "version": "1.0.0",
   "license": "SEE LICENSE IN ../../../LICENSE",
   "scripts": {
-    "build": "rimraf dist && nest build && yarn copy:templates",
+    "build": "rimraf dist && nest build",
     "dev": "nest start --watch",
     "prod": "yarn build && node dist/main",
-    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
-    "copy:templates": "cpx './src/templates/**' './dist/templates'"
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "1.5.1",
@@ -17,8 +16,8 @@
     "@nestjs/core": "7.6.14",
     "@nestjs/microservices": "7.6.14",
     "@nestjs/platform-express": "7.6.14",
-    "cpx": "^1.5.0",
     "nodemailer": "^6.4.11",
+    "path": "^0.12.7",
     "reflect-metadata": "0.1.13",
     "rimraf": "3.0.2",
     "rxjs": "6.6.3"

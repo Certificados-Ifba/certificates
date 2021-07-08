@@ -1,19 +1,12 @@
 import { decode } from 'jsonwebtoken'
 import { createContext, useCallback, useContext, useState } from 'react'
 
+import IUser from '../dtos/IUser'
 import useStickyState from '../hooks/useStickyState'
 import api from '../services/axios'
 
-interface User {
-  id?: string
-  name: string
-  email: string
-  role: string
-  is_confirmed: boolean
-}
-
 interface AuthState {
-  user: User
+  user: IUser
   token: string
 }
 
@@ -23,10 +16,17 @@ interface SignInCredentials {
   token?: string
 }
 
+interface ResetCredentials {
+  link: string
+  password: string
+}
+
 export interface AuthContextData {
-  user: User
-  signIn(credentials: SignInCredentials): Promise<void>
-  signOut(): Promise<void>
+  user: IUser
+  resetPassword(data: ResetCredentials): Promise<void>
+  signIn(data: SignInCredentials): Promise<void>
+  signOut(): void
+  isAdmin: boolean
 }
 
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData)
@@ -46,11 +46,27 @@ const AuthProvider: React.FC = ({ children }) => {
     return {} as AuthState
   })
 
+  const resetPassword = useCallback(
+    async ({ link, password }) => {
+      const response = await api.post('/password/reset', {
+        link,
+        password
+      })
+
+      const { token } = response.data?.data
+      const payload: any = decode(token || '')
+
+      setToken(token)
+      setData({ token, user: payload?.user })
+    },
+    [setToken]
+  )
+
   const signIn = useCallback(
     async (data: SignInCredentials) => {
       let token
       if (data.login && data.password) {
-        const response = await api.post('/users/login', {
+        const response = await api.post('/sessions', {
           email: data.login,
           password: data.password
         })
@@ -65,8 +81,8 @@ const AuthProvider: React.FC = ({ children }) => {
     [setToken]
   )
 
-  const signOut = useCallback(async () => {
-    api.put('/users/logout')
+  const signOut = useCallback(() => {
+    api.delete('/sessions')
     setToken(null)
 
     setData({} as AuthState)
@@ -76,8 +92,10 @@ const AuthProvider: React.FC = ({ children }) => {
     <AuthContext.Provider
       value={{
         user: data.user,
+        resetPassword,
         signIn,
-        signOut
+        signOut,
+        isAdmin: data?.user?.role === 'ADMIN'
       }}
     >
       {children}

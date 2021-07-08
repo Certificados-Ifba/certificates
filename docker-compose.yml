@@ -45,6 +45,17 @@ services:
       - db
     networks:
       - backend
+  activity:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.activity
+    hostname: activity
+    env_file:
+      - .env
+    links:
+      - db
+    networks:
+      - backend
   token:
     build:
       context: .

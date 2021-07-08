@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router'
-import { useCallback, useContext, useState } from 'react'
+import { useEffect, useCallback, useContext, useState } from 'react'
 import { FiLogOut, FiMenu } from 'react-icons/fi'
 
+import IUser from '../dtos/IUser'
 import { useAuth } from '../providers/auth'
 import { SidebarContext } from '../providers/sidebar'
-import { useToast } from '../providers/toast'
 import {
   Container,
   Button,
@@ -13,46 +13,39 @@ import {
   Avatar,
   Right
 } from '../styles/components/appbar'
+import getRole from '../utils/getRole'
 
 const Appbar: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { user, signOut, data } = useAuth()
-  const { addToast } = useToast()
+  const [user, setUser] = useState<IUser>()
+  const { user: userAuth, signOut } = useAuth()
 
-  const { toogleActive } = useContext(SidebarContext)
+  const { toggleActive } = useContext(SidebarContext)
 
-  const handleSignOut = useCallback(async () => {
-    try {
-      setLoading(true)
+  const handleSignOut = useCallback(() => {
+    setLoading(true)
+    signOut()
+    setLoading(false)
+    router.replace('/login')
+  }, [router, signOut])
 
-      await signOut()
-
-      setLoading(false)
-      router.replace('/login')
-    } catch (err) {
-      setLoading(false)
-
-      addToast({
-        type: 'error',
-        title: 'Erro na autenticação',
-        description: 'Ocorreu um erro ao sair, tente novamente mais tarde.'
-      })
+  useEffect(() => {
+    if (!user) {
+      setUser(userAuth)
     }
-  }, [router, signOut, addToast])
-
-  console.log(data)
+  }, [user, userAuth])
 
   return (
     <Container>
-      <Button onClick={toogleActive}>
+      <Button onClick={toggleActive}>
         <FiMenu size={24} />
       </Button>
       <Right>
         <UserInfo className="hide-md-down">
           <Info>
             <b>{user?.name}</b>
-            <span>{user?.role}</span>
+            <span>{getRole(user?.role)}</span>
           </Info>
           <Avatar>{user?.name.substr(0, 1).toUpperCase()}</Avatar>
         </UserInfo>

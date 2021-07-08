@@ -12,18 +12,24 @@ export class CreateParticipantDto {
   })
   email: string
 
-  role: 'PARTICIPANT'
   @ApiProperty({
     uniqueItems: true,
-    example: {
-      cpf: '36199705050',
-      dob: '1999-01-01',
-      is_student: true
-    }
+    example: '361.997.050-50'
   })
-  personal_data: {
-    cpf: String
-    dob: Date
-    is_student: Boolean
-  }
+  cpf: string
+
+  @ApiProperty({
+    example: '1999-01-01'
+  })
+  dob: Date
+
+  @ApiProperty({
+    example: '(77) 77777-7777'
+  })
+  phone: string
+
+  @ApiProperty({
+    example: true
+  })
+  institution: boolean
 }

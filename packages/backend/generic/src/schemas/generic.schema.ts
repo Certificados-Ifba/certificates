@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose'
-import { v4 as uuidv4 } from 'uuid'
 
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id
@@ -7,10 +6,6 @@ function transformValue(doc, ret: { [key: string]: any }) {
 
 export const GenericSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: uuidv4
-    },
     type: {
       type: String,
       required: [true, 'Type can not be empty']

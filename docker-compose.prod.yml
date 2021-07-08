@@ -12,6 +12,9 @@ services:
   generic:
     command: yarn workspace @certificates/generic prod
     restart: always
+  activity:
+    command: yarn workspace @certificates/activity prod
+    restart: always
   token:
     command: yarn workspace @certificates/token prod
     restart: always

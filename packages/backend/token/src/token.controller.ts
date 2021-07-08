@@ -12,29 +12,37 @@ export class TokenController {
   constructor(private readonly tokenService: TokenService) {}
 
   @MessagePattern('token_create')
-  public async createToken(data: { user: IUser }): Promise<ITokenResponse> {
+  public async createToken(data: {
+    user: IUser
+    ip: string
+    device: string
+    where?: string
+  }): Promise<ITokenResponse> {
     let result: ITokenResponse
 
-    if (data && data.user) {
+    if (data && data.user && data.ip && data.device) {
       try {
-        const createResult = await this.tokenService.createToken(data.user)
+        const createResult = await this.tokenService.createToken(data)
         result = {
           status: HttpStatus.CREATED,
           message: 'token_create_success',
-          token: createResult.token
+          token: createResult.token,
+          errors: null
         }
       } catch (e) {
         result = {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'token_create_bad_request',
-          token: null
+          status: HttpStatus.PRECONDITION_FAILED,
+          message: 'token_create_precondition_failed',
+          token: null,
+          errors: e.errors
         }
       }
     } else {
       result = {
         status: HttpStatus.BAD_REQUEST,
         message: 'token_create_bad_request',
-        token: null
+        token: null,
+        errors: null
       }
     }
 
@@ -42,16 +50,13 @@ export class TokenController {
   }
 
   @MessagePattern('token_destroy')
-  public async destroyToken(data: {
-    userId: string
-  }): Promise<ITokenDestroyResponse> {
+  public async destroyToken(userId: string): Promise<ITokenDestroyResponse> {
     return {
-      status: data && data.userId ? HttpStatus.OK : HttpStatus.BAD_REQUEST,
-      message:
-        data && data.userId
-          ? (await this.tokenService.deleteTokenForUserId(data.userId)) &&
-            'token_destroy_success'
-          : 'token_destroy_bad_request',
+      status: userId ? HttpStatus.OK : HttpStatus.BAD_REQUEST,
+      message: userId
+        ? (await this.tokenService.destroyTokenForUserId(userId)) &&
+          'token_destroy_success'
+        : 'token_destroy_bad_request',
       errors: null
     }
   }
