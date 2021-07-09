@@ -1,31 +1,28 @@
 import * as mongoose from 'mongoose'
 
-import { IEvent } from '../interfaces/event.interface'
-
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id
 }
 
-export const EventSchema = new mongoose.Schema(
+export const ActivitySchema = new mongoose.Schema(
   {
-    user: {
+    event: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'User can not be empty']
+      ref: 'Event',
+      required: [true, 'Event can not be empty']
+    },
+    type: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Generic',
+      required: [true, 'Type can not be empty']
     },
     name: {
       type: String,
       required: [true, 'Name can not be empty']
     },
-    description: String,
-    initials: String,
-    year: {
-      type: String,
-      required: [true, 'Year can not be empty']
-    },
-    edition: {
-      type: String,
-      required: [true, 'Edition can not be empty']
+    workload: {
+      type: Number,
+      required: [true, 'Workload can not be empty']
     },
     start_date: {
       type: Date,
@@ -53,12 +50,3 @@ export const EventSchema = new mongoose.Schema(
     }
   }
 )
-
-EventSchema.pre('validate', function (next) {
-  const self = this as IEvent
-
-  if (this.isModified('user_id') && self.created_at) {
-    this.invalidate('user_id', 'The field value can not be updated')
-  }
-  next()
-})
