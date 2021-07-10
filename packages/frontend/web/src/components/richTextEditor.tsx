@@ -277,18 +277,8 @@ const opt = {
 const AddVariable: React.FC<{
   editorState: any
   onChange: (data: any) => void
-  onClick: () => void
+  onClick: ({ onChange: any }) => void
 }> = ({ editorState, onChange, onClick }) => {
-  const add = (): void => {
-    const contentState = Modifier.replaceText(
-      editorState.getCurrentContent(),
-      editorState.getSelection(),
-      '⭐',
-      editorState.getCurrentInlineStyle()
-    )
-    onChange(EditorState.push(editorState, contentState, 'insert-characters'))
-  }
-
   return (
     <>
       <Button
@@ -296,7 +286,7 @@ const AddVariable: React.FC<{
         size="small"
         color="success"
         onClick={() => {
-          onClick()
+          onClick({ onChange: onChange })
         }}
         type="button"
       >
@@ -344,7 +334,7 @@ const RichTextEditor: React.FC<Props> = ({
 const EditorComp: React.FC<{
   onChange: ({ html: string, state: any }) => void
   initialHTMLValue: string
-  onClickAddVariable: (state: EditorState) => void
+  onClickAddVariable: ({ state: EditorState, onChange: any }) => void
 }> = ({ onChange, initialHTMLValue, onClickAddVariable }) => {
   const [showEditor, setShowEditor] = useState(false)
   useEffect(() => {
@@ -379,7 +369,9 @@ const EditorComp: React.FC<{
         <Editor
           toolbarCustomButtons={[
             <AddVariable
-              onClick={() => onClickAddVariable(editorState)}
+              onClick={({ onChange }) =>
+                onClickAddVariable({ state: editorState, onChange: onChange })
+              }
               onChange={() => {
                 console.log()
               }}
