@@ -2,6 +2,7 @@ import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { useCallback, useRef, useState } from 'react'
 import {
+  FiAlertCircle,
   FiCheckSquare,
   FiFileText,
   FiImage,
@@ -19,8 +20,10 @@ import { Divider } from '../../styles/components/divider'
 import { Row } from '../../styles/components/grid'
 import getValidationErrors from '../../utils/getValidationErrors'
 import Accordion from '../accordion'
+import Alert from '../alert'
 import Button from '../button'
 import Input from '../input'
+import Table from '../table'
 import CertificateLayout from './certificateLayout'
 
 const initialTextPadding = {
@@ -99,8 +102,14 @@ const AddCertificate: React.FC<Props> = ({ event }) => {
     [event, addToast]
   )
 
+  const [defaultModel, setDefaultModel] = useState(false)
+
   return (
-    <Form ref={formRef} onSubmit={handleSubmit}>
+    <Form
+      initialData={{ ...initialTextConfig }}
+      ref={formRef}
+      onSubmit={handleSubmit}
+    >
       <Accordion icon={FiPlusCircle} title="Adicionar Modelo de Certificado">
         <Section paddingTop="sm" paddingBottom="md">
           <Row cols={2}>
@@ -120,6 +129,7 @@ const AddCertificate: React.FC<Props> = ({ event }) => {
         <Section paddingTop="md" paddingBottom="sm">
           <Accordion icon={FiImage} title="Layout Frente">
             <CertificateLayout
+              formRef={formRef}
               initialTextConfig={initialTextConfig}
               initialTextPadding={initialTextPadding}
             />
@@ -130,7 +140,7 @@ const AddCertificate: React.FC<Props> = ({ event }) => {
           <Accordion icon={FiImage} title="Layout Verso">
             <Section paddingTop="sm" paddingBottom="md">
               <Button
-                size="default"
+                size="small"
                 onClick={() => {
                   setHasVerse(!hasVerse)
                 }}
@@ -149,6 +159,7 @@ const AddCertificate: React.FC<Props> = ({ event }) => {
 
             {hasVerse && (
               <CertificateLayout
+                formRef={formRef}
                 initialTextConfig={initialTextConfig}
                 initialTextPadding={initialTextPadding}
               />
@@ -156,9 +167,49 @@ const AddCertificate: React.FC<Props> = ({ event }) => {
           </Accordion>
         </Section>
         <Section paddingBottom="md">
-          <Accordion icon={FiCheckSquare} title="Critérios" />
+          <Accordion icon={FiCheckSquare} title="Critérios">
+            <Section paddingTop="sm" paddingBottom="md">
+              <Button
+                size="small"
+                onClick={() => {
+                  setDefaultModel(!defaultModel)
+                }}
+                outline={!defaultModel}
+                inline
+                type="button"
+              >
+                {defaultModel ? (
+                  <FiCheckSquare size={20} />
+                ) : (
+                  <FiSquare size={20} />
+                )}
+                <span>Modelo padrão</span>
+              </Button>
+            </Section>
+            {defaultModel && (
+              <Section paddingBottom="md">
+                <Alert type="warning" icon={FiAlertCircle}>
+                  Atenção! Verifique o texto do certificado! Pode ser que ele
+                  não seja compatível com todas as atividades que não tem
+                  critério.
+                </Alert>
+              </Section>
+            )}
+            {!defaultModel && (
+              <Section paddingBottom="md">
+                <Table overflowY={false}>
+                  <tbody>
+                    <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Section>
+            )}
+          </Accordion>
         </Section>
-
         <Footer>
           <div>
             <Button

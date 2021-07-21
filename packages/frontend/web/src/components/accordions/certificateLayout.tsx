@@ -1,7 +1,8 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { EditorState, Modifier } from 'draft-js'
-import { useCallback, useRef, useState } from 'react'
+import { MutableRefObject, useCallback, useRef, useState } from 'react'
+import { FiTrash2 } from 'react-icons/fi'
 
 import IEvent from '../../dtos/IEvent'
 import { Section } from '../../styles/components/accordion'
@@ -11,6 +12,7 @@ import {
 } from '../../styles/components/accordions/certificateLayout'
 import { Divider } from '../../styles/components/divider'
 import { useDebounce } from '../../utils/debounce'
+import Button from '../button'
 import Dropdown from '../dropdown'
 import VariableModal from '../modals/variableModal'
 import RichTextEditor from '../richTextEditor'
@@ -21,13 +23,14 @@ import Certificate from './certificate'
 interface Props {
   initialTextConfig: any
   initialTextPadding: any
+  formRef: MutableRefObject<FormHandles>
 }
 
 const CertificateLayout: React.FC<Props> = ({
   initialTextConfig,
-  initialTextPadding
+  initialTextPadding,
+  formRef
 }) => {
-  const formRef = useRef<FormHandles>(null)
   const [textConfig, setTextConfig] = useState<any>(initialTextConfig)
 
   const [displayTextGuide, setDisplayTextGuide] = useState(false)
@@ -61,14 +64,10 @@ const CertificateLayout: React.FC<Props> = ({
     setDisplayValidateGuide(!active)
   }, [])
 
+  const [preview, setPreview] = useState('')
+
   return (
-    <Form
-      initialData={textConfig}
-      ref={formRef}
-      onSubmit={() => {
-        console.log()
-      }}
-    >
+    <>
       <Section paddingTop="sm" paddingBottom="sm">
         <div>
           <RichTextEditor
@@ -198,7 +197,7 @@ const CertificateLayout: React.FC<Props> = ({
                 </div>
               }
             >
-              Editar Layout Texto
+              <span>Editar Layout Texto</span>
             </Dropdown>
           </div>
           <Dropdown
@@ -306,6 +305,8 @@ const CertificateLayout: React.FC<Props> = ({
         <div style={{ display: 'flex' }}>
           <LayoutContainer>
             <Certificate
+              preview={preview}
+              setPreview={setPreview}
               displayValidateGuide={displayValidateGuide}
               validateHorizontalPosition={textConfig.validateHorizontalPosition}
               validateVerticalPosition={textConfig.validateVerticalPosition}
@@ -322,13 +323,31 @@ const CertificateLayout: React.FC<Props> = ({
             />
           </LayoutContainer>
         </div>
+        {preview && (
+          <EditContainer style={{ marginTop: '10px' }}>
+            <div>
+              <Button
+                size="small"
+                outline
+                color="danger"
+                onClick={() => {
+                  setPreview('')
+                }}
+                type="button"
+              >
+                <FiTrash2 /> <span>Redefinir Imagem</span>
+              </Button>
+            </div>
+          </EditContainer>
+        )}
       </Section>
       <VariableModal
+        formRef={formRef}
         state={stateRichText}
         openModal={openModal}
         onClose={handleClose}
       />
-    </Form>
+    </>
   )
 }
 

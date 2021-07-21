@@ -38,8 +38,8 @@ const Dropdown: React.FC<DropdownProps> = ({
         type="button"
         {...restButton}
       >
-        {!active && <FiChevronDown size={20} />}{' '}
-        {active && <FiChevronUp size={20} />} <span>{children}</span>
+        <span>{children}</span> {active && <FiChevronUp size={20} />}
+        {!active && <FiChevronDown size={20} />}
       </Button>
       <DropdownContent>{dropdownChildren}</DropdownContent>
     </Container>

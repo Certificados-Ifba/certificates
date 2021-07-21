@@ -1,9 +1,9 @@
 import { DataTable } from '../styles/components/paginatedTable'
-import { Container } from '../styles/components/table'
+import { Container, TableProps } from '../styles/components/table'
 
-const Table: React.FC = ({ children }) => {
+const Table: React.FC<TableProps> = ({ children, overflowY = true }) => {
   return (
-    <Container>
+    <Container overflowY={overflowY}>
       <DataTable>{children}</DataTable>
     </Container>
   )

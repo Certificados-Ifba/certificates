@@ -19,7 +19,7 @@ interface ValidateContainerProps {
 }
 
 export const ImageContainer = styled.div`
-  > img {
+  > div {
     width: 1280px;
   }
 `

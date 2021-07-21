@@ -1,22 +1,38 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { EditorState, Modifier } from 'draft-js'
-import { useRef, useCallback, useState } from 'react'
-import { FiX, FiPlus, FiInfo, FiCode, FiTag } from 'react-icons/fi'
+import { useRef, useCallback, useState, MutableRefObject } from 'react'
+import {
+  FiCheck,
+  FiX,
+  FiPlus,
+  FiInfo,
+  FiCode,
+  FiTag,
+  FiChevronRight,
+  FiUser,
+  FiSearch
+} from 'react-icons/fi'
 import { GroupedOptionsType } from 'react-select'
 import * as Yup from 'yup'
 
 import { useToast } from '../../providers/toast'
+import { Row } from '../../styles/components/grid'
+import { TableRow } from '../../styles/pages/home'
+import { useDebounce } from '../../utils/debounce'
 import getValidationErrors from '../../utils/getValidationErrors'
 import Alert from '../alert'
 import Button from '../button'
+import Input from '../input'
 import Modal from '../modal'
 import Select from '../select'
+import Table from '../table'
 
 interface Props {
   openModal: boolean
   onClose: () => void
   state: any
+  formRef: MutableRefObject<FormHandles>
 }
 
 interface Variable {
@@ -36,18 +52,6 @@ const variableList: GroupVariable[] = [
     name: 'Atividade',
     variables: [
       {
-        name: 'Carga Horária da Atividade',
-        value: '[atividade_carga_horaria]',
-        description: 'Retorna a carga horária da atividade',
-        example: '4 Horas'
-      },
-      {
-        name: 'Período da Atividade',
-        value: '[atividade_periodo]',
-        description: 'Retorna um texto com o período da atividade',
-        example: '20 de agosto a 22 de agosto de 2017'
-      },
-      {
         name: 'Título da Atividade',
         value: '[atividade_titulo]',
         description: 'Retorna o nome da atividade',
@@ -62,25 +66,37 @@ const variableList: GroupVariable[] = [
         name: 'Ano do Evento',
         value: '[evento_ano]',
         description: 'Retorna o ano do evento no formato YYYY',
-        example: '2017'
+        example: '2021'
+      },
+      {
+        name: 'Edição do Evento',
+        value: '[evento_edicao]',
+        description: 'Retorna a edição do evento',
+        example: '7'
+      },
+      {
+        name: 'Local do Evento',
+        value: '[evento_local]',
+        description: 'Retorna o local do evento',
+        example: 'Vitória da Conquista/BA'
       },
       {
         name: 'Nome do Evento',
         value: '[evento_nome]',
         description: 'Retorna o nome do evento',
-        example: 'Semana de Tecnologia da Informação Week-IT'
+        example: 'Semana de Tecnologia da Informação'
       },
       {
         name: 'Período do Evento',
         value: '[evento_periodo]',
         description: 'Retorna um texto com o período do evento',
-        example: '25 de julho a 19 de dezembro de 2014'
+        example: '22 de novembro a 10 de dezembro de 2021'
       },
       {
         name: 'Sigla do Evento',
         value: '[evento_sigla]',
         description: 'Retorna a sigla do evento',
-        example: 'WeekIT'
+        example: 'Week-IT'
       }
     ]
   },
@@ -90,32 +106,8 @@ const variableList: GroupVariable[] = [
       {
         name: 'Nome da Função',
         value: '[funcao_nome]',
-        description: 'Retorna o nome da Função',
-        example: 'Bolsista'
-      }
-    ]
-  },
-  {
-    name: 'Participante',
-    variables: [
-      {
-        name: 'CPF do Participante',
-        value: '[participante_cpf]',
-        description: 'Retorna o CPF do participante',
-        example: '056.579.968-00'
-      },
-      {
-        name: 'Data de Nascimento do Participante',
-        value: '[participante_data_nascimento]',
-        description:
-          'Retorna a data de nascimento do participante no formato dia/mês/ano',
-        example: '12/08/1993'
-      },
-      {
-        name: 'Nome do Participante',
-        value: '[participante_nome]',
-        description: 'Retorna o nome do participante',
-        example: 'João da Silva'
+        description: 'Retorna o nome da função em minúsculo',
+        example: 'ouvinte'
       }
     ]
   },
@@ -129,126 +121,187 @@ const variableList: GroupVariable[] = [
         example: '4 horas'
       },
       {
-        name: 'Período da Participação',
-        value: '[participacao_carga_horaria]',
-        description: 'Retorna a carga horária da participação',
-        example: '4 horas'
+        name: 'Ordem de Autoria em Participação',
+        value: '[participacao_ordem_autoria]',
+        description:
+          'Retorna a ordem de autoria dos autores, por exemplo, de um artigo',
+        example:
+          'Matheus Coqueiro, Lucas Bertoldi, Alexandro Silva e Pablo Matos'
       },
       {
-        name: 'Quantidade de Bolsistas',
-        value: '[participacao_qtd_bolsista]',
-        description: 'Retorna a quantidade de bolsistas por extenso',
-        example: 'quatro'
+        name: 'Período da Participação',
+        value: '[participacao_periodo]',
+        description: 'Retorna um texto com o período da participação',
+        example: '22 a 26 de novembro de 2021'
+      },
+      {
+        name: 'Texto Adicional da Participação',
+        value: '[participacao_texto_adicional]',
+        description: 'Retorna o texto adicional',
+        example:
+          'Campo curinga para adicionar qualquer informação não prevista nas outras tags'
+      }
+    ]
+  },
+  {
+    name: 'Participante',
+    variables: [
+      {
+        name: 'CPF do Participante',
+        value: '[participante_cpf]',
+        description: 'Retorna o CPF do participante',
+        example: '056.579.968-00'
+      },
+      {
+        name: 'Nome do Participante',
+        value: '[participante_nome]',
+        description: 'Retorna o nome do participante em maiúsculo',
+        example: 'LUCAS BERTOLDI'
+      }
+    ]
+  },
+  {
+    name: 'Tipo de Atividade',
+    variables: [
+      {
+        name: 'Nome do Tipo de Atividade',
+        value: '[tipoAtividade_nome]',
+        description: 'Retorna o nome do tipo de atividade em minúsculo',
+        example: 'minicurso'
       }
     ]
   }
 ]
 
-const VariableModal: React.FC<Props> = ({ openModal, onClose, state }) => {
-  const formRef = useRef<FormHandles>(null)
-
-  const { addToast } = useToast()
+const VariableModal: React.FC<Props> = ({
+  openModal,
+  onClose,
+  state,
+  formRef
+}) => {
+  const getList: (groupList: GroupVariable[]) => Variable[] = (
+    groupList: GroupVariable[]
+  ) => {
+    const list: Variable[] = []
+    groupList.forEach(g => {
+      list.push(...g.variables)
+    })
+    return list
+  }
 
   const handleClose = useCallback(() => {
-    formRef.current.setErrors({})
-    formRef.current.reset()
-    setSelectedVariable(null)
+    setList(getList(variableList))
     onClose()
   }, [onClose])
-  const [selectedVariable, setSelectedVariable] = useState<Variable>(null)
 
-  const handleSubmit = useCallback(
-    async data => {
-      const schema = Yup.object().shape({
-        variable: Yup.string().required('Por favor, selecione uma variável')
-      })
-      try {
-        await schema.validate(formRef.current.getData(), {
-          abortEarly: false
-        })
-
-        const contentState = Modifier.replaceText(
-          state.state.getCurrentContent(),
-          state.state.getSelection(),
-          selectedVariable.value,
-          state.state.getCurrentInlineStyle()
-        )
-        state.onChange(
-          EditorState.push(state.state, contentState, 'insert-characters')
-        )
-        handleClose()
-      } catch (err) {
-        if (err instanceof Yup.ValidationError) {
-          const errors = getValidationErrors(err)
-          formRef.current?.setErrors(errors)
-          return
-        }
-
-        addToast({
-          type: 'error',
-          title: 'Erro ao adicionar a variável',
-          description: err
-        })
-      }
+  const addVariable = useCallback(
+    (data: Variable) => {
+      const contentState = Modifier.replaceText(
+        state.state.getCurrentContent(),
+        state.state.getSelection(),
+        data.value,
+        state.state.getCurrentInlineStyle()
+      )
+      state.onChange(
+        EditorState.push(state.state, contentState, 'insert-characters')
+      )
+      handleClose()
     },
-    [addToast, handleClose, selectedVariable, state]
+    [handleClose, state]
   )
+
+  const [list, setList] = useState(getList(variableList))
+
+  const { run } = useDebounce<void>(() => {
+    let filter: string = formRef.current.getFieldValue('variableName')
+    filter = filter || ''
+    filter = filter.toUpperCase()
+
+    const list = []
+
+    for (const g of variableList) {
+      if (g.name.toUpperCase().includes(filter)) {
+        list.push(g)
+      } else {
+        const newGroup: GroupVariable = { name: g.name, variables: [] }
+        for (const v of g.variables) {
+          if (
+            v.name.toUpperCase().includes(filter) ||
+            v.value.includes(filter)
+          ) {
+            newGroup.variables.push(v)
+          }
+        }
+        if (newGroup.variables.length > 0) list.push(newGroup)
+      }
+    }
+    setList(getList(list))
+  })
+
   return (
-    <Modal open={openModal} onClose={handleClose}>
+    <Modal size="lg" open={openModal} onClose={handleClose}>
       <header>
-        <h2>Adicionar Variável</h2>
+        <h2>Selecione uma Tag</h2>
       </header>
-      <Form ref={formRef} onSubmit={handleSubmit}>
-        <main>
-          <Select
-            formRef={formRef}
-            handleOnSelect={data => {
-              if (data) {
-                let vari: Variable
-                for (const g of variableList) {
-                  vari = g.variables.find(v => v.value === data.value)
-                  if (vari) break
-                }
-                setSelectedVariable(vari)
-              }
-            }}
-            label="Pesquise uma variável"
-            name="variable"
-            options={variableList.map(grou => {
-              return {
-                label: grou.name,
-                options: grou.variables.map(vari => {
-                  return { label: vari.name, value: vari.value }
-                })
-              }
-            })}
-            marginBottom="sm"
-            required
-          />
-          {selectedVariable && (
-            <>
-              <Alert marginBottom="sm" icon={FiInfo}>
-                {selectedVariable.description}. <br />
-                <small>
-                  Ex.: <b>{selectedVariable.example}</b>
-                </small>
-              </Alert>
-              <Alert size="sm" marginBottom="sm" icon={FiCode}>
-                {selectedVariable.value}
-              </Alert>
-            </>
-          )}
-        </main>
-        <footer>
-          <Button onClick={onClose} color="secondary" type="button" outline>
-            <FiX size={20} />
-            <span>Cancelar</span>
-          </Button>
-          <Button onClick={handleSubmit} color="success" type="button">
-            <FiPlus size={20} /> <span>Adicionar</span>
-          </Button>
-        </footer>
-      </Form>
+      <main>
+        <Row cols={3}>
+          <div>
+            <Input
+              marginBottom="sm"
+              name="variableName"
+              label="Buscar"
+              placeholder="Procure por alguma Tag"
+              icon={FiSearch}
+              onKeyDown={data => {
+                run()
+              }}
+            />
+          </div>
+        </Row>
+        <div>
+          <Table overflowY={false}>
+            <tbody>
+              {list.map(v => (
+                <tr
+                  onClick={() => {
+                    addVariable(v)
+                  }}
+                  key={v.value}
+                >
+                  <td>
+                    <small>{v.value}</small>
+                  </td>
+                  <td>
+                    <Alert size="sm" icon={FiInfo}>
+                      <small>
+                        {v.description}.<br />
+                        Ex.: <b>{v.example}</b>
+                      </small>
+                    </Alert>
+                  </td>
+                  <td>
+                    <TableRow>
+                      <Button
+                        inline
+                        ghost
+                        square
+                        color="success"
+                        size="small"
+                        type="button"
+                        onClick={() => {
+                          console.log()
+                        }}
+                      >
+                        <FiCheck size={20} /> <span>Inserir</span>
+                      </Button>
+                    </TableRow>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      </main>
     </Modal>
   )
 }
