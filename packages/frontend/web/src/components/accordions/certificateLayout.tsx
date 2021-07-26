@@ -1,7 +1,14 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { EditorState, Modifier } from 'draft-js'
-import { MutableRefObject, useCallback, useRef, useState } from 'react'
+import {
+  MutableRefObject,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
 import { FiTrash2 } from 'react-icons/fi'
 
 import IEvent from '../../dtos/IEvent'
@@ -20,18 +27,47 @@ import Select from '../select'
 import SliderBar from '../sliderBar'
 import Certificate from './certificate'
 
-interface Props {
-  initialTextConfig: any
-  initialTextPadding: any
-  formRef: MutableRefObject<FormHandles>
+const initialTextPadding = {
+  padding: 15,
+  paddingTop: 15,
+  paddingBottom: 15,
+  paddingLeft: 15,
+  paddingRight: 15
+}
+const initialValidatePadding = {
+  validateVerticalPadding: 0,
+  validateHorizontalPadding: 0
 }
 
-const CertificateLayout: React.FC<Props> = ({
-  initialTextConfig,
-  initialTextPadding,
-  formRef
-}) => {
-  const [textConfig, setTextConfig] = useState<any>(initialTextConfig)
+const initialTextPosition = 'center'
+const initialValidatePosition = {
+  validateVerticalPosition: 'bottom',
+  validateHorizontalPosition: 'right'
+}
+
+const initialTextConfig = {
+  position: initialTextPosition,
+  ...initialTextPadding,
+  ...initialValidatePadding,
+  ...initialValidatePosition
+}
+
+interface Props {
+  text: string
+  verse?: boolean
+  onFormChange: (formRef: MutableRefObject<FormHandles>) => void
+}
+
+const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
+  const [textConfig, setTextConfig] = useState<any>({
+    html: text,
+    ...initialTextConfig
+  })
+  const formRef = useRef<FormHandles>(null)
+
+  useEffect(() => {
+    onFormChange(formRef)
+  }, [formRef, onFormChange])
 
   const [displayTextGuide, setDisplayTextGuide] = useState(false)
   const [displayValidateGuide, setDisplayValidateGuide] = useState(false)
@@ -67,7 +103,13 @@ const CertificateLayout: React.FC<Props> = ({
   const [preview, setPreview] = useState('')
 
   return (
-    <>
+    <Form
+      initialData={{ html: text, ...initialTextConfig }}
+      ref={formRef}
+      onSubmit={() => {
+        console.log()
+      }}
+    >
       <Section paddingTop="sm" paddingBottom="sm">
         <div>
           <RichTextEditor
@@ -347,7 +389,7 @@ const CertificateLayout: React.FC<Props> = ({
         openModal={openModal}
         onClose={handleClose}
       />
-    </>
+    </Form>
   )
 }
 

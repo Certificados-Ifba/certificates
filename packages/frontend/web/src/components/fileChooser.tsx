@@ -1,10 +1,11 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { FiSearch, FiImage } from 'react-icons/fi'
+import { FiSearch, FiImage, FiAlertCircle } from 'react-icons/fi'
 
 import {
   Container,
   ImageContainer,
-  TextContainer
+  TextContainer,
+  Info
 } from '../styles/components/fileChooser'
 import Button from './button'
 
@@ -115,6 +116,13 @@ const FileChooser: React.FC<FileChooserProps> = ({
                 <span>Clique aqui para procurar um arquivo</span>
               </Button>
             </div>
+            <Info>
+              <FiAlertCircle size={30} />
+              <small>
+                A imagem deve estar nas <b>dimenções A4</b> e orientação
+                paisagem
+              </small>
+            </Info>
           </div>
         )}
       </div>

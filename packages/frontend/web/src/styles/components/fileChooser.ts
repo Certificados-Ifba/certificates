@@ -12,6 +12,21 @@ export const ImageContainer = styled.div`
   width: 400px;
 `
 
+export const Info = styled.div`
+  display: flex;
+  margin-top: 15px;
+  text-transform: none;
+  small {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  svg {
+    margin-right: 10px;
+  }
+  color: ${props => props.theme.colors.secondary};
+`
+
 export const Container = styled.div<{ height: string; border: boolean }>`
   .upload {
     display: flex;
@@ -54,7 +69,7 @@ export const Container = styled.div<{ height: string; border: boolean }>`
 
   .upload-button {
     width: 400px;
-    position: absolute;
+    position: relative;
   }
 
   .upload-file {
