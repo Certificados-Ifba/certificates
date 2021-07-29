@@ -17,6 +17,7 @@ import theme from '../styles/theme'
 import Button from './button'
 import Select from './select'
 import Spinner from './spinner'
+import Table from './table'
 
 interface Props {
   request: PaginatedRequest<any, any>
@@ -83,9 +84,7 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
 
   return (
     <>
-      <div style={{ overflowY: 'auto' }}>
-        <DataTable>{children}</DataTable>
-      </div>
+      <Table>{children}</Table>
       {/* {(JSON.stringify(data), data.data.length)} */}
       {(!data || data?.data?.length === 0) && (
         <NoDataContainer>

@@ -79,7 +79,8 @@ const Events: React.FC = () => {
             <FiCalendar size={24} /> Eventos
           </h1>
           <h2>
-            Os eventos são conjuntos de atividades (palestras, minicurso, etc)
+            O evento é o gerenciamento de atividade (palestras, minicurso, etc),
+            participação e modelo de certificado.
           </h2>
         </div>
         <nav>

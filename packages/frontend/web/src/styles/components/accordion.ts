@@ -21,6 +21,14 @@ export const Footer = styled.div`
       margin: 0;
     }
   }
+  .first {
+    display: inline;
+    margin-left: 10px;
+    @media (max-width: ${props => props.theme.responsive.smDown}) {
+      display: block;
+      margin: 0;
+    }
+  }
   display: flex;
   @media (max-width: ${props => props.theme.responsive.smDown}) {
     display: block;

@@ -1,16 +1,19 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import {
   FiCheckSquare,
+  FiEdit,
   FiFileText,
   FiImage,
   FiPlus,
   FiPlusCircle,
-  FiSquare
+  FiSquare,
+  FiX
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
+import { ICertificate } from '../../dtos/ICertificate'
 import IEvent from '../../dtos/IEvent'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
@@ -22,45 +25,31 @@ import Accordion from '../accordion'
 import Button from '../button'
 import Input from '../input'
 import CertificateLayout from './certificateLayout'
-
-const initialTextPadding = {
-  padding: 15,
-  paddingTop: 15,
-  paddingBottom: 15,
-  paddingLeft: 15,
-  paddingRight: 15
-}
-const initialValidatePadding = {
-  validateVerticalPadding: 0,
-  validateHorizontalPadding: 0
-}
-
-const initialTextPosition = 'center'
-const initialValidatePosition = {
-  validateVerticalPosition: 'bottom',
-  validateHorizontalPosition: 'right'
-}
-
-const initialValue =
-  '<p>Certificamos que <strong>[participante_nome]</strong> participou da <strong>[evento_edicao] [evento_nome] ([evento_sigla])</strong> do Instituto Federal de Educação, Ciência e Tecnologia da Bahia (IFBA) Campus Vitória da Conquista, realizada no período de <strong>[participacao_periodo]</strong>, com carga horária de <strong>[participacao_carga_horaria]</strong></p>'
-
-const initialTextConfig = {
-  html: initialValue,
-  position: initialTextPosition,
-  ...initialTextPadding,
-  ...initialValidatePadding,
-  ...initialValidatePosition
-}
+import Roles from './roles'
 
 interface Props {
   event: IEvent
+  edit?: boolean
+  certificate: ICertificate
+  handleOnClose: () => void
+  handleOnOpen: (data: { isOpen: boolean; edit: boolean }) => void
 }
 
-const AddCertificate: React.FC<Props> = ({ event }) => {
+const AddCertificate: React.FC<Props> = ({
+  event,
+  edit,
+  certificate,
+  handleOnClose,
+  handleOnOpen
+}) => {
+  const [layoutFrontFormRef, setLayoutFrontFormRef] = useState(null)
+  const [layoutVerseFormRef, setLayoutVerseFormRef] = useState(null)
+  const [rolesFormRef, setRolesFormRef] = useState(null)
   const [loading, setLoading] = useState(false)
   const formRef = useRef<FormHandles>(null)
   const { addToast } = useToast()
-  const [hasVerse, setHasVerse] = useState(false)
+  const [cert, setCert] = useState(JSON.parse(JSON.stringify(certificate)))
+  const [isOpen, setIsOpen] = useState(edit)
 
   const handleSubmit = useCallback(
     data => {
@@ -83,7 +72,6 @@ const AddCertificate: React.FC<Props> = ({ event }) => {
         .catch(err => {
           if (err instanceof Yup.ValidationError) {
             const errors = getValidationErrors(err)
-            formRef.current?.setErrors(errors)
             setLoading(false)
             return
           }
@@ -99,12 +87,36 @@ const AddCertificate: React.FC<Props> = ({ event }) => {
     [event, addToast]
   )
 
+  useEffect(() => {
+    handleOnOpen({ isOpen, edit })
+  }, [edit, handleOnOpen, isOpen])
+
+  const submit = useCallback(() => {
+    console.log(layoutFrontFormRef)
+    console.log(layoutVerseFormRef)
+    console.log(rolesFormRef)
+    console.log(formRef)
+  }, [formRef, layoutFrontFormRef, layoutVerseFormRef, rolesFormRef])
+
   return (
-    <Form ref={formRef} onSubmit={handleSubmit}>
-      <Accordion icon={FiPlusCircle} title="Adicionar Modelo de Certificado">
-        <Section paddingTop="sm" paddingBottom="md">
-          <Row cols={2}>
-            <div>
+    <Accordion
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      icon={edit ? FiEdit : FiPlusCircle}
+      title={
+        edit
+          ? 'Editar Modelo de Certificado'
+          : 'Adicionar Modelo de Certificado'
+      }
+    >
+      <Section paddingTop="sm" paddingBottom="md">
+        <Row cols={2}>
+          <div>
+            <Form
+              initialData={{ name: cert?.name }}
+              ref={formRef}
+              onSubmit={handleSubmit}
+            >
               <Input
                 type="text"
                 formRef={formRef}
@@ -113,67 +125,95 @@ const AddCertificate: React.FC<Props> = ({ event }) => {
                 placeholder="Ex.: Modelo Padrão"
                 icon={FiFileText}
               />
-            </div>
-          </Row>
-        </Section>
-        <Divider />
-        <Section paddingTop="md" paddingBottom="sm">
-          <Accordion icon={FiImage} title="Layout Frente">
-            <CertificateLayout
-              initialTextConfig={initialTextConfig}
-              initialTextPadding={initialTextPadding}
-            />
-          </Accordion>
-        </Section>
+            </Form>
+          </div>
+        </Row>
+      </Section>
+      <Divider />
+      <Section paddingTop="md" paddingBottom="sm">
+        <Accordion icon={FiImage} title="Layout Frente">
+          <CertificateLayout
+            onFormChange={form => {
+              setLayoutFrontFormRef(form)
+            }}
+            text={cert.front.text}
+          />
+        </Accordion>
+      </Section>
 
-        <Section paddingBottom="sm">
-          <Accordion icon={FiImage} title="Layout Verso">
-            <Section paddingTop="sm" paddingBottom="md">
-              <Button
-                size="default"
-                onClick={() => {
-                  setHasVerse(!hasVerse)
-                }}
-                outline={!hasVerse}
-                inline
-                type="button"
-              >
-                {hasVerse ? (
-                  <FiCheckSquare size={20} />
-                ) : (
-                  <FiSquare size={20} />
-                )}
-                <span>Possui verso?</span>
-              </Button>
-            </Section>
-
-            {hasVerse && (
-              <CertificateLayout
-                initialTextConfig={initialTextConfig}
-                initialTextPadding={initialTextPadding}
-              />
-            )}
-          </Accordion>
-        </Section>
-        <Section paddingBottom="md">
-          <Accordion icon={FiCheckSquare} title="Critérios" />
-        </Section>
-
-        <Footer>
-          <div>
+      <Section paddingBottom="sm">
+        <Accordion icon={FiImage} title="Layout Verso">
+          <Section paddingTop="sm" paddingBottom="md">
             <Button
-              size="default"
+              size="small"
               onClick={() => {
-                console.log()
+                setCert({
+                  ...cert,
+                  verse: cert.verse ? null : { img: '', text: cert.front.text }
+                })
               }}
+              outline={!cert.verse}
+              inline
+              type="button"
+            >
+              {cert.verse ? (
+                <FiCheckSquare size={20} />
+              ) : (
+                <FiSquare size={20} />
+              )}
+              <span>Possui verso?</span>
+            </Button>
+          </Section>
+
+          {cert.verse && (
+            <CertificateLayout
+              onFormChange={form => {
+                setLayoutVerseFormRef(form)
+              }}
+              verse={true}
+              text={cert.verse.text}
+            />
+          )}
+        </Accordion>
+      </Section>
+      <Section paddingBottom="md">
+        <Roles
+          onFormChange={form => {
+            setRolesFormRef(form)
+          }}
+        />
+      </Section>
+      <Footer>
+        <div>
+          <Button
+            outline
+            color="secondary"
+            size="default"
+            type="button"
+            onClick={() => {
+              setIsOpen(false)
+              handleOnClose()
+            }}
+          >
+            <FiX size={20} />
+            <span>{edit ? 'Fechar' : 'Cancelar'}</span>
+          </Button>
+        </div>
+        {!edit && (
+          <div className="first">
+            <Button
+              color={edit ? 'secondary' : 'primary'}
+              size="default"
+              type="button"
+              onClick={submit}
             >
               <FiPlus size={20} />
               <span>Adicionar Modelo</span>
             </Button>
           </div>
-        </Footer>
-      </Accordion>
-    </Form>
+        )}
+      </Footer>
+    </Accordion>
   )
 }
 
