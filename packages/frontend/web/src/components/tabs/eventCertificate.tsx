@@ -13,8 +13,10 @@ interface Props {
 
 const EventCertificate: React.FC<Props> = ({ event }) => {
   const [showList, setshowList] = useState(true)
+  const [showAdd, setShowAdd] = useState(true)
   const [certificateList, setCertificateList] = useState<ICertificate[]>([
     {
+      id: '1',
       name: 'Modelo Padrão 3',
       front: {
         img: "'/teste1.png'",
@@ -24,6 +26,7 @@ const EventCertificate: React.FC<Props> = ({ event }) => {
       roles: []
     },
     {
+      id: '2',
       name: 'Modelo para Professores',
       front: {
         img: "'/teste.jpeg'",
@@ -37,6 +40,7 @@ const EventCertificate: React.FC<Props> = ({ event }) => {
       },
       roles: [
         {
+          number: 1,
           activity: {
             name: 'Mesa Redonda',
             id: '1'
@@ -47,6 +51,7 @@ const EventCertificate: React.FC<Props> = ({ event }) => {
           }
         },
         {
+          number: 2,
           activity: {
             name: 'Mesa Redonda',
             id: '1'
@@ -60,37 +65,48 @@ const EventCertificate: React.FC<Props> = ({ event }) => {
     }
   ])
 
-  const handleOpen = useCallback(data => {
-    if (data.isOpen) setshowList(false)
-  }, [])
-
   const [editCertificate, setEditCertificate] = useState<ICertificate>(null)
 
   const handleClose = useCallback(() => {
-    setshowList(true)
+    setShowAdd(true)
     setEditCertificate(null)
   }, [])
 
   return (
     <Container>
-      <AddCertificate
-        handleOnOpen={data => handleOpen(data)}
-        handleOnClose={() => handleClose()}
-        certificate={{
-          name: '',
-          front: {
-            text:
-              '<p>Certificamos que <strong>[participante_nome]</strong> participou da <strong>[evento_edicao] [evento_nome] ([evento_sigla])</strong> do Instituto Federal de Educação, Ciência e Tecnologia da Bahia (IFBA) Campus Vitória da Conquista, realizada no período de <strong>[participacao_periodo]</strong>, com carga horária de <strong>[participacao_carga_horaria]</strong></p>',
-            img: ''
-          },
-          roles: []
-        }}
-        event={event}
-      />
+      {showAdd && (
+        <AddCertificate
+          certificate={{
+            id: '1',
+            name: '',
+            front: {
+              text:
+                '<p>Certificamos que <strong>[participante_nome]</strong> participou da <strong>[evento_edicao] [evento_nome] ([evento_sigla])</strong> do Instituto Federal de Educação, Ciência e Tecnologia da Bahia (IFBA) Campus Vitória da Conquista, realizada no período de <strong>[participacao_periodo]</strong>, com carga horária de <strong>[participacao_carga_horaria]</strong></p>',
+              img: ''
+            },
+            roles: []
+          }}
+          event={event}
+        ></AddCertificate>
+      )}
+
       {editCertificate && (
         <AddCertificate
-          handleOnOpen={data => handleOpen(data)}
-          handleOnClose={() => handleClose()}
+          handleOnOpen={data => {
+            if (data.isOpen) {
+              setShowAdd(false)
+              setshowList(false)
+            } else {
+              setShowAdd(true)
+              setEditCertificate(null)
+              setshowList(true)
+            }
+          }}
+          handleOnClose={() => {
+            setshowList(true)
+            setShowAdd(true)
+            setEditCertificate(null)
+          }}
           certificate={editCertificate}
           edit={true}
           event={event}
@@ -102,6 +118,7 @@ const EventCertificate: React.FC<Props> = ({ event }) => {
             <div key={index}>
               <CertificatePreview
                 handleEdit={c => {
+                  setShowAdd(false)
                   setEditCertificate(c)
                 }}
                 handleDelete={c => {

@@ -120,7 +120,7 @@ const FileChooser: React.FC<FileChooserProps> = ({
               <FiAlertCircle size={30} />
               <small>
                 A imagem deve estar nas <b>dimenções A4</b> e orientação
-                paisagem
+                paisagem. Dimensão: 1123 x 794 pixels (Largura x Altura).
               </small>
             </Info>
           </div>

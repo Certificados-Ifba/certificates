@@ -34,9 +34,10 @@ import EventModal from '../modals/eventModal'
 interface Props {
   event: IEvent
   setEvent: Dispatch<SetStateAction<IEvent>>
+  edit: boolean
 }
 
-const EventInfo: React.FC<Props> = ({ event, setEvent }) => {
+const EventInfo: React.FC<Props> = ({ event, setEvent, edit }) => {
   const [show, setShow] = useState(false)
   const [openEventModal, setOpenEventModal] = useState(false)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
@@ -73,9 +74,9 @@ const EventInfo: React.FC<Props> = ({ event, setEvent }) => {
 
   useEffect(() => {
     if (!show) {
-      setShow(isAdmin)
+      setShow(isAdmin && edit)
     }
-  }, [show, isAdmin])
+  }, [show, isAdmin, edit])
 
   return (
     <Container>

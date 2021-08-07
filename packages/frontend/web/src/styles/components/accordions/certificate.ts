@@ -125,3 +125,12 @@ export const TextContainer = styled.div<TextContainerProps>`
       padding-right: ${props.paddingRight}%;
     `}
 `
+
+export interface ImageProps {
+  img: string
+}
+
+export const Image = styled.div<ImageProps>`
+  background-image: url(${props => props.img});
+  height: 878px;
+`

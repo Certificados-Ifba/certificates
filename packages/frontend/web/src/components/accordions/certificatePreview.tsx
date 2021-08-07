@@ -91,9 +91,10 @@ const CertificatePreview: React.FC<Props> = ({
       </Row>
       <div style={{ marginTop: '15px' }}>
         <Roles
+          id={certificate.id}
           roles={certificate.roles}
           onFormChange={() => {
-            console.log('a')
+            console.log('')
           }}
           preview={true}
         ></Roles>

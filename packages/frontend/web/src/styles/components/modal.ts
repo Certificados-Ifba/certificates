@@ -87,10 +87,13 @@ export const Container = styled.div<ModalProps>`
     display: flex;
 
     ${props => props.size === 'sm' && 'justify-content: space-between;'}
-    ${props => props.size === 'lg' && 'justify-content: flex-end;'}
+    ${props =>
+      (props.size === 'lg' || props.size === 'xl') &&
+      'justify-content: flex-end;'}
 
     > button {
-      ${props => props.size === 'lg' && 'margin-left: 8px;'}
+      ${props =>
+        (props.size === 'lg' || props.size === 'xl') && 'margin-left: 8px;'}
     }
 
     ${props =>

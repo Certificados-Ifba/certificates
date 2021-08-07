@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import image from '../../../public/teste.jpeg'
 import {
   Container,
+  Image,
   ImageContainer,
   TextContainer,
   ValidateContainer
@@ -19,12 +20,13 @@ interface Props {
   paddingRight: number
   validateVerticalPadding: number
   validateHorizontalPadding: number
-  displayTextGuide: boolean
-  displayValidateGuide: boolean
+  displayTextGuide?: boolean
+  displayValidateGuide?: boolean
   validateVerticalPosition: 'bottom' | 'top'
   validateHorizontalPosition: 'right' | 'left' | 'center'
-  setPreview: Dispatch<SetStateAction<string>>
-  preview: string
+  setPreview?: Dispatch<SetStateAction<string>>
+  preview?: string
+  image?: string
 }
 
 const Certificate: React.FC<Props> = ({
@@ -42,17 +44,21 @@ const Certificate: React.FC<Props> = ({
   validateVerticalPadding,
   displayValidateGuide,
   preview,
-  setPreview
+  setPreview,
+  image
 }) => {
   return (
     <>
       <Container>
         <ImageContainer>
-          <FileChooser
-            height="878px"
-            preview={preview}
-            setPreview={setPreview}
-          />
+          {image && <Image img={image}></Image>}
+          {!image && (
+            <FileChooser
+              height="878px"
+              preview={preview}
+              setPreview={setPreview}
+            ></FileChooser>
+          )}
           {preview && (
             <>
               <TextContainer

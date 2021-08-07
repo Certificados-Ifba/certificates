@@ -31,8 +31,8 @@ interface Props {
   event: IEvent
   edit?: boolean
   certificate: ICertificate
-  handleOnClose: () => void
-  handleOnOpen: (data: { isOpen: boolean; edit: boolean }) => void
+  handleOnClose?: () => void
+  handleOnOpen?: (data: { isOpen: boolean; edit: boolean }) => void
 }
 
 const AddCertificate: React.FC<Props> = ({
@@ -88,7 +88,7 @@ const AddCertificate: React.FC<Props> = ({
   )
 
   useEffect(() => {
-    handleOnOpen({ isOpen, edit })
+    if (handleOnOpen) handleOnOpen({ isOpen, edit })
   }, [edit, handleOnOpen, isOpen])
 
   const submit = useCallback(() => {
@@ -178,6 +178,7 @@ const AddCertificate: React.FC<Props> = ({
       </Section>
       <Section paddingBottom="md">
         <Roles
+          id="add"
           onFormChange={form => {
             setRolesFormRef(form)
           }}
@@ -192,7 +193,7 @@ const AddCertificate: React.FC<Props> = ({
             type="button"
             onClick={() => {
               setIsOpen(false)
-              handleOnClose()
+              if (handleOnClose) handleOnClose()
             }}
           >
             <FiX size={20} />
