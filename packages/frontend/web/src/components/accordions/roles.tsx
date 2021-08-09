@@ -29,9 +29,10 @@ interface Props {
   onFormChange: (formRef: MutableRefObject<FormHandles>) => void
   preview?: boolean
   roles?: IRole[]
+  id: string
 }
 
-const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
+const Roles: React.FC<Props> = ({ onFormChange, preview, roles, id }) => {
   const formRef = useRef<FormHandles>(null)
 
   const [defaultModel, setDefaultModel] = useState(
@@ -43,6 +44,9 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
     onFormChange(formRef)
   }, [formRef, onFormChange])
 
+  const funcID = 'addFunction' + (preview ? 'modal' : '') + id
+  const atvID = 'addActivity' + (preview ? 'modal' : '') + id
+
   const tableStyle: any = {}
 
   if (!preview) tableStyle.minWidth = '400px'
@@ -50,13 +54,13 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
   const [openModal, setOpenModal] = useState(false)
 
   const addRole = useCallback(() => {
-    const addFunction = formRef.current.getFieldValue('addFunction')
-    const addActivity = formRef.current.getFieldValue('addActivity')
+    const addFunction = formRef.current.getFieldValue(funcID)
+    const addActivity = formRef.current.getFieldValue(atvID)
     const error: any = {}
-    if (!addFunction) error.addFunction = 'Por favor, selecione uma função'
-    if (!addActivity) error.addActivity = 'Por favor, selecione uma atividade'
+    if (!addFunction) error[funcID] = 'Por favor, selecione uma função'
+    if (!addActivity) error[atvID] = 'Por favor, selecione uma atividade'
     formRef.current.setErrors(error)
-    if (!error.addFunction && !error.addActivity) {
+    if (!error[funcID] && !error[atvID]) {
       setRoleList([
         ...roleList,
         {
@@ -66,11 +70,11 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
             roleList.length === 0 ? 1 : roleList[roleList.length - 1].number + 1
         }
       ])
-      formRef.current.setFieldValue('addFunction', null)
-      formRef.current.setFieldValue('addActivity', null)
+      formRef.current.setFieldValue(funcID, null)
+      formRef.current.setFieldValue(atvID, null)
       setOpenModal(false)
     }
-  }, [roleList])
+  }, [funcID, roleList, atvID])
 
   return (
     <Form
@@ -80,28 +84,29 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
       }}
     >
       <Accordion icon={FiCheckSquare} title="Critérios">
-        <Section paddingTop="md" paddingBottom="md">
-          <div></div>
-          <Button
-            size="small"
-            onClick={() => {
-              setDefaultModel(!defaultModel)
-            }}
-            outline={defaultModel}
-            inline
-            type="button"
-          >
-            {!defaultModel ? (
-              <FiCheckSquare size={20} />
-            ) : (
-              <FiSquare size={20} />
-            )}
-            <span>Possui algum critério?</span>
-          </Button>
-        </Section>
+        {!preview && (
+          <Section paddingTop="md" paddingBottom="md">
+            <Button
+              size="small"
+              onClick={() => {
+                setDefaultModel(!defaultModel)
+              }}
+              outline={defaultModel}
+              inline
+              type="button"
+            >
+              {!defaultModel ? (
+                <FiCheckSquare size={20} />
+              ) : (
+                <FiSquare size={20} />
+              )}
+              <span>Possui algum critério?</span>
+            </Button>
+          </Section>
+        )}
         {!defaultModel && (
           <>
-            <Section paddingBottom="md">
+            <Section paddingTop={preview ? 'md' : undefined} paddingBottom="md">
               <Table>
                 <thead>
                   <tr>
@@ -119,7 +124,7 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
                         <td>
                           <Select
                             formRef={formRef}
-                            name="addActivity"
+                            name={atvID}
                             isSearchable={false}
                             options={[
                               {
@@ -136,7 +141,7 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
                         <td>
                           <Select
                             formRef={formRef}
-                            name="addFunction"
+                            name={funcID}
                             isSearchable={false}
                             options={[
                               {
@@ -157,7 +162,7 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
                             color="success"
                             size="small"
                             type="button"
-                            onClick={() => addRole}
+                            onClick={() => addRole()}
                           >
                             <FiPlus size={20} /> <span>Adicionar</span>
                           </Button>
@@ -219,7 +224,7 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
           </>
         )}
         {defaultModel && (
-          <Section paddingBottom="md">
+          <Section paddingTop={preview ? 'md' : undefined} paddingBottom="md">
             <Alert type="warning" icon={FiAlertCircle}>
               Atenção! Esse certificado será usado para todos os tipos de
               atividades e funções que não tenham nenhum modelo definido.
@@ -234,39 +239,43 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles }) => {
           <h2>Adicionar um Critério</h2>
         </header>
         <main>
-          <Select
-            marginBottom="sm"
-            label="Tipo de Atividade"
-            formRef={formRef}
-            name="addActivity"
-            isSearchable={false}
-            options={[
-              {
-                value: { name: 'Mesa Redonda', value: '1' },
-                label: 'Mesa Redonda'
-              },
-              {
-                value: { name: 'Palestra', value: '2 ' },
-                label: 'Palestra'
-              }
-            ]}
-          />
-          <Select
-            label="Função"
-            formRef={formRef}
-            name="addFunction"
-            isSearchable={false}
-            options={[
-              {
-                value: { name: 'Palestrante', value: '1' },
-                label: 'Palestrante'
-              },
-              {
-                value: { name: 'Professor', value: '1' },
-                label: 'Professor'
-              }
-            ]}
-          />
+          {preview && (
+            <>
+              <Select
+                marginBottom="sm"
+                label="Tipo de Atividade"
+                formRef={formRef}
+                name={atvID}
+                isSearchable={false}
+                options={[
+                  {
+                    value: { name: 'Mesa Redonda', value: '1' },
+                    label: 'Mesa Redonda'
+                  },
+                  {
+                    value: { name: 'Palestra', value: '2 ' },
+                    label: 'Palestra'
+                  }
+                ]}
+              />
+              <Select
+                label="Função"
+                formRef={formRef}
+                name={funcID}
+                isSearchable={false}
+                options={[
+                  {
+                    value: { name: 'Palestrante', value: '1' },
+                    label: 'Palestrante'
+                  },
+                  {
+                    value: { name: 'Professor', value: '1' },
+                    label: 'Professor'
+                  }
+                ]}
+              />
+            </>
+          )}
         </main>
         <footer>
           <Button

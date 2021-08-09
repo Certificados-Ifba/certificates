@@ -15,4 +15,6 @@ export interface ICertificate {
   verse?: ILayout
   roles: IRole[]
   edit?: boolean
+  id: string
+  confirmed?: boolean
 }

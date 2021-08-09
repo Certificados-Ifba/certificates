@@ -45,7 +45,7 @@ const initialValidatePosition = {
   validateHorizontalPosition: 'right'
 }
 
-const initialTextConfig = {
+export const initialTextConfig = {
   position: initialTextPosition,
   ...initialTextPadding,
   ...initialValidatePadding,

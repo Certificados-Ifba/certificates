@@ -60,7 +60,8 @@ export class EventActivitiesController {
           activitieType: 'Competição',
           workload: 10,
           start_date: new Date(),
-          end_date: new Date()
+          end_date: new Date(),
+          participants: 0
         },
         {
           id: 2,
@@ -68,7 +69,8 @@ export class EventActivitiesController {
           activitieType: 'Palestra',
           workload: 10,
           start_date: new Date(),
-          end_date: new Date()
+          end_date: new Date(),
+          participants: 20
         },
         {
           id: 3,
@@ -76,7 +78,8 @@ export class EventActivitiesController {
           activitieType: 'Palestra',
           workload: 10,
           start_date: new Date(),
-          end_date: new Date()
+          end_date: new Date(),
+          participants: 50
         }
       ],
       errors: null

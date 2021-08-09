@@ -1,6 +1,10 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
-export const Container = styled.div`
+interface ContainerProps {
+  hasAlert?: boolean
+}
+
+export const Container = styled.div<ContainerProps>`
   margin: 43px 60px 64px;
 
   @media (max-width: 1024px) {
@@ -14,7 +18,8 @@ export const Container = styled.div`
   > header {
     display: flex;
     align-items: center;
-    margin-bottom: 45px;
+    ${props => !props.hasAlert && 'margin-bottom: 45px;'}
+
     div {
       flex: 1;
       h1 {
@@ -41,6 +46,15 @@ export const Container = styled.div`
         }
       }
     }
+  }
+
+  .alert {
+    ${props =>
+      props.hasAlert &&
+      css`
+        margin-bottom: 20px;
+        margin-top: 10px;
+      `}
   }
 `
 
