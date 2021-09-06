@@ -1,6 +1,12 @@
 import { Form } from '@unform/web'
 import styled from 'styled-components'
 
+export const TopButton = styled.span`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+`
+
 export const Container = styled.div`
   justify-content: center;
   align-items: center;
@@ -23,62 +29,6 @@ export const Container = styled.div`
     margin: 0;
     @media (min-width: ${props => props.theme.responsive.smDown}) {
       font-size: 1.5rem;
-    }
-  }
-`
-
-export const LogoArea = styled.div`
-  display: flex;
-  grid-area: logo;
-  flex-direction: column;
-  align-items: center;
-  div {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    margin: 20px 0;
-    h1 {
-      font: 600 30px Poppins, sans-serif;
-      margin-left: 20px;
-    }
-    img {
-      width: 70px;
-    }
-  }
-  h2 {
-    font: 600 20px Poppins, sans-serif;
-    text-align: center;
-    margin: 12px 0 30px;
-    color: ${props => props.theme.colors.light};
-  }
-  @media (min-width: ${props => props.theme.responsive.smDown}) {
-    margin-bottom: 24px;
-    div {
-      h1 {
-        font-size: 36px;
-      }
-      img {
-        width: auto;
-      }
-    }
-    h2 {
-      font-size: 24px;
-      margin: 12px 0 30px;
-    }
-  }
-  @media (min-width: ${props => props.theme.responsive.mdDown}) {
-    h2 {
-      font-size: 32px;
-      margin: 12px 0 30px;
-    }
-  }
-  @media (min-width: ${props => props.theme.responsive.lgDown}) {
-    align-items: flex-start;
-    h2 {
-      margin: 30px 0 30px;
-      font-size: 32px;
-      text-align: initial;
     }
   }
 `

@@ -5,11 +5,12 @@ import { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
 import { FiLock, FiLogIn, FiArrowLeft, FiSend, FiMail } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import Logo from '../assets/logo-full.svg'
 import Alert from '../components/alert'
 import Button from '../components/button'
 import Card from '../components/card'
 import Input from '../components/input'
+import Help from '../components/login/help'
+import LogoArea from '../components/login/logoArea'
 import withoutAuth from '../hocs/withoutAuth'
 import { useAuth } from '../providers/auth'
 import { useToast } from '../providers/toast'
@@ -18,8 +19,8 @@ import Row from '../styles/components/row'
 import {
   Container,
   FormArea,
-  LogoArea,
-  FormContainer
+  FormContainer,
+  TopButton
 } from '../styles/pages/login'
 import getValidationErrors from '../utils/getValidationErrors'
 
@@ -35,10 +36,7 @@ const Login: React.FC = () => {
       <Head>
         <title>Login | Certificados</title>
       </Head>
-      <LogoArea>
-        <Logo />
-        <h2>Organizando eventos e ajudando participantes</h2>
-      </LogoArea>
+      <LogoArea />
       {!forgotPassword && (
         <FormLogin setForgotPassword={setForgotPassword}></FormLogin>
       )}
@@ -204,59 +202,73 @@ const FormLogin: React.FC<{
     [router, signIn, addToast]
   )
   return (
-    <FormArea ref={formRef} onSubmit={handleSingIn}>
-      <Card>
-        <header>
-          <h2>Faça o login para continuar</h2>
-        </header>
-        <FormContainer>
-          <Input
-            formRef={formRef}
-            label="E-mail"
-            name="login"
-            icon={FiMail}
-            type="email"
-            placeholder="Digite seu e-mail"
-            autoComplete="username"
-            marginBottom="sm"
-          />
-          <Input
-            formRef={formRef}
-            label="Senha"
-            name="password"
-            type="password"
-            icon={FiLock}
-            placeholder="Digite sua senha"
-            autoComplete="current-password"
-            aria-describedby="password-constraints"
-            marginBottom="md"
-          />
-          <Row>
-            <Button
-              size="big"
-              color="primary"
-              type="submit"
+    <>
+      <TopButton>
+        <Button
+          onClick={() => {
+            router.push(`participants/login`)
+          }}
+          size="small"
+          type="button"
+        >
+          Encontrar certificados
+        </Button>
+      </TopButton>
+      <FormArea ref={formRef} onSubmit={handleSingIn}>
+        <Card>
+          <header>
+            <h2>Faça o login para continuar</h2>
+          </header>
+          <FormContainer>
+            <Input
+              formRef={formRef}
+              label="E-mail"
+              name="login"
+              icon={FiMail}
+              type="email"
+              placeholder="Digite seu e-mail"
+              autoComplete="username"
               marginBottom="sm"
-              loading={loading}
-            >
-              <FiLogIn size={20} /> <span>Entrar</span>
-            </Button>
-          </Row>
-          <Row>
-            <Button
-              onClick={() => {
-                setForgotPassword(true)
-              }}
-              size="big"
-              type="button"
-              ghost
-            >
-              Esqueci a minha senha
-            </Button>
-          </Row>
-        </FormContainer>
-      </Card>
-    </FormArea>
+            />
+            <Input
+              formRef={formRef}
+              label="Senha"
+              name="password"
+              type="password"
+              icon={FiLock}
+              placeholder="Digite sua senha"
+              autoComplete="current-password"
+              aria-describedby="password-constraints"
+              marginBottom="md"
+            />
+            <Row>
+              <Button
+                size="big"
+                color="primary"
+                type="submit"
+                marginBottom="sm"
+                loading={loading}
+              >
+                <FiLogIn size={20} /> <span>Entrar</span>
+              </Button>
+            </Row>
+            <Row>
+              <Button
+                onClick={() => {
+                  setForgotPassword(true)
+                }}
+                size="small"
+                type="button"
+                ghost
+              >
+                Esqueci a minha senha
+              </Button>
+            </Row>
+            <Help />
+          </FormContainer>
+        </Card>
+      </FormArea>
+    </>
   )
 }
 
