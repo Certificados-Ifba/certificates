@@ -12,6 +12,74 @@ export class TestEventsController {
     @Inject('EVENT_SERVICE') private readonly eventServiceClient: ClientProxy
   ) {}
 
+  @Get('events/participants/activities')
+  public async getActivitiesOfParticipants(
+    @Res({ passthrough: true }) res: Response
+  ): Promise<any> {
+    res.header('x-total-count', String(1))
+    res.header('x-total-page', String(1))
+
+    return {
+      message: 'Lista de Participantes',
+      data: [
+        {
+          id: 1,
+          name: 'Competição Baiana de Veículos Autônomos em Escala',
+          activitieType: 'Competição',
+          workload: 10,
+          start_date: '2021-08-14T02:58:03.079Z',
+          end_date: '2021-08-14T02:58:03.079Z',
+          participants: 0,
+          function: 'Ouvinte'
+        },
+        {
+          id: 2,
+          name: 'Competição Baiana de Veículos Autônomos em Escala',
+          activitieType: 'Palestra',
+          workload: 10,
+          start_date: '2021-08-14T02:58:03.079Z',
+          end_date: '2021-08-14T02:58:03.079Z',
+          participants: 20,
+          function: 'Ouvinte'
+        },
+        {
+          id: 3,
+          name: 'Competição Baiana de Veículos Autônomos em Escala',
+          activitieType: 'Palestra',
+          workload: 10,
+          start_date: '2021-08-14T02:58:03.079Z',
+          end_date: '2021-08-14T02:58:03.079Z',
+          participants: 50,
+          function: 'Ouvinte'
+        }
+      ],
+      errors: null
+    }
+  }
+
+  @Get('events/participants')
+  public async getEventsOfParticipants(
+    @Res({ passthrough: true }) res: Response
+  ): Promise<any> {
+    res.header('x-total-count', String(1))
+    res.header('x-total-page', String(1))
+
+    return {
+      message: 'Lista de Participantes',
+      data: [
+        {
+          name: 'Evento',
+          initials: 'EV',
+          edition: '01',
+          local: 'Vitória da Conquista',
+          start_date: '2021-07-01T00:00:00.000Z',
+          end_date: '2021-07-01T00:00:00.000Z'
+        }
+      ],
+      errors: null
+    }
+  }
+
   @Get('participants')
   @ApiOkResponse({
     type: GetEventsResponseDto,
