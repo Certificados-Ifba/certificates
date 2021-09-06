@@ -5,6 +5,10 @@ export const TopButton = styled.span`
   position: absolute;
   top: 10px;
   right: 10px;
+  > div {
+    @media (min-width: ${props => props.theme.responsive.smDown}) {
+      display: -webkit-inline-box;
+    }
 `
 
 export const Container = styled.div`

@@ -2,7 +2,15 @@ import { FormHandles } from '@unform/core'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
-import { FiLock, FiLogIn, FiArrowLeft, FiSend, FiMail } from 'react-icons/fi'
+import {
+  FiLock,
+  FiLogIn,
+  FiArrowLeft,
+  FiSend,
+  FiMail,
+  FiSearch,
+  FiCheck
+} from 'react-icons/fi'
 import * as Yup from 'yup'
 
 import Alert from '../components/alert'
@@ -204,15 +212,30 @@ const FormLogin: React.FC<{
   return (
     <>
       <TopButton>
-        <Button
-          onClick={() => {
-            router.push(`participants/login`)
-          }}
-          size="small"
-          type="button"
-        >
-          Encontrar certificados
-        </Button>
+        <div>
+          <Button
+            onClick={() => {
+              router.push(`/validate`)
+            }}
+            size="small"
+            type="button"
+            inline
+          >
+            <FiCheck size={20} />
+            <span>Validar Certificado</span>
+          </Button>
+          <Button
+            onClick={() => {
+              router.push(`participants/login`)
+            }}
+            size="small"
+            type="button"
+            inline
+          >
+            <FiSearch size={20} />
+            <span>Encontrar Certificados</span>
+          </Button>
+        </div>
       </TopButton>
       <FormArea ref={formRef} onSubmit={handleSingIn}>
         <Card>

@@ -2,7 +2,13 @@ import { FormHandles } from '@unform/core'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useRef } from 'react'
-import { FiSearch, FiCreditCard, FiCalendar } from 'react-icons/fi'
+import {
+  FiSearch,
+  FiCreditCard,
+  FiCalendar,
+  FiLogIn,
+  FiCheck
+} from 'react-icons/fi'
 import * as Yup from 'yup'
 
 import Button from '../../../components/button'
@@ -63,15 +69,29 @@ const Login: React.FC = () => {
   return (
     <>
       <TopButton>
-        <Button
-          onClick={() => {
-            router.push(`/login`)
-          }}
-          size="small"
-          type="button"
-        >
-          Acesso administrativo
-        </Button>
+        <div>
+          <Button
+            onClick={() => {
+              router.push(`/validate`)
+            }}
+            size="small"
+            type="button"
+            inline
+          >
+            <FiCheck size={20} />
+            <span>Validar Certificado</span>
+          </Button>
+          <Button
+            onClick={() => {
+              router.push(`/login`)
+            }}
+            size="small"
+            type="button"
+            inline
+          >
+            <FiLogIn size={20} /> <span>Acesso administrativo</span>
+          </Button>
+        </div>
       </TopButton>
       <Container maxWidth={500} login={true}>
         <Head>
@@ -117,7 +137,8 @@ const Login: React.FC = () => {
                     type="button"
                     ghost
                   >
-                    Validar Certificado
+                    <FiCheck size={20} />
+                    <span>Validar Certificado</span>
                   </Button>
                 </Row>
               </div>

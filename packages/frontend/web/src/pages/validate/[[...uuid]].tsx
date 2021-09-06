@@ -3,7 +3,15 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { FiCheck, FiCreditCard, FiHash, FiSearch } from 'react-icons/fi'
+import {
+  FiCheck,
+  FiCreditCard,
+  FiEye,
+  FiHash,
+  FiLogIn,
+  FiRepeat,
+  FiSearch
+} from 'react-icons/fi'
 import * as Yup from 'yup'
 
 import Valid from '../../assets/valid.svg'
@@ -96,15 +104,29 @@ const Validate: React.FC = () => {
   return (
     <>
       <TopButton>
-        <Button
-          onClick={() => {
-            router.push(`/login`)
-          }}
-          size="small"
-          type="button"
-        >
-          Acesso administrativo
-        </Button>
+        <div>
+          <Button
+            onClick={() => {
+              router.push(`/participants/login`)
+            }}
+            size="small"
+            type="button"
+            inline
+          >
+            <FiSearch size={20} />
+            <span>Encontrar Certificados</span>
+          </Button>
+          <Button
+            onClick={() => {
+              router.push(`/login`)
+            }}
+            size="small"
+            type="button"
+            inline
+          >
+            <FiLogIn size={20} /> <span>Acesso administrativo</span>
+          </Button>
+        </div>
       </TopButton>
       <Container maxWidth={500} login={true}>
         <Head>
@@ -141,7 +163,7 @@ const Validate: React.FC = () => {
                 <>
                   {valid && (
                     <ImageContainer>
-                      <Image src="/valid.svg" width="" height="300px"></Image>
+                      <Image src="/valid.svg" width="" height="200px"></Image>
                     </ImageContainer>
                   )}
                   {!valid && (
@@ -149,6 +171,16 @@ const Validate: React.FC = () => {
                       <Image src="/invalid.svg" width="" height="200px"></Image>
                     </ImageContainer>
                   )}
+                  <Button
+                    onClick={() => {
+                      router.push(`/participants/login`)
+                    }}
+                    size="default"
+                    type="button"
+                  >
+                    <FiEye size={20}></FiEye>
+                    <span>Visualizar Certificado</span>
+                  </Button>
                 </>
               )}
               {!uuid && (
@@ -181,19 +213,12 @@ const Validate: React.FC = () => {
                       type="button"
                       ghost
                     >
-                      {valid ? 'Verificar outro' : 'Digitar novamente'}
+                      <FiRepeat size={20} />
+                      <span>
+                        {valid ? 'Verificar outro' : 'Digitar novamente'}
+                      </span>
                     </Button>
                   )}
-                  <Button
-                    onClick={() => {
-                      router.push(`/participants/login`)
-                    }}
-                    size="small"
-                    type="button"
-                    ghost
-                  >
-                    Encontrar certificados
-                  </Button>
                 </Row>
               </div>
               <Help />
