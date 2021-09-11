@@ -5,5 +5,9 @@ export const coordinatorPermissions = [
   'event_get_by_id',
   'generic_list',
   'participant_create',
-  'participant_list'
+  'participant_list',
+  'activity_list',
+  'activity_create',
+  'certificate_list',
+  'certificate_create'
 ]

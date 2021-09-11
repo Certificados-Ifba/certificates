@@ -93,7 +93,7 @@ const Events: React.FC = () => {
       </header>
       <Card>
         <header>
-          <h2>Últimos Eventos</h2>
+          <h2>Eventos cadastrados</h2>
           <Form onSubmit={handleFilter}>
             <Input name="search" placeholder="Buscar evento" icon={FiSearch} />
           </Form>
@@ -142,9 +142,9 @@ const Events: React.FC = () => {
           <tbody>
             {request.data?.data?.map(event => (
               <tr
-                key={event.id}
+                key={event?.id}
                 onClick={() => {
-                  router.push(`events/info/${event.id}`)
+                  router.push(`events/info/${event?.id}`)
                 }}
               >
                 <td>{`${event.name} (${event.initials})`}</td>
@@ -163,7 +163,7 @@ const Events: React.FC = () => {
                       color="secondary"
                       size="small"
                       onClick={() => {
-                        router.push(`events/info/${event.id}`)
+                        router.push(`events/info/${event?.id}`)
                       }}
                     >
                       <FiInfo size={20} />

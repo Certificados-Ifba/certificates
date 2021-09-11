@@ -11,7 +11,8 @@ import {
   HttpException,
   HttpStatus,
   Res,
-  Query
+  Query,
+  Module
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import {
@@ -21,23 +22,25 @@ import {
   ApiBearerAuth
 } from '@nestjs/swagger'
 import { Response } from 'express'
-import { Authorization } from 'src/decorators/authorization.decorator'
-import { Permission } from 'src/decorators/permission.decorator'
-import { IAuthorizedRequest } from 'src/interfaces/common/authorized-request.interface'
-import { CreateEventResponseDto } from 'src/interfaces/event/dto/create-event-response.dto'
-import { CreateEventDto } from 'src/interfaces/event/dto/create-event.dto'
-import { DeleteEventResponseDto } from 'src/interfaces/event/dto/delete-event-response.dto'
-import { EventIdDto } from 'src/interfaces/event/dto/event-id.dto'
-import { GetEventByIdResponseDto } from 'src/interfaces/event/dto/get-event-by-id-response.dto'
-import { GetEventsResponseDto } from 'src/interfaces/event/dto/get-events-response.dto'
-import { ListEventDto } from 'src/interfaces/event/dto/list-event.dto'
-import { UpdateEventResponseDto } from 'src/interfaces/event/dto/update-event-response.dto'
-import { UpdateEventDto } from 'src/interfaces/event/dto/update-event.dto'
-import { IServiceEventCreateResponse } from 'src/interfaces/event/service-event-create-response.interface'
-import { IServiceEventDeleteResponse } from 'src/interfaces/event/service-event-delete-response.interface'
-import { IServiceEventGetByIdResponse } from 'src/interfaces/event/service-event-get-by-id-response.interface'
-import { IServiceEventListResponse } from 'src/interfaces/event/service-event-list-response.interface'
-import { IServiceEventUpdateByIdResponse } from 'src/interfaces/event/service-event-update-by-id-response.interface'
+
+import { Authorization } from '../decorators/authorization.decorator'
+import { Permission } from '../decorators/permission.decorator'
+import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
+import { CreateEventResponseDto } from '../interfaces/event/dto/create-event-response.dto'
+import { CreateEventDto } from '../interfaces/event/dto/create-event.dto'
+import { DeleteEventResponseDto } from '../interfaces/event/dto/delete-event-response.dto'
+import { EventIdDto } from '../interfaces/event/dto/event-id.dto'
+import { GetEventByIdResponseDto } from '../interfaces/event/dto/get-event-by-id-response.dto'
+import { GetEventsResponseDto } from '../interfaces/event/dto/get-events-response.dto'
+import { ListEventDto } from '../interfaces/event/dto/list-event.dto'
+import { UpdateEventResponseDto } from '../interfaces/event/dto/update-event-response.dto'
+import { UpdateEventDto } from '../interfaces/event/dto/update-event.dto'
+import { IServiceEventCreateResponse } from '../interfaces/event/service-event-create-response.interface'
+import { IServiceEventDeleteResponse } from '../interfaces/event/service-event-delete-response.interface'
+import { IServiceEventGetByIdResponse } from '../interfaces/event/service-event-get-by-id-response.interface'
+import { IServiceEventListResponse } from '../interfaces/event/service-event-list-response.interface'
+import { IServiceEventUpdateByIdResponse } from '../interfaces/event/service-event-update-by-id-response.interface'
+import { ActivitiesController } from './activities.controller'
 
 @Controller('events')
 @ApiBearerAuth('JWT')
@@ -46,6 +49,9 @@ export class EventsController {
   constructor(
     @Inject('EVENT_SERVICE') private readonly eventServiceClient: ClientProxy
   ) {}
+
+  // @Controller()
+  // ActivitiesController
 
   @Get(':id')
   @Authorization(true)

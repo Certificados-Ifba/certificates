@@ -25,7 +25,7 @@ import isValidCpf from '../../utils/isValidCpf'
 import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
-import Select from '../select'
+import Select from '../newSelect'
 
 interface Props {
   type: 'add' | 'update'

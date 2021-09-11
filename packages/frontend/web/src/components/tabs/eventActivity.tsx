@@ -3,31 +3,43 @@ import { Form } from '@unform/web'
 import { useCallback, useRef, useState } from 'react'
 import { FiEdit, FiPlus, FiSearch, FiTrash2 } from 'react-icons/fi'
 
+import IActivity from '../../dtos/IActivity'
+import IEvent from '../../dtos/IEvent'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import usePaginatedRequest from '../../services/usePaginatedRequest'
 import { TableRow } from '../../styles/pages/home'
+import { formatData } from '../../utils/formatters'
 import Alert from '../alert'
 import Button from '../button'
 import Column from '../column'
 import Input from '../input'
-import EventActivityModal from '../modals/activityModal'
+import ActivityModal from '../modals/activityModal'
 import DeleteModal from '../modals/deleteModal'
 import PaginatedTable from '../paginatedTable'
 
-const EventActivity: React.FC<{ event: any }> = ({ event }) => {
-  const { addToast } = useToast()
+interface IRequest {
+  data: IActivity[]
+}
 
-  const [activitySelected, setActivitySelected] = useState(null)
-  const [nameActivitySelected, setNameActivitySelected] = useState(null)
+interface Props {
+  event: IEvent
+}
+
+const EventActivity: React.FC<Props> = ({ event }) => {
+  const [activity, setActivity] = useState<IActivity>(null)
   const [openModal, setOpenModal] = useState(false)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [filters, setFilters] = useState(null)
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
+  const [typeModal, setTypeModal] = useState<'update' | 'add'>(null)
   const searchFormRef = useRef<FormHandles>()
-  const request = usePaginatedRequest<any>({
-    url: `events/${event.id}/activities`,
+
+  const { addToast } = useToast()
+
+  const request = usePaginatedRequest<IRequest>({
+    url: `events/${event?.id}/activities`,
     params:
       filters && order !== ''
         ? Object.assign(filters, { sort_by: column, order_by: order })
@@ -69,7 +81,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
 
   const handleSubmitDelete = useCallback(() => {
     api
-      .delete(`event/${event.id}/activity/${activitySelected}`)
+      .delete(`events/${event?.id}/activities/${activity?.id}`)
       .then(resp => {
         if (resp?.data?.message === 'event_activity_delete_by_id_success') {
           addToast({
@@ -89,7 +101,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
           description: 'Houve um erro ao deletar a atividade.'
         })
       })
-  }, [event, activitySelected, addToast, request])
+  }, [event, activity, addToast, request])
 
   return (
     <>
@@ -106,7 +118,8 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
           size="small"
           inline
           onClick={() => {
-            setActivitySelected(null)
+            setActivity(null)
+            setTypeModal('add')
             setOpenModal(true)
           }}
         >
@@ -130,13 +143,15 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
           </tr>
         </thead>
         <tbody>
-          {request.data?.data?.map(act => (
-            <tr key={act.id}>
-              <td>{act.name}</td>
-              <td>{act.activitieType}</td>
-              <td>{act.workload} h</td>
-              <td>{new Date(act.start_date).toLocaleDateString()}</td>
-              <td>{new Date(act.end_date).toLocaleDateString()}</td>
+          {request.data?.data?.map(activity => (
+            <tr key={activity.id}>
+              <td>{activity.name}</td>
+              <td>{activity.type?.name}</td>
+              <td>
+                {activity.workload} Hora{Number(activity.workload) > 1 && 's'}
+              </td>
+              <td>{formatData(activity.start_date)}</td>
+              <td>{formatData(activity.end_date)}</td>
               <td>
                 <TableRow>
                   <Button
@@ -146,7 +161,8 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
                     color="secondary"
                     size="small"
                     onClick={() => {
-                      setActivitySelected(1)
+                      setActivity(activity)
+                      setTypeModal('update')
                       setOpenModal(true)
                     }}
                   >
@@ -159,8 +175,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
                     color="danger"
                     size="small"
                     onClick={() => {
-                      setActivitySelected(act.id)
-                      setNameActivitySelected(act.name)
+                      setActivity(activity)
                       setOpenDeleteModal(true)
                     }}
                   >
@@ -172,8 +187,9 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
           ))}
         </tbody>
       </PaginatedTable>
-      <EventActivityModal
-        activitySelected={activitySelected}
+      <ActivityModal
+        type={typeModal}
+        activity={activity}
         event={event}
         openModal={openModal}
         request={request}
@@ -187,7 +203,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
       >
         <Alert>
           Tem certeza que você deseja excluir a atividade{' '}
-          <b>{nameActivitySelected}</b>?
+          <b>{activity?.name}</b>?
         </Alert>
       </DeleteModal>
     </>

@@ -2,9 +2,10 @@ import { Controller, Inject, Get, Param, Res } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { ApiTags, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { Response } from 'express'
-import { Authorization } from 'src/decorators/authorization.decorator'
-import { Permission } from 'src/decorators/permission.decorator'
-import { EventIdDto } from 'src/interfaces/event/dto/event-id.dto'
+
+import { Authorization } from '../../decorators/authorization.decorator'
+import { Permission } from '../../decorators/permission.decorator'
+import { EventIdDto } from '../../interfaces/event/dto/event-id.dto'
 
 @Controller('events')
 @ApiBearerAuth('JWT')
@@ -16,7 +17,7 @@ export class EventParticipantsController {
 
   @Authorization(true)
   @Permission('event_participant_list')
-  @Get(':eventId/participants')
+  @Get(':event_id/participants')
   @ApiOkResponse({
     description: 'List of event participants'
   })

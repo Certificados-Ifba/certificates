@@ -93,16 +93,16 @@ const EventDetail: React.FC = () => {
             path: 'activities'
           },
           {
-            name: 'Participantes',
+            name: 'Participações',
             icon: FiUsers,
             children: <EventParticipant event={event} />,
-            path: 'participants'
+            path: 'certificates'
           },
           {
-            name: 'Certificados',
+            name: 'Modelos de Certificado',
             icon: FiAward,
             children: <EventCertificate event={event} />,
-            path: 'certificates'
+            path: 'models'
           }
         ]}
       />

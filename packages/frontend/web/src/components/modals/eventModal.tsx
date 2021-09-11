@@ -1,7 +1,14 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useRef, useCallback, useEffect } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useRef,
+  useCallback,
+  useEffect,
+  useState
+} from 'react'
 import {
   FiBookmark,
   FiTag,
@@ -16,13 +23,19 @@ import {
 import * as Yup from 'yup'
 
 import IEvent from '../../dtos/IEvent'
+import IUser from '../../dtos/IUser'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
+import { Group, Badge } from '../../styles/components/select'
 import getValidationErrors from '../../utils/getValidationErrors'
+import AsyncSelect from '../asyncSelect'
 import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
-import Select from '../select'
+
+interface IResponse {
+  data: IUser[]
+}
 
 interface Props {
   type: 'add' | 'edit'
@@ -39,6 +52,7 @@ const EventModal: React.FC<Props> = ({
   setEvent,
   event
 }) => {
+  const [loading, setLoading] = useState(false)
   const { addToast } = useToast()
 
   const router = useRouter()
@@ -61,20 +75,23 @@ const EventModal: React.FC<Props> = ({
 
   const handleSubmit = useCallback(
     async data => {
+      console.log(data)
+
+      setLoading(true)
       const schema = Yup.object().shape({
         name: Yup.string().required('O evento precisa ter um nome'),
         initials: Yup.string().required('Por favor, digite a sigla do evento'),
+        edition: Yup.string().required('Por favor, digite a edição do evento'),
         local: Yup.string().required('Por favor, digite o local do evento'),
         user: Yup.string().required(
           'Você precisa selecionar um coordenador para o evento'
         ),
-        start_date: Yup.date().required('Selecione a data de início'),
-        end_date: Yup.date()
-          .required('Selecione a data do fim')
-          .min(
-            data.start_date,
-            'A data final precisa ser maior que a data inicial'
-          )
+        start_date: Yup.string().required('Selecione a data de início'),
+        end_date: Yup.string().required('Selecione a data do fim')
+        // .min(
+        //   data.start_date,
+        //   'A data final precisa ser maior que a data inicial'
+        // )
       })
 
       try {
@@ -84,9 +101,9 @@ const EventModal: React.FC<Props> = ({
 
         if (type === 'add') {
           const response = await api.post('events', data)
-          router.push(`events/${response.data?.data?.event.id}`)
+          router.push(`events/info/${response.data?.data?.event.id}`)
         } else {
-          const response = await api.put(`events/${event.id}`, data)
+          const response = await api.put(`events/${event?.id}`, data)
           setEvent(response.data?.data?.event)
         }
 
@@ -111,9 +128,42 @@ const EventModal: React.FC<Props> = ({
           }`,
           description: err
         })
+        setLoading(false)
       }
     },
     [router, type, event?.id, addToast, handleCloseSaveModal, setEvent]
+  )
+
+  const loadUsers = useCallback(async search => {
+    const response = await api.get<IResponse>('/users', {
+      params: { search, sort_by: 'name', order_by: 'ASC' }
+    })
+
+    const data = [
+      {
+        label: 'Administrador',
+        options: []
+      },
+      {
+        label: 'Coordenador',
+        options: []
+      }
+    ]
+
+    response.data?.data?.forEach(user => {
+      data[user.role === 'ADMIN' ? 0 : 1].options.push({
+        value: user.id,
+        label: user.name
+      })
+    })
+    return data
+  }, [])
+
+  const formatGroupLabel = data => (
+    <Group>
+      <span>{data.label}</span>
+      <Badge>{data.options.length}</Badge>
+    </Group>
   )
 
   return (
@@ -176,13 +226,12 @@ const EventModal: React.FC<Props> = ({
             type="date"
             icon={FiCalendar}
           />
-          <Select
-            async={true}
-            url="users"
-            formRef={formRef}
+          <AsyncSelect
             label="Coordenador"
+            formRef={formRef}
             name="user"
-            isSearchable={true}
+            loadOptions={loadUsers}
+            formatGroupLabel={formatGroupLabel}
             icon={FiUser}
           />
         </main>
@@ -198,7 +247,11 @@ const EventModal: React.FC<Props> = ({
             <FiX size={20} />
             <span>Cancelar</span>
           </Button>
-          <Button color={event ? 'secondary' : 'primary'} type="submit">
+          <Button
+            color={event ? 'secondary' : 'primary'}
+            type="submit"
+            loading={loading}
+          >
             {event ? (
               <>
                 <FiCheck size={20} /> <span>Atualizar</span>

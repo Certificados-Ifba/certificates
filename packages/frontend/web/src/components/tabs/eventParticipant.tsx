@@ -2,10 +2,11 @@ import { useCallback, useState } from 'react'
 import { FiPlusCircle, FiUsers } from 'react-icons/fi'
 
 import IEvent from '../../dtos/IEvent'
+import { CertificatesProvider } from '../../providers/certificates'
 import { Container } from '../../styles/components/tabs/eventParticipant'
 import Accordion from '../accordion'
-import ParticipationForm from '../accordions/participationForm'
-import ParticipationList from '../accordions/participationList'
+import CertificateForm from '../accordions/certificateForm'
+import CertificateList from '../accordions/certificateList'
 
 interface Props {
   event: IEvent
@@ -25,13 +26,15 @@ const EventParticipant: React.FC<Props> = ({ event }) => {
         isOpen={isOpen}
         icon={FiPlusCircle}
       >
-        <ParticipationForm
-          event={event}
-          closeAccordion={handleCloseAccordion}
-        />
+        <CertificatesProvider>
+          <CertificateForm
+            event={event}
+            closeAccordion={handleCloseAccordion}
+          />
+        </CertificatesProvider>
       </Accordion>
       <Accordion title="Participantes do Evento" isOpen={true} icon={FiUsers}>
-        <ParticipationList event={event} openAccordion={handleOpenAccordion} />
+        <CertificateList event={event} openAccordion={handleOpenAccordion} />
       </Accordion>
     </Container>
   )

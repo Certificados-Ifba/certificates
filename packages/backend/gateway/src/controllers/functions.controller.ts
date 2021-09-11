@@ -25,11 +25,10 @@ import { Authorization } from '../decorators/authorization.decorator'
 import { Permission } from '../decorators/permission.decorator'
 import { CreateFunctionResponseDto } from '../interfaces/function/dto/create-function-response.dto'
 import { CreateFunctionDto } from '../interfaces/function/dto/create-function.dto'
-import { GetFunctionsResponseDto } from '../interfaces/function/dto/get-functions-response.dto'
+import { ListFunctionResponseDto } from '../interfaces/function/dto/list-function-response.dto'
 import { ListGenericDto } from '../interfaces/generic/dto/list-generic.dto'
-import capitalize from '../utils/capitalize'
 import { GetFunctionByIdResponseDto } from './../interfaces/function/dto/get-function-by-id-response.dto'
-import { UpdateGenericResponseDto } from './../interfaces/function/dto/update-function-response.dto'
+import { UpdateFunctionResponseDto } from './../interfaces/function/dto/update-function-response.dto'
 import { DeleteGenericResponseDto } from './../interfaces/generic/dto/delete-generic-response.dto'
 import { GenericIdDto } from './../interfaces/generic/dto/generic-id.dto'
 import { UpdateGenericDto } from './../interfaces/generic/dto/update-generic.dto'
@@ -52,13 +51,13 @@ export class FunctionsController {
   @Authorization(true)
   @Permission('generic_list')
   @ApiOkResponse({
-    type: GetFunctionsResponseDto,
+    type: ListFunctionResponseDto,
     description: 'List of functions'
   })
   public async getFunctions(
     @Res({ passthrough: true }) res: Response,
     @Query() query: ListGenericDto
-  ): Promise<GetFunctionsResponseDto> {
+  ): Promise<ListFunctionResponseDto> {
     const { search, page, per_page, sort_by, order_by } = query
     const functionsResponse: IServiceGenericListResponse = await this.genericServiceClient
       .send('generic_list', {
@@ -93,7 +92,7 @@ export class FunctionsController {
     const createFunctionResponse: IServiceGenericCreateResponse = await this.genericServiceClient
       .send('generic_create', {
         type: 'function',
-        name: capitalize(genericRequest.name.trim())
+        name: genericRequest.name
       })
       .toPromise()
 
@@ -173,17 +172,17 @@ export class FunctionsController {
   @Authorization(true)
   @Permission('generic_update_by_id')
   @ApiOkResponse({
-    type: UpdateGenericResponseDto
+    type: UpdateFunctionResponseDto
   })
   public async updateGeneric(
     @Param() params: GenericIdDto,
     @Body() genericRequest: UpdateGenericDto
-  ): Promise<UpdateGenericResponseDto> {
+  ): Promise<UpdateFunctionResponseDto> {
     const updateGenericResponse: IServiceGenericUpdateByIdResponse = await this.genericServiceClient
       .send('generic_update_by_id', {
         id: params.id,
         generic: {
-          name: capitalize(genericRequest.name.trim())
+          name: genericRequest.name
         }
       })
       .toPromise()

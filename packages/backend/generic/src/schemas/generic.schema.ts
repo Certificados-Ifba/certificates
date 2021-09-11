@@ -8,10 +8,14 @@ export const GenericSchema = new mongoose.Schema(
   {
     type: {
       type: String,
+      lowercase: true,
+      trim: true,
       required: [true, 'Type can not be empty']
     },
     name: {
       type: String,
+      lowercase: true,
+      trim: true,
       required: [true, 'Name can not be empty']
     }
   },

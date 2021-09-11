@@ -305,8 +305,7 @@ export class UserController {
       const usersWithEmail = await this.userService.searchUserByEmail(
         userParams.email
       )
-
-      if (usersWithEmail) {
+      if (usersWithEmail && userParams.email) {
         result = {
           status: HttpStatus.CONFLICT,
           message: 'user_create_conflict',

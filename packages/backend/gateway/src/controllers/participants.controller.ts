@@ -39,7 +39,6 @@ import { IServiceParticipantUpdateByIdResponse } from '../interfaces/participant
 import { DeleteUserResponseDto } from '../interfaces/user/dto/delete-user-response.dto'
 import { UserIdDto } from '../interfaces/user/dto/user-id.dto'
 import { IServiceUserDeleteResponse } from '../interfaces/user/service-user-delete-response.interface'
-import capitalize from '../utils/capitalize'
 import { ParticipantIdDto } from './../interfaces/participant/dto/participant-id.dto'
 
 @Controller('participants')
@@ -107,8 +106,8 @@ export class ParticipantsController {
 
     const createParticipantResponse: IServiceParticipantCreateResponse = await this.userServiceClient
       .send('user_create', {
-        name: capitalize(name.trim()),
-        email: email.toLowerCase().trim(),
+        name,
+        email,
         role: 'PARTICIPANT',
         personal_data: {
           cpf: cpf.replace(/[^\d]+/g, ''),
@@ -174,8 +173,8 @@ export class ParticipantsController {
     const updateParticipantResponse: IServiceParticipantUpdateByIdResponse = await this.userServiceClient
       .send('user_update_by_id', {
         user: {
-          name: capitalize(name.trim()),
-          email: email.toLowerCase().trim(),
+          name,
+          email,
           personal_data: {
             dob: dob,
             phone: phone,

@@ -2,10 +2,10 @@ import { Controller, Inject, Get, Param, Res } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { ApiTags, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { Response } from 'express'
-import { Authorization } from 'src/decorators/authorization.decorator'
-import { Permission } from 'src/decorators/permission.decorator'
-import { ActivityEventIdDto } from 'src/interfaces/event/dto/activity/event-activity.dto'
 
+import { Authorization } from '../../decorators/authorization.decorator'
+import { Permission } from '../../decorators/permission.decorator'
+import { ActivityEventIdDto } from '../../interfaces/event/dto/activity/event-activity.dto'
 import { EventIdDto } from '../../interfaces/event/dto/event-id.dto'
 
 @Controller('events')
@@ -16,7 +16,7 @@ export class EventActivitiesController {
     @Inject('EVENT_SERVICE') private readonly eventServiceClient: ClientProxy
   ) {}
 
-  @Get(':eventId/activities/:id')
+  @Get(':event_id/activities/:id')
   @Authorization(true)
   @Permission('event_activity_get_by_id')
   @ApiOkResponse({
@@ -41,7 +41,7 @@ export class EventActivitiesController {
 
   @Authorization(true)
   @Permission('event_activity_list')
-  @Get(':eventId/activities')
+  @Get(':event_id/activities')
   @ApiOkResponse({
     description: 'List of event activities'
   })

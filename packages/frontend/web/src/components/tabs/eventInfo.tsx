@@ -46,7 +46,7 @@ const EventInfo: React.FC<Props> = ({ event, setEvent }) => {
 
   const handleSubmitDelete = useCallback(async () => {
     try {
-      await api.delete(`events/${event.id}`)
+      await api.delete(`events/${event?.id}`)
       addToast({
         title: 'Evento excluido',
         type: 'success',

@@ -1,0 +1,11 @@
+FROM node:alpine
+
+WORKDIR /usr/src/app
+
+COPY package.json yarn.lock prettier.config.js tsconfig.json .eslintrc.js .eslintignore ./
+COPY packages/shared ./packages/shared
+COPY packages/backend/certificate/package.json ./packages/backend/certificate/
+
+RUN yarn && yarn cache clean
+
+COPY packages/backend/certificate/ ./packages/backend/certificate/

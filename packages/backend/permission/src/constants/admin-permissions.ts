@@ -23,5 +23,9 @@ export const adminPermissions = [
   'participant_create',
   'participant_list',
   'participant_delete_by_id',
-  'participant_update_by_id'
+  'participant_update_by_id',
+  'activity_list',
+  'activity_create',
+  'certificate_list',
+  'certificate_create'
 ]

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 
 import { IGeneric } from '../../generic/generic.interface'
 
-export class GetActivityByIdResponseDto {
+export class GetActivityTypeByIdResponseDto {
   @ApiProperty({ example: 'generic_get_by_id_success' })
   message: string
 

@@ -146,6 +146,7 @@ export class ActivityController {
   @MessagePattern('activity_delete_by_id')
   public async activityDeleteForUser(params: {
     id: string
+    permission: boolean
   }): Promise<IActivityDeleteResponse> {
     let result: IActivityDeleteResponse
 

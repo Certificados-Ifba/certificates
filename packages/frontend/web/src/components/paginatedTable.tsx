@@ -5,6 +5,7 @@ import {
   FiChevronsLeft,
   FiChevronsRight
 } from 'react-icons/fi'
+import ScrollBar from 'simplebar-react'
 
 import { PaginatedRequest } from '../services/usePaginatedRequest'
 import {
@@ -13,10 +14,12 @@ import {
   NoDataContainer,
   PaginateList
 } from '../styles/components/paginatedTable'
+import { ReactSelect } from '../styles/components/select'
 import theme from '../styles/theme'
 import Button from './button'
-import Select from './select'
 import Spinner from './spinner'
+
+import 'simplebar/dist/simplebar.min.css'
 
 interface Props {
   request: PaginatedRequest<any, any>
@@ -83,10 +86,11 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
 
   return (
     <>
-      <div style={{ overflowY: 'auto' }}>
+      {/* <div style={{ overflowY: 'auto' }}> */}
+      <ScrollBar>
         <DataTable>{children}</DataTable>
-      </div>
-      {/* {(JSON.stringify(data), data.data.length)} */}
+      </ScrollBar>
+      {/* </div> */}
       {(!data || data?.data?.length === 0) && (
         <NoDataContainer>
           {data?.data?.length === 0 ? (
@@ -101,10 +105,10 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
       <Pagination>
         <div>
           <span className="hide-md-down">Linhas por página</span>
-          <Select
+          <ReactSelect
+            menuPosition="fixed"
             instanceId="perPage"
             isSearchable={false}
-            pageSize={2}
             onChange={handlePerPage}
             defaultValue={perPage}
             value={perPage}

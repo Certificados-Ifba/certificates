@@ -35,6 +35,8 @@ export const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      uppercase: true,
+      trim: true,
       required: [true, 'Name can not be empty']
     },
     email: {
@@ -42,7 +44,9 @@ export const UserSchema = new mongoose.Schema(
       match: [
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
         'E-mail should be valid'
-      ]
+      ],
+      lowercase: true,
+      trim: true
     },
     password: {
       type: String,

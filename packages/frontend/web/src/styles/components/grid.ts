@@ -20,7 +20,7 @@ export const Row = styled.div<RowProps>`
   }
   @media (max-width: ${props => props.theme.responsive.mdDown}) {
     display: block;
-    > div {
+    > * {
       margin-bottom: ${props => props.theme.margins.sm};
     }
   }

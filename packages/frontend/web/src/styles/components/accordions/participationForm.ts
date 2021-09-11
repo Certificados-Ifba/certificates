@@ -1,38 +1,17 @@
 import styled from 'styled-components'
 
-interface ParticipantCardProps {
-  showInfo: boolean
-}
-
-export const ParticipantCard = styled.div<ParticipantCardProps>`
-  :hover {
-    box-shadow: 0px 0px 5px 0px ${props => props.theme.colors.mediumTint};
-  }
-
-  border-radius: 10px;
-  box-shadow: 0px 0px 3px 0px ${props => props.theme.colors.mediumTint};
-
-  padding: 20px;
-
-  h3 {
-    display: flex;
-    ${props => (props.showInfo ? 'margin-bottom: 10px;' : '')}
-    span {
-      margin-top: auto;
-      margin-bottom: auto;
-      margin-left: 5px;
-    }
-  }
+export const TitleOption = styled.div`
+  margin-bottom: 5px;
+  font-weight: bold;
 `
 
-export const ParticipantOption = styled.div`
-  .title {
-    margin-bottom: 5px;
-  }
-
-  .info {
-    font-size: small;
-    margin-left: 10px;
-    margin-bottom: 5px;
+export const InfoOption = styled.div`
+  font-size: 0.85rem;
+  margin-left: 10px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  svg {
+    margin-right: 8px;
   }
 `

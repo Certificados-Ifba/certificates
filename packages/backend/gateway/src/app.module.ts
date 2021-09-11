@@ -5,6 +5,8 @@ import { TerminusModule } from '@nestjs/terminus'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 
 import { ActivitiesController } from './controllers/activities.controller'
+import { ActivityTypesController } from './controllers/activity-types.controller'
+import { CertificatesController } from './controllers/certificates.controller'
 import { EventActivitiesController } from './controllers/event/event-activity.controller'
 import { EventParticipantsController } from './controllers/event/event-participant.controller'
 import { EventsController } from './controllers/events.controller'
@@ -29,13 +31,13 @@ import { PermissionGuard } from './services/guards/permission.guard'
   ],
   controllers: [
     ActivitiesController,
+    ActivityTypesController,
+    CertificatesController,
     EventsController,
     FunctionsController,
     ParticipantsController,
     TestEventsController,
     UsersController,
-    ParticipantsController,
-    EventActivitiesController,
     EventParticipantsController,
     SessionsController,
     PasswordController,
@@ -43,6 +45,14 @@ import { PermissionGuard } from './services/guards/permission.guard'
   ],
   providers: [
     ConfigService,
+    {
+      provide: 'ACTIVITY_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        const activityServiceOptions = configService.get('activityService')
+        return ClientProxyFactory.create(activityServiceOptions)
+      },
+      inject: [ConfigService]
+    },
     {
       provide: 'TOKEN_SERVICE',
       useFactory: (configService: ConfigService) => {
@@ -77,6 +87,15 @@ import { PermissionGuard } from './services/guards/permission.guard'
       provide: 'GENERIC_SERVICE',
       useFactory: (configService: ConfigService) => {
         return ClientProxyFactory.create(configService.get('genericService'))
+      },
+      inject: [ConfigService]
+    },
+    {
+      provide: 'CERTIFICATE_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create(
+          configService.get('certificateService')
+        )
       },
       inject: [ConfigService]
     },

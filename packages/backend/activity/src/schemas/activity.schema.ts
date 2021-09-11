@@ -2,6 +2,8 @@ import * as mongoose from 'mongoose'
 
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id
+  ret.start_date = ret.start_date.toISOString().substr(0, 10)
+  ret.end_date = ret.end_date.toISOString().substr(0, 10)
 }
 
 export const ActivitySchema = new mongoose.Schema(

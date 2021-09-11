@@ -15,6 +15,7 @@ import IUser from '../dtos/IUser'
 import withAuth from '../hocs/withAuth'
 import { useAuth } from '../providers/auth'
 import { Container, ListCards } from '../styles/pages/home'
+import capitalize from '../utils/capitalize'
 
 const Home: React.FC = () => {
   const [user, setUser] = useState<IUser>()
@@ -26,7 +27,7 @@ const Home: React.FC = () => {
     }
   }, [user, userAuth])
 
-  const firstName = user?.name.split(' ')[0]
+  const firstName = capitalize(user?.name.split(' ')[0])
 
   return (
     <Container>

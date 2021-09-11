@@ -149,7 +149,7 @@ const Users: React.FC = () => {
       </header>
       <Card>
         <header>
-          <h2>Usuários Cadastrados</h2>
+          <h2>Usuários cadastrados</h2>
           <Form onSubmit={handleFilter}>
             <Input name="search" placeholder="Buscar usuário" icon={FiSearch} />
           </Form>

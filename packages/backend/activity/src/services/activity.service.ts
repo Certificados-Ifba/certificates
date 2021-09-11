@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
-import { IActivityListParams } from 'src/interfaces/activity-list-params.interface'
-import { DataResponse } from 'src/interfaces/activity-list-response.interface'
 
+import { IActivityListParams } from '../interfaces/activity-list-params.interface'
+import { DataResponse } from '../interfaces/activity-list-response.interface'
 import { IActivityUpdateParams } from '../interfaces/activity-update-params.interface'
 import { IActivity } from '../interfaces/activity.interface'
 
@@ -51,7 +51,7 @@ export class ActivityService {
     const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
 
     const activities = await this.ActivityModel.find(query)
-      .populate('user')
+      .populate('type')
       .skip(perPage * (page - 1))
       .limit(perPage)
       .sort(sort)

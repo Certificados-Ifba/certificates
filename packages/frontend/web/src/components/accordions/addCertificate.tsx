@@ -70,7 +70,7 @@ const AddCertificate: React.FC<Props> = ({ event }) => {
           abortEarly: false
         })
         .then(async data => {
-          const response = await api.post(`event/${event.id}/activity`, data)
+          const response = await api.post(`event/${event?.id}/activity`, data)
 
           if (response.data) {
             addToast({
