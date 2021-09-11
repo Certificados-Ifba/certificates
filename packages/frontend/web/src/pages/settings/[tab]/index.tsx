@@ -1,8 +1,14 @@
 import Head from 'next/head'
-import { FiSettings, FiBriefcase, FiFileText } from 'react-icons/fi'
+import {
+  FiSettings,
+  FiBriefcase,
+  FiFileText,
+  FiAlignCenter
+} from 'react-icons/fi'
 
 import Tab from '../../../components/tab'
 import Generic from '../../../components/tabs/generic'
+import TextConfig from '../../../components/tabs/textConfig'
 import withAuth from '../../../hocs/withAuth'
 import { Container } from '../../../styles/pages/home'
 
@@ -25,6 +31,12 @@ const Settings: React.FC = () => {
       </header>
       <Tab
         tabs={[
+          {
+            name: 'Texto Padrão',
+            icon: FiAlignCenter,
+            children: <TextConfig />,
+            path: 'text'
+          },
           {
             name: 'Funções',
             icon: FiBriefcase,

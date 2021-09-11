@@ -7,9 +7,11 @@ import {
   FiCalendar,
   FiInfo,
   FiAward,
-  FiUsers
+  FiUsers,
+  FiSend
 } from 'react-icons/fi'
 
+import Alert from '../../../../components/alert'
 import Button from '../../../../components/button'
 import Tab from '../../../../components/tab'
 import EventActivity from '../../../../components/tabs/eventActivity'
@@ -51,7 +53,7 @@ const EventDetail: React.FC = () => {
   }, [id, addToast])
 
   return (
-    <Container>
+    <Container hasAlert={true}>
       <Head>
         <title>{event?.name} | Evento</title>
       </Head>
@@ -68,6 +70,7 @@ const EventDetail: React.FC = () => {
         </div>
         <nav>
           <Button
+            color="secondary"
             ghost
             onClick={() => {
               router.push('/events')
@@ -76,14 +79,44 @@ const EventDetail: React.FC = () => {
             <FiChevronLeft size={20} />
             <span className="hide-md-down">Voltar</span>
           </Button>
+          <Button
+            onClick={() => {
+              router.push(`/publish/${event.id}`)
+            }}
+          >
+            <FiSend size={20} />
+            <span className="hide-md-down">Publicar</span>
+          </Button>
         </nav>
       </header>
+      {true && (
+        <Alert type="warning" card={true}>
+          <b>Atenção!</b> Esse evento ainda não foi publicado.
+          <br />
+          <small>
+            Para os participantes baixarem os certificados ele precisa ser
+            publicado.
+          </small>
+        </Alert>
+      )}
+      {false && (
+        <Alert type="danger" card={true}>
+          <b>Atenção!</b> Esse evento está em edição.
+          <br />
+          <small>
+            Para os participantes baixarem os certificados ele precisa ser
+            publicado.
+          </small>
+        </Alert>
+      )}
       <Tab
         tabs={[
           {
             name: 'Informações',
             icon: FiInfo,
-            children: <EventInfo event={event} setEvent={setEvent} />,
+            children: (
+              <EventInfo edit={true} event={event} setEvent={setEvent} />
+            ),
             path: 'info'
           },
           {

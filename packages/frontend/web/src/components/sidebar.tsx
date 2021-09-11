@@ -63,7 +63,7 @@ const Sidebar: React.FC = () => {
         },
         {
           name: 'Configurações',
-          link: '/settings/function',
+          link: '/settings/text',
           icon: FiSettings,
           activeLinks: ['/settings/[tab]']
         }

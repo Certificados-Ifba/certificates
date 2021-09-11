@@ -19,7 +19,7 @@ interface ValidateContainerProps {
 }
 
 export const ImageContainer = styled.div`
-  > img {
+  > div {
     width: 1280px;
   }
 `
@@ -73,26 +73,22 @@ export const ValidateContainer = styled.div<ValidateContainerProps>`
       }
     `}
 `
-
 export const TextContainer = styled.div<TextContainerProps>`
-  ${props =>
-    (props.position === 'center' || props.position === 'custom') &&
-    css`
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      right: 0;
-      .text {
-        display: flex;
-        width: 100%;
-        height: 100%;
-      }
-      .center {
-        margin-top: auto;
-        margin-bottom: auto;
-      }
-    `}
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: 0;
+
+  .text {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+  .center {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
 
   ${props =>
     props.displayGuide &&
@@ -114,15 +110,27 @@ export const TextContainer = styled.div<TextContainerProps>`
       }
     `}
 
-  ${props => props.position === 'center' && 'padding: ' + props.padding + '%;'}
   ${props =>
-    props.position === 'custom' && 'padding-top: ' + props.paddingTop + '%;'}
-  ${props =>
+    props.position === 'center' &&
+    css`
+      padding: ${props.padding}%;
+    `}
+
+    ${props =>
     props.position === 'custom' &&
-    'padding-bottom: ' + props.paddingBottom + '%;'}
-  ${props =>
-    props.position === 'custom' && 'padding-left: ' + props.paddingLeft + '%;'}
-  ${props =>
-    props.position === 'custom' &&
-    'padding-right: ' + props.paddingRight + '%;'}
+    css`
+      padding-top: ${props.paddingTop}%;
+      padding-bottom: ${props.paddingBottom}%;
+      padding-left: ${props.paddingLeft}%;
+      padding-right: ${props.paddingRight}%;
+    `}
+`
+
+export interface ImageProps {
+  img: string
+}
+
+export const Image = styled.div<ImageProps>`
+  background-image: url(${props => props.img});
+  height: 878px;
 `

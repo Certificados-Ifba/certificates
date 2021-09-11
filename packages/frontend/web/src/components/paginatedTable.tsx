@@ -18,6 +18,7 @@ import { ReactSelect } from '../styles/components/select'
 import theme from '../styles/theme'
 import Button from './button'
 import Spinner from './spinner'
+import Table from './table'
 
 import 'simplebar/dist/simplebar.min.css'
 
@@ -86,11 +87,7 @@ const PaginatedTable: React.FC<Props> = ({ request, children }) => {
 
   return (
     <>
-      {/* <div style={{ overflowY: 'auto' }}> */}
-      <ScrollBar>
-        <DataTable>{children}</DataTable>
-      </ScrollBar>
-      {/* </div> */}
+      <Table>{children}</Table>
       {(!data || data?.data?.length === 0) && (
         <NoDataContainer>
           {data?.data?.length === 0 ? (

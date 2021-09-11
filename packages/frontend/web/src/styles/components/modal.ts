@@ -2,7 +2,7 @@ import { transparentize } from 'polished'
 import styled, { css } from 'styled-components'
 
 interface ModalProps {
-  size?: 'sm' | 'lg'
+  size?: 'sm' | 'lg' | 'xl'
   reverse?: boolean
 }
 
@@ -13,9 +13,10 @@ interface RowProps {
 export const Container = styled.div<ModalProps>`
   .modal-container-div {
     ${props =>
-      props.size === 'sm' && 'width:' + props.theme.modal.size.sm + ';'}
-    ${props =>
-      props.size === 'lg' && 'width:' + props.theme.modal.size.lg + ';'}
+      props.size === 'sm' &&
+      css`
+        width: ${props.theme.modal.size[props.size]};
+      `}
   }
 
   display: none;
@@ -37,6 +38,20 @@ export const Container = styled.div<ModalProps>`
 
   @media (max-width: ${props => props.theme.responsive.mdDown}) {
     top: 110px;
+  }
+
+  @media (max-width: 500px) {
+    margin: 0;
+    .modal-container-div {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: ${props => props.theme.modal.size[props.size]}) {
+    margin: 0;
+    .modal-container-div {
+      width: 100%;
+    }
   }
 
   header {
@@ -72,10 +87,13 @@ export const Container = styled.div<ModalProps>`
     display: flex;
 
     ${props => props.size === 'sm' && 'justify-content: space-between;'}
-    ${props => props.size === 'lg' && 'justify-content: flex-end;'}
+    ${props =>
+      (props.size === 'lg' || props.size === 'xl') &&
+      'justify-content: flex-end;'}
 
     > button {
-      ${props => props.size === 'lg' && 'margin-left: 8px;'}
+      ${props =>
+        (props.size === 'lg' || props.size === 'xl') && 'margin-left: 8px;'}
     }
 
     ${props =>

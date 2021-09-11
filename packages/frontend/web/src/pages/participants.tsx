@@ -106,9 +106,7 @@ const Participants: React.FC = () => {
           <h1>
             <FiUserCheck size={24} /> Participantes
           </h1>
-          <h2>
-            Todas as pessoas que participaram ou vão participar dos eventos
-          </h2>
+          <h2>Todas as pessoas que participaram ou participarão de eventos</h2>
         </div>
         <nav>
           <Button

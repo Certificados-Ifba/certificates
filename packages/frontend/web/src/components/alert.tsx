@@ -7,6 +7,7 @@ interface Props {
   marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   size?: 'sm' | 'lg' | 'md'
   icon?: React.ComponentType<IconBaseProps>
+  card?: boolean
 }
 
 const Alert: React.FC<Props> = ({
@@ -14,7 +15,8 @@ const Alert: React.FC<Props> = ({
   marginBottom,
   size,
   children,
-  icon: Icon
+  icon: Icon,
+  card
 }) => {
   let iconSize: number
   let fontSize: string
@@ -36,7 +38,13 @@ const Alert: React.FC<Props> = ({
     }
   }
   return (
-    <Container fontSize={fontSize} type={type} marginBottom={marginBottom}>
+    <Container
+      className="alert"
+      fontSize={fontSize}
+      type={type}
+      marginBottom={marginBottom}
+      card={card}
+    >
       {Icon && (
         <span className="alert-icon">
           <Icon size={iconSize} />
