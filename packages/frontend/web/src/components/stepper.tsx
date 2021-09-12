@@ -6,11 +6,45 @@ export interface Step {
   name: string
   active?: boolean
   selected?: boolean
-  id: string
+  id?: number
+}
+
+export interface StepConfig {
+  name: string
 }
 
 export interface Props {
   steps: Step[]
+}
+
+const active = (step: number, stepSelected: number) => {
+  return step <= stepSelected
+}
+
+const getStep = (name: string, step: number, stepSelected: number) => {
+  return {
+    active: active(step, stepSelected),
+    name: name,
+    selected: step === stepSelected,
+    id: step
+  }
+}
+
+export const getStepList: (steps: StepConfig[], selected: number) => Step[] = (
+  steps,
+  selected
+) => {
+  const list: Step[] = []
+  let index = 0
+  for (const step of steps) {
+    list.push(getStep(step.name, index, selected))
+    index++
+  }
+  return list
+}
+
+export const getSelected: (steps: Step[]) => Step = steps => {
+  return steps.find(data => data.selected)
 }
 
 const Stepper: React.FC<Props> = ({ steps }) => {
