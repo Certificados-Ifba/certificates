@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useState } from 'react'
+import { FiImage } from 'react-icons/fi'
 
 import image from '../../../public/teste.jpeg'
 import {
@@ -54,6 +55,18 @@ const Certificate: React.FC<Props> = ({
           {image && <Image img={image}></Image>}
           {!image && (
             <FileChooser
+              handleFileSelected={() => {
+                console.log()
+              }}
+              type="image"
+              info={
+                <>
+                  A imagem deve estar nas <b>dimenções A4</b> e orientação
+                  paisagem. Dimensão: 1123 x 794 pixels (Largura x Altura).
+                </>
+              }
+              title="Arraste a imagem do certificado aqui"
+              icon={FiImage}
               height="878px"
               preview={preview}
               setPreview={setPreview}

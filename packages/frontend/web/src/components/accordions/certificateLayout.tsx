@@ -92,12 +92,13 @@ const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
     setStateRichText(value)
   }, [])
 
+  const [dropdownTextActive, setdropdownTextActive] = useState(false)
+  const [dropdownValidateActive, setDropdownValidateActive] = useState(false)
   const handleDropdownText = useCallback(({ active }) => {
-    setDisplayTextGuide(!active)
+    setDisplayTextGuide(active)
   }, [])
-
   const handleDropdownValidate = useCallback(({ active }) => {
-    setDisplayValidateGuide(!active)
+    setDisplayValidateGuide(active)
   }, [])
 
   const [preview, setPreview] = useState('')
@@ -127,6 +128,8 @@ const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
         <EditContainer>
           <div className="first-button">
             <Dropdown
+              active={dropdownTextActive}
+              setActive={setdropdownTextActive}
               onChangeState={handleDropdownText}
               color="secondary"
               inline
@@ -243,6 +246,8 @@ const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
             </Dropdown>
           </div>
           <Dropdown
+            active={dropdownValidateActive}
+            setActive={setDropdownValidateActive}
             color="secondary"
             onChangeState={handleDropdownValidate}
             dropdownChildren={

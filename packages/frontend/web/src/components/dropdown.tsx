@@ -3,8 +3,7 @@ import {
   ReactNode,
   SetStateAction,
   useCallback,
-  useEffect,
-  useState
+  useEffect
 } from 'react'
 import { IconBaseProps } from 'react-icons'
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
@@ -27,8 +26,8 @@ export interface DropdownProps extends ButtonProps {
     | 'medium'
     | 'light'
   onChangeState?: ({ active: boolean }) => void
-  active?: boolean
-  setActive?: Dispatch<SetStateAction<boolean>>
+  active: boolean
+  setActive: Dispatch<SetStateAction<boolean>>
 }
 
 const Dropdown: React.FC<DropdownProps> = ({ ...rest }) => {
@@ -42,23 +41,6 @@ const Dropdown: React.FC<DropdownProps> = ({ ...rest }) => {
     onChangeState,
     ...restButton
   } = rest
-
-  const [dropActive, setDropActive] = useState(false)
-
-  const handleSetActive = useCallback(
-    (active: boolean) => {
-      if (setActive) {
-        setActive(active)
-      } else {
-        setDropActive(active)
-      }
-    },
-    [setActive]
-  )
-
-  const isActive = () => {
-    return setActive ? active : dropActive
-  }
 
   const handleEvt = useCallback(
     event => {
@@ -77,9 +59,14 @@ const Dropdown: React.FC<DropdownProps> = ({ ...rest }) => {
           if (dropClick) break
         }
       }
-      if (!dropClick) handleSetActive(false)
+      if (!dropClick) {
+        if (active) {
+          setActive(false)
+          if (onChangeState) onChangeState({ active: false })
+        }
+      }
     },
-    [handleSetActive]
+    [active, onChangeState, setActive]
   )
 
   useEffect(() => {
@@ -90,11 +77,11 @@ const Dropdown: React.FC<DropdownProps> = ({ ...rest }) => {
   }, [handleEvt])
 
   return (
-    <Container className="dropdown" active={isActive()}>
+    <Container className="dropdown" active={active}>
       <Button
         onClick={() => {
-          handleSetActive(!isActive())
-          if (onChangeState) onChangeState({ active: isActive() })
+          setActive(!active)
+          if (onChangeState) onChangeState({ active: !active })
         }}
         type="button"
         {...restButton}
@@ -106,8 +93,8 @@ const Dropdown: React.FC<DropdownProps> = ({ ...rest }) => {
         )}
         <span>{children}</span>
         <span style={{ marginLeft: '0.5rem' }}>
-          {isActive() && <FiChevronUp size={20} />}
-          {!isActive() && <FiChevronDown size={20} />}
+          {active && <FiChevronUp size={20} />}
+          {!active && <FiChevronDown size={20} />}
         </span>
       </Button>
       <DropdownContent className="dropdown-content">
