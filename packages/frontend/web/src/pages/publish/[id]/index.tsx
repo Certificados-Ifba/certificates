@@ -1,23 +1,16 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useState } from 'react'
-import {
-  FiFileText,
-  FiChevronLeft,
-  FiCalendar,
-  FiInfo,
-  FiAward,
-  FiUsers,
-  FiSend,
-  FiChevronsLeft,
-  FiChevronRight,
-  FiCheck
-} from 'react-icons/fi'
+import { useEffect, useState } from 'react'
+import { FiChevronLeft, FiSend, FiChevronRight, FiCheck } from 'react-icons/fi'
 
 import Alert from '../../../components/alert'
 import Button from '../../../components/button'
 import Card from '../../../components/card'
-import Stepper, { Step } from '../../../components/stepper'
+import Stepper, {
+  getSelected,
+  getStepList,
+  StepConfig
+} from '../../../components/stepper'
 import EventActivity from '../../../components/steps/eventActivity'
 import EventCertificate from '../../../components/steps/eventCertificate'
 import PublishSuccess from '../../../components/steps/publishSuccess'
@@ -29,7 +22,16 @@ import { Container } from '../../../styles/pages/home'
 import { CardHeader } from '../../../styles/pages/publish'
 
 const infoName = 'Informações'
+const activityName = 'Atividades'
+const modelName = 'Modelos de Certificados'
 const endName = 'Pronto'
+
+const stepConfig: StepConfig[] = [
+  { name: infoName },
+  { name: activityName },
+  { name: modelName },
+  { name: endName }
+]
 
 const Publish: React.FC = () => {
   const router = useRouter()
@@ -59,45 +61,7 @@ const Publish: React.FC = () => {
     if (id) loadData()
   }, [id, addToast])
 
-  const active = useCallback((s: string, stepSelected: string) => {
-    if (s === 'step-1') return true
-    if (stepSelected === 'step-2') return s === 'step-2'
-    if (stepSelected === 'step-3') return s === 'step-2' || s === 'step-3'
-    if (stepSelected === 'step-4')
-      return s === 'step-2' || s === 'step-3' || s === 'step-4'
-  }, [])
-
-  const getStep = useCallback<
-    (name: string, step: string, stepSelected: string) => Step
-  >(
-    (name: string, step: string, stepSelected: string) => {
-      return {
-        active: active(step, stepSelected),
-        name: name,
-        selected: step === stepSelected,
-        id: step
-      }
-    },
-    [active]
-  )
-
-  const getStepList = useCallback<(selected: string) => Step[]>(
-    (selected: string) => {
-      return [
-        getStep(infoName, 'step-1', selected),
-        getStep('Atividades', 'step-2', selected),
-        getStep('Modelos de Certificados', 'step-3', selected),
-        getStep(endName, 'step-4', selected)
-      ]
-    },
-    [getStep]
-  )
-
-  const [steps, setSteps] = useState(getStepList('step-1'))
-
-  const getSelected = useCallback(() => {
-    return steps.find(data => data.selected)
-  }, [steps])
+  const [steps, setSteps] = useState(getStepList(stepConfig, 0))
 
   return (
     <Container>
@@ -112,7 +76,7 @@ const Publish: React.FC = () => {
         </div>
       </header>
       <Stepper steps={steps}></Stepper>
-      {getSelected().id !== 'step-4' && (
+      {getSelected(steps).name !== endName && (
         <Alert marginBottom="md" card={true} type="warning">
           <b>Atenção!</b> Revise as informações antes de publicar o evento.
         </Alert>
@@ -121,21 +85,17 @@ const Publish: React.FC = () => {
       <Card>
         <CardHeader>
           <Button
-            disabled={getSelected().id === 'step-4'}
+            disabled={getSelected(steps).name === endName}
             ghost
             color="secondary"
             size="default"
             type="button"
             onClick={() => {
-              const selected = getSelected()
+              const selected = getSelected(steps)
               if (selected.name === infoName) {
                 router.push(`/events/info/${event.id}`)
               } else {
-                setSteps(
-                  getStepList(
-                    'step-' + (parseInt(selected.id.substr(5, 1)) - 1)
-                  )
-                )
+                setSteps(getStepList(stepConfig, selected.id - 1))
               }
             }}
             inline
@@ -148,45 +108,46 @@ const Publish: React.FC = () => {
             size="default"
             type="button"
             onClick={() => {
-              const selected = getSelected()
+              const selected = getSelected(steps)
               if (selected.name === endName) {
                 router.push(`/events/info/${event.id}`)
               } else {
                 console.log()
-                setSteps(
-                  getStepList(
-                    'step-' + (parseInt(selected.id.substr(5, 1)) + 1)
-                  )
-                )
+                setSteps(getStepList(stepConfig, selected.id + 1))
               }
             }}
             inline
           >
-            {getSelected().id === 'step-4' && (
+            {getSelected(steps).name === endName && (
               <>
                 <FiCheck size={20} /> <span>Concluir</span>
               </>
             )}
-            {getSelected().id === 'step-3' && (
+            {getSelected(steps).name === modelName && (
               <>
                 <FiCheck size={20} /> <span>Publicar</span>
               </>
             )}
-            {getSelected().id !== 'step-3' && getSelected().id !== 'step-4' && (
-              <>
-                <FiChevronRight size={20} /> <span>Avançar</span>
-              </>
-            )}
+            {getSelected(steps).name !== modelName &&
+              getSelected(steps).name !== endName && (
+                <>
+                  <FiChevronRight size={20} /> <span>Avançar</span>
+                </>
+              )}
           </Button>
         </CardHeader>
-        {getSelected().id === 'step-1' && (
+        {getSelected(steps).name === infoName && (
           <EventInfo edit={false} event={event} setEvent={setEvent}></EventInfo>
         )}
-        {getSelected().id === 'step-2' && (
+        {getSelected(steps).name === activityName && (
           <EventActivity addToast={addToast} event={event}></EventActivity>
         )}
-        {getSelected().id === 'step-3' && <EventCertificate></EventCertificate>}
-        {getSelected().id === 'step-4' && <PublishSuccess></PublishSuccess>}
+        {getSelected(steps).name === modelName && (
+          <EventCertificate></EventCertificate>
+        )}
+        {getSelected(steps).name === endName && (
+          <PublishSuccess></PublishSuccess>
+        )}
       </Card>
     </Container>
   )

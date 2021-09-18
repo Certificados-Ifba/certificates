@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 export const TextContainer = styled.div`
   text-align: center;
@@ -27,7 +27,11 @@ export const Info = styled.div`
   color: ${props => props.theme.colors.secondary};
 `
 
-export const Container = styled.div<{ height: string; border: boolean }>`
+export const Container = styled.div<{
+  height: string
+  border: boolean
+  background: boolean
+}>`
   .upload {
     display: flex;
     align-items: center;
@@ -35,7 +39,11 @@ export const Container = styled.div<{ height: string; border: boolean }>`
     width: 100%;
     height: ${props => props.height};
     color: ${props => props.theme.colors.primary};
-    background-color: ${props => props.theme.colors.mediumTint};
+    ${props =>
+      props.background &&
+      css`
+        background-color: ${props => props.theme.colors.mediumTint};
+      `}
     position: relative;
     background-repeat: no-repeat;
     background-position: center;

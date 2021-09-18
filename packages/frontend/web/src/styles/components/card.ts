@@ -27,9 +27,15 @@ export const Container = styled.div`
         margin-bottom: ${props => props.theme.margins.sm};
         margin-left: 0;
       }
+
       form {
         width: 100%;
         margin-bottom: ${props => props.theme.margins.sm};
+      }
+    }
+    .dropdown-content {
+      button {
+        margin-left: 0;
       }
     }
   }
