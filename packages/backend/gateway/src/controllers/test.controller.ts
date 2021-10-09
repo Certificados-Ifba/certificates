@@ -1,4 +1,4 @@
-import { Controller, Inject, Get, Res } from '@nestjs/common'
+import { Controller, Inject, Get, Res, Post, Query, Body } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger'
 import { Response } from 'express'
@@ -11,6 +11,15 @@ export class TestEventsController {
   constructor(
     @Inject('EVENT_SERVICE') private readonly eventServiceClient: ClientProxy
   ) {}
+
+  @Post('import')
+  public async import(@Body() body: any): Promise<any> {
+    return {
+      message: 'Atividade importada com sucesso',
+      data: null,
+      errors: null
+    }
+  }
 
   @Get('events/participants/activities')
   public async getActivitiesOfParticipants(

@@ -44,6 +44,11 @@ export const Container = styled.div<{
       css`
         background-color: ${props => props.theme.colors.mediumTint};
       `}
+    ${props =>
+      !props.background &&
+      css`
+        border-style: dashed;
+      `}
     position: relative;
     background-repeat: no-repeat;
     background-position: center;
@@ -57,6 +62,11 @@ export const Container = styled.div<{
       transition: opacity 0.25s ease-in-out;
       > div {
         width: 400px;
+        @media (max-width: ${props => props.theme.responsive.smDown}) {
+          width: 90%;
+          margin-left: auto;
+          margin-right: auto;
+        }
       }
     }
 

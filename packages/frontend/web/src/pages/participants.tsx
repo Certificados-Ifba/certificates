@@ -1,7 +1,15 @@
 import { Form } from '@unform/web'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
-import { FiEdit, FiPlus, FiSearch, FiTrash2, FiUserCheck } from 'react-icons/fi'
+import {
+  FiEdit,
+  FiFilePlus,
+  FiPlus,
+  FiSearch,
+  FiTrash2,
+  FiUserCheck
+} from 'react-icons/fi'
 
 import Alert from '../components/alert'
 import Button from '../components/button'
@@ -96,6 +104,8 @@ const Participants: React.FC = () => {
     }
   }, [show, isAdmin])
 
+  const router = useRouter()
+
   return (
     <Container>
       <Head>
@@ -131,6 +141,17 @@ const Participants: React.FC = () => {
               icon={FiSearch}
             />
           </Form>
+          <Button
+            inline
+            color="info"
+            size="small"
+            onClick={() => {
+              router.push(`/import/participants`)
+            }}
+          >
+            <FiFilePlus size={20} />
+            <span>Importar via Planilha</span>
+          </Button>
         </header>
         <PaginatedTable request={request}>
           <thead>

@@ -1,7 +1,16 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
+import { useRouter } from 'next/router'
 import { useCallback, useRef, useState } from 'react'
-import { FiEdit, FiPlus, FiSearch, FiTrash2 } from 'react-icons/fi'
+import {
+  FiEdit,
+  FiFilePlus,
+  FiList,
+  FiMenu,
+  FiPlus,
+  FiSearch,
+  FiTrash2
+} from 'react-icons/fi'
 
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
@@ -10,6 +19,7 @@ import { TableRow } from '../../styles/pages/home'
 import Alert from '../alert'
 import Button from '../button'
 import Column from '../column'
+import Dropdown from '../dropdown'
 import Input from '../input'
 import EventActivityModal from '../modals/activityModal'
 import DeleteModal from '../modals/deleteModal'
@@ -27,7 +37,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const searchFormRef = useRef<FormHandles>()
   const request = usePaginatedRequest<any>({
-    url: `events/${event.id}/activities`,
+    url: `events/${event?.id}/activities`,
     params:
       filters && order !== ''
         ? Object.assign(filters, { sort_by: column, order_by: order })
@@ -69,7 +79,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
 
   const handleSubmitDelete = useCallback(() => {
     api
-      .delete(`event/${event.id}/activity/${activitySelected}`)
+      .delete(`event/${event?.id}/activity/${activitySelected}`)
       .then(resp => {
         if (resp?.data?.message === 'event_activity_delete_by_id_success') {
           addToast({
@@ -90,7 +100,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
         })
       })
   }, [event, activitySelected, addToast, request])
-
+  const router = useRouter()
   return (
     <>
       <header>
@@ -103,8 +113,9 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
           />
         </Form>
         <Button
-          size="small"
           inline
+          color="primary"
+          size="small"
           onClick={() => {
             setActivitySelected(null)
             setOpenModal(true)
@@ -112,6 +123,17 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
         >
           <FiPlus size={20} />
           <span>Adicionar Atividade</span>
+        </Button>
+        <Button
+          inline
+          color="info"
+          size="small"
+          onClick={() => {
+            router.push(`/import/events/activities/${event?.id}`)
+          }}
+        >
+          <FiFilePlus size={20} />
+          <span>Importar via Planilha</span>
         </Button>
       </header>
       <PaginatedTable request={request}>
