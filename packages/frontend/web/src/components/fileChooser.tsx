@@ -30,6 +30,7 @@ interface FileChooserProps {
   icon?: React.ComponentType<IconBaseProps>
   type: 'image' | 'spreadsheet'
   handleFileSelected: (file: FileSelected) => void
+  handleFileRemoved?: () => void
 }
 
 const FileChooser: React.FC<FileChooserProps> = ({
@@ -40,7 +41,8 @@ const FileChooser: React.FC<FileChooserProps> = ({
   title,
   icon: Icon,
   type,
-  handleFileSelected
+  handleFileSelected,
+  handleFileRemoved
 }) => {
   const [highlight, setHighlight] = useState(false)
   const [fileInfo, setFileInfo] = useState<FileSelected>(null)
@@ -183,6 +185,7 @@ const FileChooser: React.FC<FileChooserProps> = ({
                   type="button"
                   onClick={() => {
                     setFileInfo(null)
+                    if (handleFileRemoved) handleFileRemoved()
                   }}
                 >
                   <FiTrash2 size={20} />

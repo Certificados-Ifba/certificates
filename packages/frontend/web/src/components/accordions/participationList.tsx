@@ -1,9 +1,11 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
+import { useRouter } from 'next/router'
 import { useCallback, useRef, useState } from 'react'
 import {
   FiDownload,
   FiExternalLink,
+  FiFilePlus,
   FiMinusCircle,
   FiPlus,
   FiSearch
@@ -23,12 +25,14 @@ interface Props {
 }
 
 const ParticipationList: React.FC<Props> = ({ event, openAccordion }) => {
+  const router = useRouter()
+
   const [filters, setFilters] = useState(null)
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
   const searchFormRef = useRef<FormHandles>()
   const request = usePaginatedRequest<any>({
-    url: `events/${event.id}/participants`,
+    url: `events/${event?.id}/participants`,
     params:
       filters && order !== ''
         ? Object.assign(filters, { sort_by: column, order_by: order })
@@ -73,6 +77,17 @@ const ParticipationList: React.FC<Props> = ({ event, openAccordion }) => {
         <Button size="small" inline onClick={openAccordion}>
           <FiPlus size={20} />
           <span>Adicionar Atividade</span>
+        </Button>
+        <Button
+          inline
+          color="info"
+          size="small"
+          onClick={() => {
+            router.push(`/import/events/participants/${event?.id}`)
+          }}
+        >
+          <FiFilePlus size={20} />
+          <span>Importar via Planilha</span>
         </Button>
       </header>
       <PaginatedTable request={request}>

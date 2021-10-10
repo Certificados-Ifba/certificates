@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components'
 
 interface ContainerProps {
   hasAlert?: boolean
+  titleForm?: boolean
 }
 
 export const Container = styled.div<ContainerProps>`
@@ -16,12 +17,38 @@ export const Container = styled.div<ContainerProps>`
   }
 
   > header {
-    display: flex;
-    align-items: center;
+    ${props =>
+      props.titleForm &&
+      css`
+        display: block;
+        form {
+          margin-top: 10px;
+          width: 100%;
+        }
+        @media (min-width: ${props => props.theme.responsive.lgDown}) {
+          display: flex;
+          align-items: center;
+          > form {
+            flex: 1;
+            margin-left: 40px;
+          }
+          > div {
+            flex: 1;
+          }
+        }
+      `}
+
+    ${props =>
+      !props.titleForm &&
+      css`
+        display: flex;
+        align-items: center;
+      `}    
+
     ${props => !props.hasAlert && 'margin-bottom: 45px;'}
 
     div {
-      flex: 1;
+      ${props => !props.titleForm && 'flex: 1;'}
       h1 {
         font-size: 1.875rem;
       }

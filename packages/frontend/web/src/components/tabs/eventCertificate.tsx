@@ -113,7 +113,7 @@ const EventCertificate: React.FC<Props> = ({ event }) => {
         />
       )}
       {showList && (
-        <Row cols={2}>
+        <Row firstWidth="1460px" cols={2}>
           {certificateList.map((certificate, index) => (
             <div key={index}>
               <CertificatePreview
