@@ -7,7 +7,7 @@ export default interface IEvent {
   initials: string
   year: string
   edition: string
-  start_date: string
-  end_date: string
+  start_date: any
+  end_date: any
   user: IUser
 }

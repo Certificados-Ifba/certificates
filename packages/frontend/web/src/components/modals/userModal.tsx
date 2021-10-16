@@ -24,7 +24,7 @@ import Alert from '../alert'
 import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
-import Select from '../select'
+import Select from '../newSelect'
 
 interface Props {
   type: 'add' | 'update' | 'update-email'
@@ -44,7 +44,7 @@ const UserModal: React.FC<Props> = ({
   const { addToast } = useToast()
   const formRef = useRef<FormHandles>(null)
 
-  const handleCloseSaveModal = useCallback(() => {
+  const handleCloseModal = useCallback(() => {
     formRef.current.reset()
     formRef.current.setErrors({})
     onClose()
@@ -100,7 +100,7 @@ const UserModal: React.FC<Props> = ({
                 } com sucesso.`
         })
         request.revalidate()
-        handleCloseSaveModal()
+        handleCloseModal()
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err)
@@ -122,7 +122,7 @@ const UserModal: React.FC<Props> = ({
         })
       }
     },
-    [type, user, addToast, request, handleCloseSaveModal]
+    [type, user, addToast, request, handleCloseModal]
   )
 
   useEffect(() => {
@@ -134,7 +134,7 @@ const UserModal: React.FC<Props> = ({
   }, [user, openModal, type])
 
   return (
-    <Modal open={openModal} onClose={handleCloseSaveModal}>
+    <Modal open={openModal} onClose={handleCloseModal}>
       <header>
         <h2>
           {type === 'update' ? (
@@ -251,7 +251,7 @@ const UserModal: React.FC<Props> = ({
         <footer>
           <Button
             onClick={() => {
-              handleCloseSaveModal()
+              handleCloseModal()
             }}
             color="secondary"
             type="button"

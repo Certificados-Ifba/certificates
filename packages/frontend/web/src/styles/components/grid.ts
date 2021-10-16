@@ -30,7 +30,7 @@ export const Row = styled.div<RowProps>`
         ? props.secondWidth
         : props.theme.responsive.mdDown}) {
     display: block;
-    > div {
+    > * {
       margin-bottom: ${props => props.theme.margins.sm};
     }
   }

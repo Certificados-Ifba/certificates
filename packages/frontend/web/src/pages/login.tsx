@@ -203,7 +203,7 @@ const FormLogin: React.FC<{
         addToast({
           type: 'error',
           title: 'Não foi possível entrar',
-          description: 'Por favor, verifique seu usuário e sua senha.'
+          description: err
         })
       }
     },

@@ -2,6 +2,8 @@ import * as mongoose from 'mongoose'
 
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id
+  ret.start_date = ret.start_date.toISOString().substr(0, 10)
+  ret.end_date = ret.end_date.toISOString().substr(0, 10)
 }
 
 export const EventSchema = new mongoose.Schema(
@@ -35,6 +37,11 @@ export const EventSchema = new mongoose.Schema(
     end_date: {
       type: Date,
       required: [true, 'End date can not be empty']
+    },
+    status: {
+      type: String,
+      enum: ['DRAFT', 'PUBLISHED', 'REVIEW'],
+      default: 'DRAFT'
     }
   },
   {

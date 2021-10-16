@@ -58,10 +58,10 @@ const Settings: React.FC = () => {
                 icon={FiFileText}
                 name="Tipo de Atividade"
                 plural="Tipo de Atividades"
-                url="/activities"
+                url="/activity_types"
               />
             ),
-            path: 'activity'
+            path: 'activity-type'
           }
         ]}
       />

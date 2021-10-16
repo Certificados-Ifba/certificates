@@ -18,6 +18,10 @@ const getErrorMessage = (
     case 'user_get_by_link_expired':
       message = 'Link expirado, favor tente novamente.'
       break
+    case 'user_search_by_credentials_not_match':
+    case 'user_search_by_credentials_not_found':
+      message = 'Por favor, verifique seu usuário e sua senha.'
+      break
     case 'user_forgot_password_not_found':
       message = 'E-mail não encontrado, favor informar um e-mail cadastrado.'
       break

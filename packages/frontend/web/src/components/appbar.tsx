@@ -13,6 +13,7 @@ import {
   Avatar,
   Right
 } from '../styles/components/appbar'
+import capitalize from '../utils/capitalize'
 import getRole from '../utils/getRole'
 
 const Appbar: React.FC = () => {
@@ -44,7 +45,7 @@ const Appbar: React.FC = () => {
       <Right>
         <UserInfo className="hide-md-down">
           <Info>
-            <b>{user?.name}</b>
+            <b>{capitalize(user?.name)}</b>
             <span>{getRole(user?.role)}</span>
           </Info>
           <Avatar>{user?.name.substr(0, 1).toUpperCase()}</Avatar>

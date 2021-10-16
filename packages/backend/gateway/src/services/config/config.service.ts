@@ -41,6 +41,27 @@ export class ConfigService {
       },
       transport: Transport.TCP
     }
+    this.envConfig.activityService = {
+      options: {
+        port: process.env.ACTIVITY_SERVICE_PORT,
+        host: process.env.ACTIVITY_SERVICE_HOST
+      },
+      transport: Transport.TCP
+    }
+    this.envConfig.certificateService = {
+      options: {
+        port: process.env.CERTIFICATE_SERVICE_PORT,
+        host: process.env.CERTIFICATE_SERVICE_HOST
+      },
+      transport: Transport.TCP
+    }
+    this.envConfig.storageService = {
+      options: {
+        port: process.env.STORAGE_SERVICE_PORT,
+        host: process.env.STORAGE_SERVICE_HOST
+      },
+      transport: Transport.TCP
+    }
   }
 
   get(key: string): any {

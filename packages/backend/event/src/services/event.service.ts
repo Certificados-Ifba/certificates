@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
-import { IEventListParams } from 'src/interfaces/event-list-params.interface'
-import { DataResponse } from 'src/interfaces/event-list-response.interface'
 
+import { IEventListParams } from '../interfaces/event-list-params.interface'
+import { DataResponse } from '../interfaces/event-list-response.interface'
 import { IEventUpdateParams } from '../interfaces/event-update-params.interface'
 import { IEvent } from '../interfaces/event.interface'
 

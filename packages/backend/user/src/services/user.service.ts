@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { IUserListParams } from 'src/interfaces/user-list-params.interface'
-import { DataResponse } from 'src/interfaces/user-list-response.interface'
-import { IUserUpdateParams } from 'src/interfaces/user-update-params.interface'
 
 import { IUserLink } from '../interfaces/user-link.interface'
+import { IUserListParams } from '../interfaces/user-list-params.interface'
+import { DataResponse } from '../interfaces/user-list-response.interface'
+import { IUserUpdateParams } from '../interfaces/user-update-params.interface'
 import { IUser } from '../interfaces/user.interface'
 import { ConfigService } from './config/config.service'
 
@@ -23,7 +23,7 @@ export class UserService {
     }).exec()
   }
 
-  public async searchUserByCPF(cpf: String): Promise<IUser> {
+  public async searchUserByCpf(cpf: String): Promise<IUser> {
     return this.UserModel.findOne({
       'personal_data.cpf': cpf
     }).exec()

@@ -4,7 +4,8 @@ import {
   HealthCheckService,
   MicroserviceHealthIndicator
 } from '@nestjs/terminus'
-import { ConfigService } from 'src/services/config/config.service'
+
+import { ConfigService } from '../services/config/config.service'
 
 @Controller('health')
 export class HealthController {

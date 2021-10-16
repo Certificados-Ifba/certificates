@@ -1,5 +1,6 @@
 import axios from 'axios'
 import Cookie from 'js-cookie'
+import router from 'next/router'
 
 import getErrorMessage from '../utils/getErrorMessage'
 
@@ -20,7 +21,9 @@ api.interceptors.response.use(
 
     if (data?.message === 'token_decode_unauthorized') {
       Cookie.remove('certificates.session')
+      router.push('/')
     }
+
     return Promise.reject(getErrorMessage(data?.message, data?.errors))
   }
 )

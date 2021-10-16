@@ -5,15 +5,17 @@ import { TerminusModule } from '@nestjs/terminus'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 
 import { ActivitiesController } from './controllers/activities.controller'
-import { EventActivitiesController } from './controllers/event/event-activity.controller'
-import { EventParticipantsController } from './controllers/event/event-participant.controller'
+import { ActivityTypesController } from './controllers/activity-types.controller'
+import { CertificatesController } from './controllers/certificates.controller'
 import { EventsController } from './controllers/events.controller'
 import { FunctionsController } from './controllers/functions.controller'
 import { HealthController } from './controllers/health.controller'
+import { InfosController } from './controllers/infos.controller'
+import { ModelsController } from './controllers/models.controller'
 import { ParticipantsController } from './controllers/participants.controller'
 import { PasswordController } from './controllers/password.controller'
 import { SessionsController } from './controllers/sessions.controller'
-import { TestEventsController } from './controllers/test.controller'
+import { UploadController } from './controllers/upload.controller'
 import { UsersController } from './controllers/users.controller'
 import { ConfigService } from './services/config/config.service'
 import { ThrottlerConfigService } from './services/config/throttler.service'
@@ -29,20 +31,29 @@ import { PermissionGuard } from './services/guards/permission.guard'
   ],
   controllers: [
     ActivitiesController,
+    ActivityTypesController,
+    CertificatesController,
     EventsController,
     FunctionsController,
+    HealthController,
+    InfosController,
+    ModelsController,
     ParticipantsController,
-    TestEventsController,
-    UsersController,
-    ParticipantsController,
-    EventActivitiesController,
-    EventParticipantsController,
-    SessionsController,
     PasswordController,
-    HealthController
+    SessionsController,
+    UploadController,
+    UsersController
   ],
   providers: [
     ConfigService,
+    {
+      provide: 'ACTIVITY_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        const activityServiceOptions = configService.get('activityService')
+        return ClientProxyFactory.create(activityServiceOptions)
+      },
+      inject: [ConfigService]
+    },
     {
       provide: 'TOKEN_SERVICE',
       useFactory: (configService: ConfigService) => {
@@ -77,6 +88,22 @@ import { PermissionGuard } from './services/guards/permission.guard'
       provide: 'GENERIC_SERVICE',
       useFactory: (configService: ConfigService) => {
         return ClientProxyFactory.create(configService.get('genericService'))
+      },
+      inject: [ConfigService]
+    },
+    {
+      provide: 'CERTIFICATE_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create(
+          configService.get('certificateService')
+        )
+      },
+      inject: [ConfigService]
+    },
+    {
+      provide: 'STORAGE_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create(configService.get('storageService'))
       },
       inject: [ConfigService]
     },

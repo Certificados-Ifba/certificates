@@ -21,28 +21,27 @@ import {
   ApiBearerAuth
 } from '@nestjs/swagger'
 import { Response } from 'express'
-import { Permission } from 'src/decorators/permission.decorator'
-import { DeleteUserResponseDto } from 'src/interfaces/user/dto/delete-user-response.dto'
-import { GetUserByIdResponseDto } from 'src/interfaces/user/dto/get-user-by-id-response.dto'
-import { GetUsersResponseDto } from 'src/interfaces/user/dto/get-user-response.dto'
-import { ListUserDto } from 'src/interfaces/user/dto/list-user.dto'
-import { ResendMailResponseDto } from 'src/interfaces/user/dto/resend-mail-response.dto'
-import { UpdateUserResponseDto } from 'src/interfaces/user/dto/update-user-response.dto'
-import { UpdateUserDto } from 'src/interfaces/user/dto/update-user.dto'
-import { UserIdDto } from 'src/interfaces/user/dto/user-id.dto'
-import { IServiceUserDeleteResponse } from 'src/interfaces/user/service-user-delete-response.interface'
-import { IServiceUserListResponse } from 'src/interfaces/user/service-user-list-response.interface'
-import { IServiceUserResendResponse } from 'src/interfaces/user/service-user-resend-response.interface'
-import { IServiceUserUpdateByIdResponse } from 'src/interfaces/user/service-user-update-by-id-response.interface'
-import capitalize from 'src/utils/capitalize'
 
 import { Authorization } from '../decorators/authorization.decorator'
+import { Permission } from '../decorators/permission.decorator'
 import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
 import { CreateUserResponseDto } from '../interfaces/user/dto/create-user-response.dto'
 import { CreateUserDto } from '../interfaces/user/dto/create-user.dto'
+import { DeleteUserResponseDto } from '../interfaces/user/dto/delete-user-response.dto'
+import { GetUserByIdResponseDto } from '../interfaces/user/dto/get-user-by-id-response.dto'
 import { GetUserByTokenResponseDto } from '../interfaces/user/dto/get-user-by-token-response.dto'
+import { GetUsersResponseDto } from '../interfaces/user/dto/get-user-response.dto'
+import { ListUserDto } from '../interfaces/user/dto/list-user.dto'
+import { ResendMailResponseDto } from '../interfaces/user/dto/resend-mail-response.dto'
+import { UpdateUserResponseDto } from '../interfaces/user/dto/update-user-response.dto'
+import { UpdateUserDto } from '../interfaces/user/dto/update-user.dto'
+import { UserIdDto } from '../interfaces/user/dto/user-id.dto'
 import { IServiceUserCreateResponse } from '../interfaces/user/service-user-create-response.interface'
+import { IServiceUserDeleteResponse } from '../interfaces/user/service-user-delete-response.interface'
 import { IServiceUserGetByIdResponse } from '../interfaces/user/service-user-get-by-id-response.interface'
+import { IServiceUserListResponse } from '../interfaces/user/service-user-list-response.interface'
+import { IServiceUserResendResponse } from '../interfaces/user/service-user-resend-response.interface'
+import { IServiceUserUpdateByIdResponse } from '../interfaces/user/service-user-update-by-id-response.interface'
 
 @Controller('users')
 @ApiBearerAuth('JWT')
@@ -117,9 +116,6 @@ export class UsersController {
   public async createUser(
     @Body() userRequest: CreateUserDto
   ): Promise<CreateUserResponseDto> {
-    if (userRequest.name) userRequest.name = capitalize(userRequest.name.trim())
-    if (userRequest.email)
-      userRequest.email = userRequest.email.toLowerCase().trim()
     const createUserResponse: IServiceUserCreateResponse = await this.userServiceClient
       .send('user_create', userRequest)
       .toPromise()
@@ -175,9 +171,6 @@ export class UsersController {
     @Param() params: UserIdDto,
     @Body() userRequest: UpdateUserDto
   ): Promise<UpdateUserResponseDto> {
-    if (userRequest.name) userRequest.name = capitalize(userRequest.name.trim())
-    if (userRequest.email)
-      userRequest.email = userRequest.email.toLowerCase().trim()
     const updateUserResponse: IServiceUserUpdateByIdResponse = await this.userServiceClient
       .send('user_update_by_id', {
         user: userRequest,

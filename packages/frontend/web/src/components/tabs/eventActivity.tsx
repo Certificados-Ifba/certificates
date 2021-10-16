@@ -12,31 +12,43 @@ import {
   FiTrash2
 } from 'react-icons/fi'
 
+import IActivity from '../../dtos/IActivity'
+import IEvent from '../../dtos/IEvent'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import usePaginatedRequest from '../../services/usePaginatedRequest'
 import { TableRow } from '../../styles/pages/home'
+import { formatData } from '../../utils/formatters'
 import Alert from '../alert'
 import Button from '../button'
 import Column from '../column'
 import Dropdown from '../dropdown'
 import Input from '../input'
-import EventActivityModal from '../modals/activityModal'
+import ActivityModal from '../modals/activityModal'
 import DeleteModal from '../modals/deleteModal'
 import PaginatedTable from '../paginatedTable'
 
-const EventActivity: React.FC<{ event: any }> = ({ event }) => {
-  const { addToast } = useToast()
+interface IRequest {
+  data: IActivity[]
+}
 
-  const [activitySelected, setActivitySelected] = useState(null)
-  const [nameActivitySelected, setNameActivitySelected] = useState(null)
+interface Props {
+  event: IEvent
+}
+
+const EventActivity: React.FC<Props> = ({ event }) => {
+  const [activity, setActivity] = useState<IActivity>(null)
   const [openModal, setOpenModal] = useState(false)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [filters, setFilters] = useState(null)
   const [column, setColumn] = useState('name')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('ASC')
+  const [typeModal, setTypeModal] = useState<'update' | 'add'>(null)
   const searchFormRef = useRef<FormHandles>()
-  const request = usePaginatedRequest<any>({
+
+  const { addToast } = useToast()
+
+  const request = usePaginatedRequest<IRequest>({
     url: `events/${event?.id}/activities`,
     params:
       filters && order !== ''
@@ -75,32 +87,28 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
 
   const handleCloseDeleteModal = useCallback(() => {
     setOpenDeleteModal(false)
+    setActivity(null)
   }, [])
 
-  const handleSubmitDelete = useCallback(() => {
-    api
-      .delete(`event/${event?.id}/activity/${activitySelected}`)
-      .then(resp => {
-        if (resp?.data?.message === 'event_activity_delete_by_id_success') {
-          addToast({
-            title: 'Mensagem',
-            type: 'success',
-            description: 'A atividade foi excluída com sucesso.'
-          })
-          request.revalidate()
-          setOpenDeleteModal(false)
-        }
+  const handleSubmitDelete = useCallback(async () => {
+    try {
+      await api.delete(`events/${event?.id}/activities/${activity?.id}`)
+      addToast({
+        title: 'Atividade excluida',
+        type: 'success',
+        description: `${activity?.name} excluído com sucesso.`
       })
-      .catch(err => {
-        console.error(err)
-        addToast({
-          title: 'Erro desconhecido',
-          type: 'error',
-          description: 'Houve um erro ao deletar a atividade.'
-        })
+      request.revalidate()
+      setOpenDeleteModal(false)
+    } catch (err) {
+      addToast({
+        title: 'Erro na exclusão',
+        type: 'error',
+        description: err
       })
-  }, [event, activitySelected, addToast, request])
-  const router = useRouter()
+    }
+  }, [event, activity, addToast, request])
+
   return (
     <>
       <header>
@@ -117,7 +125,8 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
           color="primary"
           size="small"
           onClick={() => {
-            setActivitySelected(null)
+            setActivity(null)
+            setTypeModal('add')
             setOpenModal(true)
           }}
         >
@@ -152,13 +161,15 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
           </tr>
         </thead>
         <tbody>
-          {request.data?.data?.map(act => (
-            <tr key={act.id}>
-              <td>{act.name}</td>
-              <td>{act.activitieType}</td>
-              <td>{act.workload} h</td>
-              <td>{new Date(act.start_date).toLocaleDateString()}</td>
-              <td>{new Date(act.end_date).toLocaleDateString()}</td>
+          {request.data?.data?.map(activity => (
+            <tr key={activity.id}>
+              <td>{activity.name}</td>
+              <td>{activity.type?.name}</td>
+              <td>
+                {activity.workload} Hora{Number(activity.workload) > 1 && 's'}
+              </td>
+              <td>{formatData(activity.start_date)}</td>
+              <td>{formatData(activity.end_date)}</td>
               <td>
                 <TableRow>
                   <Button
@@ -168,7 +179,8 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
                     color="secondary"
                     size="small"
                     onClick={() => {
-                      setActivitySelected(1)
+                      setActivity(activity)
+                      setTypeModal('update')
                       setOpenModal(true)
                     }}
                   >
@@ -181,8 +193,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
                     color="danger"
                     size="small"
                     onClick={() => {
-                      setActivitySelected(act.id)
-                      setNameActivitySelected(act.name)
+                      setActivity(activity)
                       setOpenDeleteModal(true)
                     }}
                   >
@@ -194,8 +205,9 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
           ))}
         </tbody>
       </PaginatedTable>
-      <EventActivityModal
-        activitySelected={activitySelected}
+      <ActivityModal
+        type={typeModal}
+        activity={activity}
         event={event}
         openModal={openModal}
         request={request}
@@ -209,7 +221,7 @@ const EventActivity: React.FC<{ event: any }> = ({ event }) => {
       >
         <Alert>
           Tem certeza que você deseja excluir a atividade{' '}
-          <b>{nameActivitySelected}</b>?
+          <b>{activity?.name}</b>?
         </Alert>
       </DeleteModal>
     </>

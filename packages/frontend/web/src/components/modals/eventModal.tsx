@@ -1,7 +1,14 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useRef, useCallback, useEffect } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useRef,
+  useCallback,
+  useEffect,
+  useState
+} from 'react'
 import {
   FiBookmark,
   FiTag,
@@ -16,13 +23,21 @@ import {
 import * as Yup from 'yup'
 
 import IEvent from '../../dtos/IEvent'
+import IUser from '../../dtos/IUser'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
+import { Row } from '../../styles/components/grid'
+import { Group, Badge } from '../../styles/components/select'
+import capitalize from '../../utils/capitalize'
 import getValidationErrors from '../../utils/getValidationErrors'
+import AsyncSelect from '../asyncSelect'
 import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
-import Select from '../select'
+
+interface IResponse {
+  data: IUser[]
+}
 
 interface Props {
   type: 'add' | 'edit'
@@ -39,6 +54,7 @@ const EventModal: React.FC<Props> = ({
   setEvent,
   event
 }) => {
+  const [loading, setLoading] = useState(false)
   const { addToast } = useToast()
 
   const router = useRouter()
@@ -53,28 +69,42 @@ const EventModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (event) {
-      formRef.current.setData(event)
+      formRef.current.setData({
+        name: event.name,
+        initials: event.initials,
+        edition: event.initials,
+        start_date: event.start_date,
+        end_date: event.end_date,
+        local: event.local,
+        user: {
+          label: capitalize(event.user.name),
+          value: event.user.id
+        }
+      })
     } else {
-      formRef.current.setErrors({})
+      formRef.current.reset()
     }
   }, [event, openModal])
 
   const handleSubmit = useCallback(
     async data => {
+      console.log(data)
+
+      setLoading(true)
       const schema = Yup.object().shape({
         name: Yup.string().required('O evento precisa ter um nome'),
         initials: Yup.string().required('Por favor, digite a sigla do evento'),
+        edition: Yup.string().required('Por favor, digite a edição do evento'),
         local: Yup.string().required('Por favor, digite o local do evento'),
         user: Yup.string().required(
           'Você precisa selecionar um coordenador para o evento'
         ),
-        start_date: Yup.date().required('Selecione a data de início'),
-        end_date: Yup.date()
-          .required('Selecione a data do fim')
-          .min(
-            data.start_date,
-            'A data final precisa ser maior que a data inicial'
-          )
+        start_date: Yup.string().required('Selecione a data de início'),
+        end_date: Yup.string().required('Selecione a data do fim')
+        // .min(
+        //   data.start_date,
+        //   'A data final precisa ser maior que a data inicial'
+        // )
       })
 
       try {
@@ -84,9 +114,9 @@ const EventModal: React.FC<Props> = ({
 
         if (type === 'add') {
           const response = await api.post('events', data)
-          router.push(`events/${response.data?.data?.event.id}`)
+          router.push(`events/info/${response.data?.data?.event.id}`)
         } else {
-          const response = await api.put(`events/${event.id}`, data)
+          const response = await api.put(`events/${event?.id}`, data)
           setEvent(response.data?.data?.event)
         }
 
@@ -111,13 +141,46 @@ const EventModal: React.FC<Props> = ({
           }`,
           description: err
         })
+        setLoading(false)
       }
     },
     [router, type, event?.id, addToast, handleCloseSaveModal, setEvent]
   )
 
+  const loadUsers = useCallback(async search => {
+    const response = await api.get<IResponse>('/users', {
+      params: { search, sort_by: 'name', order_by: 'ASC' }
+    })
+
+    const data = [
+      {
+        label: 'Administrador',
+        options: []
+      },
+      {
+        label: 'Coordenador',
+        options: []
+      }
+    ]
+
+    response.data?.data?.forEach(user => {
+      data[user.role === 'ADMIN' ? 0 : 1].options.push({
+        value: user.id,
+        label: capitalize(user.name)
+      })
+    })
+    return data
+  }, [])
+
+  const formatGroupLabel = data => (
+    <Group>
+      <span>{data.label}</span>
+      <Badge>{data.options.length}</Badge>
+    </Group>
+  )
+
   return (
-    <Modal open={openModal} onClose={handleCloseSaveModal}>
+    <Modal open={openModal} onClose={handleCloseSaveModal} size="xl">
       <header>
         <h2>
           <FiCalendar size={20} />
@@ -134,57 +197,58 @@ const EventModal: React.FC<Props> = ({
             placeholder="Nome do Evento"
             icon={FiBookmark}
           />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="initials"
-            label="Sigla"
-            placeholder="Sigla"
-            icon={FiHash}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="edition"
-            label="Edição"
-            placeholder="Edição"
-            icon={FiTag}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="local"
-            label="Local"
-            placeholder="Local"
-            icon={FiMapPin}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="start_date"
-            label="Data Inicial"
-            placeholder="Data Inicial"
-            type="date"
-            icon={FiCalendar}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="end_date"
-            label="Data Final"
-            placeholder="Data Final"
-            type="date"
-            icon={FiCalendar}
-          />
-          <Select
-            async={true}
-            url="users"
-            formRef={formRef}
-            label="Coordenador"
-            name="user"
-            isSearchable={true}
-            icon={FiUser}
-          />
+          <Row cols={2}>
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="initials"
+              label="Sigla"
+              placeholder="Sigla"
+              icon={FiHash}
+            />
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="edition"
+              label="Edição"
+              placeholder="Edição"
+              icon={FiTag}
+            />
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="start_date"
+              label="Data Inicial"
+              placeholder="Data Inicial"
+              type="date"
+              icon={FiCalendar}
+            />
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="end_date"
+              label="Data Final"
+              placeholder="Data Final"
+              type="date"
+              icon={FiCalendar}
+            />
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="local"
+              label="Local"
+              placeholder="Local"
+              icon={FiMapPin}
+            />
+            <AsyncSelect
+              label="Coordenador"
+              formRef={formRef}
+              name="user"
+              loadOptions={loadUsers}
+              formatGroupLabel={formatGroupLabel}
+              icon={FiUser}
+            />
+          </Row>
         </main>
         <footer>
           <Button
@@ -198,7 +262,11 @@ const EventModal: React.FC<Props> = ({
             <FiX size={20} />
             <span>Cancelar</span>
           </Button>
-          <Button color={event ? 'secondary' : 'primary'} type="submit">
+          <Button
+            color={event ? 'secondary' : 'primary'}
+            type="submit"
+            loading={loading}
+          >
             {event ? (
               <>
                 <FiCheck size={20} /> <span>Atualizar</span>

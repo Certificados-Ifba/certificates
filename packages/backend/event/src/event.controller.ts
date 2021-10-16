@@ -40,8 +40,6 @@ export class EventController {
     if (params?.id && params?.user) {
       const event = await this.eventService.searchEventById(params.id)
       if (event) {
-        console.log(event.user)
-
         if (params.user.role !== 'ADMIN' && event.user?.id !== params.user.id) {
           result = {
             status: HttpStatus.FORBIDDEN,
