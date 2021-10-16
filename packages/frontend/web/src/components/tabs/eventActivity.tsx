@@ -1,7 +1,16 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
+import { useRouter } from 'next/router'
 import { useCallback, useRef, useState } from 'react'
-import { FiEdit, FiPlus, FiSearch, FiTrash2 } from 'react-icons/fi'
+import {
+  FiEdit,
+  FiFilePlus,
+  FiList,
+  FiMenu,
+  FiPlus,
+  FiSearch,
+  FiTrash2
+} from 'react-icons/fi'
 
 import IActivity from '../../dtos/IActivity'
 import IEvent from '../../dtos/IEvent'
@@ -13,6 +22,7 @@ import { formatData } from '../../utils/formatters'
 import Alert from '../alert'
 import Button from '../button'
 import Column from '../column'
+import Dropdown from '../dropdown'
 import Input from '../input'
 import ActivityModal from '../modals/activityModal'
 import DeleteModal from '../modals/deleteModal'
@@ -111,8 +121,9 @@ const EventActivity: React.FC<Props> = ({ event }) => {
           />
         </Form>
         <Button
-          size="small"
           inline
+          color="primary"
+          size="small"
           onClick={() => {
             setActivity(null)
             setTypeModal('add')
@@ -121,6 +132,17 @@ const EventActivity: React.FC<Props> = ({ event }) => {
         >
           <FiPlus size={20} />
           <span>Adicionar Atividade</span>
+        </Button>
+        <Button
+          inline
+          color="info"
+          size="small"
+          onClick={() => {
+            router.push(`/import/events/activities/${event?.id}`)
+          }}
+        >
+          <FiFilePlus size={20} />
+          <span>Importar via Planilha</span>
         </Button>
       </header>
       <PaginatedTable request={request}>

@@ -38,6 +38,7 @@
     "styled-components": "^5.2.1",
     "swr": "^0.5.4",
     "uuid": "^8.3.2",
+    "xlsx": "^0.17.2",
     "yup": "^0.32.9"
   },
   "devDependencies": {

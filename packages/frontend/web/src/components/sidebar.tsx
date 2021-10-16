@@ -42,6 +42,7 @@ const Sidebar: React.FC = () => {
         {
           name: 'Dashboard',
           link: '/',
+          activeLinks: ['/dashboard/[id]', '/dashboard/[id]/participants'],
           icon: FiHome
         },
         {
