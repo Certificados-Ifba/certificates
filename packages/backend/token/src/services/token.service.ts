@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Query } from 'mongoose'
-import { IUser } from 'src/interfaces/user.interface'
 
 import { IToken } from '../interfaces/token.interface'
+import { IUser } from '../interfaces/user.interface'
 import { ConfigService } from './config/config.service'
 
 @Injectable()

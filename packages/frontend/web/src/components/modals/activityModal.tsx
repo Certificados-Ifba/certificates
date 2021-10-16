@@ -1,6 +1,6 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import {
   FiCalendar,
   FiCheck,
@@ -9,27 +9,44 @@ import {
   FiFileText,
   FiPlus,
   FiPlusCircle,
+  FiTag,
   FiX
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
+import IActivity from '../../dtos/IActivity'
+import IEvent from '../../dtos/IEvent'
+import IGeneric from '../../dtos/IGeneric'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import { PaginatedRequest } from '../../services/usePaginatedRequest'
+import { Row } from '../../styles/components/grid'
+import capitalize from '../../utils/capitalize'
+import { formatData } from '../../utils/formatters'
 import getValidationErrors from '../../utils/getValidationErrors'
+import { inDateRange, minDate } from '../../utils/validators'
+import AsyncSelect from '../asyncSelect'
 import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
-import Select from '../select'
 
-const EventActivityModal: React.FC<{
-  event: any
+interface Props {
+  type: 'add' | 'update'
+  event: IEvent
   openModal: boolean
   onClose: () => void
-  activitySelected: string
+  activity?: IActivity
   request: PaginatedRequest<any, any>
-}> = ({ event, openModal, onClose, activitySelected, request }) => {
-  const [loading, setLoading] = useState(false)
+}
+
+const ActivityModal: React.FC<Props> = ({
+  type,
+  event,
+  openModal,
+  onClose,
+  activity,
+  request
+}) => {
   const formRef = useRef<FormHandles>(null)
 
   const { addToast } = useToast()
@@ -40,83 +57,120 @@ const EventActivityModal: React.FC<{
     onClose()
   }, [onClose])
 
-  useEffect(() => {
-    if (activitySelected && openModal) {
-      async function loadData() {
-        const response = await api.get(
-          `events/${event.id}/activities/${activitySelected}`
-        )
-        formRef.current?.setData(response?.data?.data)
-      }
-      setLoading(true)
-      loadData()
-      setLoading(false)
-    }
-  }, [activitySelected, event, openModal])
-
   const handleSubmit = useCallback(
-    data => {
+    async data => {
       const schema = Yup.object().shape({
-        name: Yup.string().required(`A atividade do evento precisa de um nome`),
-        activitieType: Yup.string().required(`Selecione um tipo de atividade`),
-        workload: Yup.string().required('Por favor, digite a carga horária'),
-        start_date: Yup.string().required(
-          'Selecione a data inicial da atividade'
-        ),
-        end_date: Yup.string().required('Selecione a data final da atividade')
+        name: Yup.string().required('A atividade precisa ter um nome'),
+        type: Yup.string().required(`Selecione um tipo da atividade`),
+        workload: Yup.number()
+          .typeError('Por favor, digite a carga horária')
+          .positive('A carga horária precisa ser positiva')
+          .required('Por favor, digite a carga horária'),
+        start_date: Yup.string()
+          .test(
+            'in-date-range',
+            `A atividade precisa ser entre os dias ${formatData(
+              event.start_date
+            )} e ${formatData(event.end_date)}`,
+            (value: string) =>
+              inDateRange(value, event.start_date, event.end_date)
+          )
+          .required('Selecione a data de início'),
+        end_date: Yup.string()
+          .test(
+            'in-date-range',
+            `A atividade precisa ser entre os dias ${formatData(
+              event.start_date
+            )} e ${formatData(event.end_date)}`,
+            (value: string) =>
+              inDateRange(value, event.start_date, event.end_date)
+          )
+          .test(
+            'min-date',
+            'A data final precisa ser maior que a data inicial',
+            (value: string) => minDate(value, data.start_date)
+          )
+          .required('Selecione a data do fim')
       })
-      schema
-        .validate(data, {
+
+      try {
+        await schema.validate(data, {
           abortEarly: false
         })
-        .then(async data => {
-          let response
-          if (activitySelected) {
-            response = await api.put(
-              `event/${event.id}/activity/${activitySelected}`,
-              data
-            )
-          } else {
-            response = await api.post(`event/${event.id}/activity`, data)
-          }
-          if (response.data) {
-            addToast({
-              type: 'success',
-              title: `Atividade ${
-                activitySelected ? 'alterada' : 'cadastrada'
-              }`,
-              description: `A atividade foi ${
-                activitySelected ? 'alterada' : 'cadastrada'
-              } com sucesso.`
-            })
-            request.revalidate()
-            handleCloseModal()
-          }
-        })
-        .catch(err => {
-          if (err instanceof Yup.ValidationError) {
-            const errors = getValidationErrors(err)
-            formRef.current?.setErrors(errors)
-            setLoading(false)
-            return
-          }
-          setLoading(false)
 
-          addToast({
-            type: 'error',
-            title: `Erro ${activitySelected ? 'na alteração' : 'no cadastro'}`,
-            description: err
-          })
+        if (type === 'add') {
+          await api.post(`events/${event?.id}/activities`, data)
+        } else {
+          await api.put(`events/${event?.id}/activities/${activity?.id}`, data)
+        }
+
+        addToast({
+          type: 'success',
+          title: `A atividade ${type === 'add' ? 'cadastrado' : 'atualizado'}`,
+          description: `A atividade foi ${
+            type === 'add' ? 'cadastrado' : 'atualizado'
+          } com sucesso.`
         })
+        request.revalidate()
+        handleCloseModal()
+        // setLoading(false)
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err)
+          formRef.current?.setErrors(errors)
+          return
+        }
+        addToast({
+          type: 'error',
+          title: `Erro ao ${
+            type === 'add' ? 'adicionar atividade' : 'atualizar atividade'
+          }`,
+          description: err
+        })
+        // setLoading(false)
+      }
     },
-    [activitySelected, event, addToast, request, handleCloseModal]
+    [type, event, activity?.id, addToast, handleCloseModal, request]
   )
 
+  const loadTypes = useCallback(async search => {
+    const response = await api.get<{ data: IGeneric[] }>('/activity_types', {
+      params: { search, sort_by: 'name', order_by: 'ASC' }
+    })
+
+    const data = []
+
+    response.data?.data?.forEach(type => {
+      data.push({
+        value: type.id,
+        label: capitalize(type.name)
+      })
+    })
+    return data
+  }, [])
+
+  useEffect(() => {
+    if (activity) {
+      formRef.current.setData({
+        name: activity.name,
+        type: {
+          label: capitalize(activity.type.name),
+          value: activity.type.id
+        },
+        workload: activity.workload,
+        start_date: activity.start_date,
+        end_date: activity.end_date
+      })
+    } else {
+      formRef.current.reset()
+    }
+  }, [activity, openModal])
+
   return (
-    <Modal open={openModal} onClose={handleCloseModal}>
+    <Modal open={openModal} onClose={handleCloseModal} size="xl">
       <header>
         <h2>
-          {activitySelected ? (
+          {activity ? (
             <>
               <FiEdit size={20} />
               <span>Editar Atividade</span>
@@ -138,46 +192,43 @@ const EventActivityModal: React.FC<{
             marginBottom="sm"
             placeholder="Nome"
             icon={FiFileText}
-            disabled={loading}
           />
-          <Select
-            formRef={formRef}
-            label="Tipo de Atividade"
-            name="activitieType"
-            isSearchable={true}
-            marginBottom="sm"
-            async={true}
-            url="activities"
-          />
-          <Input
-            type="number"
-            formRef={formRef}
-            name="workload"
-            label="Carga Horária (Horas)"
-            marginBottom="sm"
-            placeholder="Carga Horária"
-            icon={FiClock}
-            disabled={loading}
-          />
-          <Input
-            type="date"
-            formRef={formRef}
-            name="start_date"
-            label="Inicia em"
-            marginBottom="sm"
-            placeholder="Data de Início"
-            icon={FiCalendar}
-            disabled={loading}
-          />
-          <Input
-            type="date"
-            formRef={formRef}
-            name="end_date"
-            label="Termina em"
-            placeholder="Data Final"
-            icon={FiCalendar}
-            disabled={loading}
-          />
+          <Row cols={2}>
+            <AsyncSelect
+              formRef={formRef}
+              label="Tipo de Atividade"
+              name="type"
+              marginBottom="sm"
+              icon={FiTag}
+              loadOptions={loadTypes}
+            />
+            <Input
+              type="number"
+              formRef={formRef}
+              name="workload"
+              label="Carga Horária (Horas)"
+              marginBottom="sm"
+              placeholder="Carga Horária"
+              icon={FiClock}
+            />
+            <Input
+              type="date"
+              formRef={formRef}
+              name="start_date"
+              label="Inicia em"
+              marginBottom="sm"
+              placeholder="Data de Início"
+              icon={FiCalendar}
+            />
+            <Input
+              type="date"
+              formRef={formRef}
+              name="end_date"
+              label="Termina em"
+              placeholder="Data Final"
+              icon={FiCalendar}
+            />
+          </Row>
         </main>
         <footer>
           <Button
@@ -192,11 +243,11 @@ const EventActivityModal: React.FC<{
             <span>Cancelar</span>
           </Button>
           <Button
-            color={activitySelected ? 'secondary' : 'primary'}
+            color={activity ? 'secondary' : 'primary'}
             type="submit"
-            loading={loading}
+            // loading={loading}
           >
-            {activitySelected ? (
+            {activity ? (
               <>
                 <FiCheck size={20} /> <span>Atualizar</span>
               </>
@@ -212,4 +263,4 @@ const EventActivityModal: React.FC<{
   )
 }
 
-export default EventActivityModal
+export default ActivityModal

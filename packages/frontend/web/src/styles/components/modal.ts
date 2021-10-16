@@ -12,11 +12,8 @@ interface RowProps {
 
 export const Container = styled.div<ModalProps>`
   .modal-container-div {
-    ${props =>
-      props.size === 'sm' &&
-      css`
-        width: ${props.theme.modal.size[props.size]};
-      `}
+    margin: 0 1rem;
+    width: ${props => props.theme.modal.size[props.size]};
   }
 
   display: none;

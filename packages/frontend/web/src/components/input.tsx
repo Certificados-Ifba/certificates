@@ -17,7 +17,6 @@ import {
   SecureToggle
 } from '../styles/components/input'
 import { formatCpf, formatPhone } from '../utils/formatters'
-// import { getInputDate } from '../utils/formatDate'
 
 interface BaseProps<Multiline = false>
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -120,12 +119,7 @@ const Input: React.FC<Props> = ({
       ref: inputRef.current,
       path: 'value',
       setValue(ref: any, value) {
-        if (value && ref.type === 'date') {
-          ref.value = new Date(value).toISOString().substr(0, 10)
-        } else {
-          ref.value = value || ''
-        }
-
+        ref.value = value || ''
         setInputState(value ? 'isFilled' : 'isDefault')
       },
       clearValue: ref => {
@@ -173,11 +167,12 @@ const Input: React.FC<Props> = ({
     id: fieldName,
     'aria-label': fieldName,
     type: isShowPass ? 'text' : type,
+    size: 1,
     defaultValue
   }
 
   return (
-    <>
+    <div>
       {label && !restAux.hidden && <Label htmlFor={fieldName}>{label}</Label>}
       <Container
         hidden={restAux.hidden}
@@ -209,7 +204,7 @@ const Input: React.FC<Props> = ({
           </Error>
         )}
       </Container>
-    </>
+    </div>
   )
 }
 

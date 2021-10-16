@@ -48,13 +48,13 @@ const Validate: React.FC = () => {
   const formRef = useRef<FormHandles>(null)
 
   const validateCode = useCallback(
-    code => {
+    async code => {
       try {
         setLoading(true)
 
-        console.log(code)
+        const { data } = await api.get(`/certificates/validate/${code}`)
 
-        setValid(code === '1')
+        setValid(data?.data)
         setLoading(false)
       } catch (err) {
         addToast({

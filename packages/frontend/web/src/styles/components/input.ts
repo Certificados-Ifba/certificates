@@ -69,6 +69,10 @@ fieldset {
       margin-right: 8px;
     }
     input {
+      /* width: 150px; */
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
       border: none;
       font-size: 0.875rem;
       color: ${props => props.theme.colors.darkTint};

@@ -60,7 +60,7 @@ const ParticipationModal: React.FC<Props> = ({
           abortEarly: false
         })
         .then(async data => {
-          const response = await api.post(`event/${event.id}/activity`, data)
+          const response = await api.post(`event/${event?.id}/activity`, data)
 
           if (response.data) {
             addToast({
@@ -119,7 +119,7 @@ const ParticipationModal: React.FC<Props> = ({
                 isSearchable={true}
                 marginBottom="sm"
                 async={true}
-                url="activitys"
+                url="activities"
               />
               <Input
                 type="number"

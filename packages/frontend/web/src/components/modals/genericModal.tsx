@@ -59,7 +59,7 @@ const GenericModal: React.FC<Props> = ({
           await api.post(url, data)
         } else {
           delete data.cpf
-          await api.put(`${url}/${generic.id}`, data)
+          await api.put(`${url}/${generic?.id}`, data)
         }
 
         addToast({
@@ -79,7 +79,7 @@ const GenericModal: React.FC<Props> = ({
         }
         addToast({
           type: 'error',
-          title: `Erro ${generic.id ? 'na alteração' : 'no cadastro'}`,
+          title: `Erro ${generic?.id ? 'na alteração' : 'no cadastro'}`,
           description: err
         })
       }

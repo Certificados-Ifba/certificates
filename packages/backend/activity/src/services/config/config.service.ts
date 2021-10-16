@@ -3,7 +3,7 @@ export class ConfigService {
 
   constructor() {
     this.envConfig = {
-      port: process.env.EVENT_SERVICE_PORT
+      port: process.env.ACTIVITY_SERVICE_PORT
     }
   }
 

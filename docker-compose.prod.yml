@@ -15,6 +15,9 @@ services:
   activity:
     command: yarn workspace @certificates/activity prod
     restart: always
+  certificate:
+    command: yarn workspace @certificates/certificate prod
+    restart: always
   token:
     command: yarn workspace @certificates/token prod
     restart: always

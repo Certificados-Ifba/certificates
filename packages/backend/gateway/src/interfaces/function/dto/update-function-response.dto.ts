@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 
 import { IGeneric } from '../../generic/generic.interface'
 
-export class UpdateGenericResponseDto {
+export class UpdateFunctionResponseDto {
   @ApiProperty({ example: 'generic_update_by_id_success' })
   message: string
 

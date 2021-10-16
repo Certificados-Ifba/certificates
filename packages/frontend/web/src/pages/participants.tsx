@@ -133,7 +133,7 @@ const Participants: React.FC = () => {
       </header>
       <Card>
         <header>
-          <h2>Participantes dos Últimos Eventos</h2>
+          <h2>Participantes cadastrados</h2>
           <Form onSubmit={handleFilter}>
             <Input
               name="search"

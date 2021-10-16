@@ -1,6 +1,5 @@
-import { adminPermissions } from 'src/constants/admin-permissions'
-import { coordinatorPermissions } from 'src/constants/coordinator-permissions'
-
+import { adminPermissions } from '../constants/admin-permissions'
+import { coordinatorPermissions } from '../constants/coordinator-permissions'
 import { IRolePermissionStrategy } from '../interfaces/role-permission-strategy.interface'
 import { IUser } from '../interfaces/user.interface'
 import { participantPermissions } from './../constants/participant-permissions'

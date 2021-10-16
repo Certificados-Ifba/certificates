@@ -1,56 +1,32 @@
-import { FormHandles, UnformField, useField } from '@unform/core'
+/* eslint-disable react/display-name */
+import { FormHandles, useField } from '@unform/core'
 import {
   useRef,
   useEffect,
-  useState,
+  MutableRefObject,
   useCallback,
-  MutableRefObject
+  useState
 } from 'react'
 import { IconBaseProps } from 'react-icons'
 import { FiAlertCircle } from 'react-icons/fi'
 import { components, OptionTypeBase } from 'react-select'
-import Select, { AsyncProps } from 'react-select/async'
+import { Props as AsyncProps } from 'react-select/async'
 
 import { Label, Error } from '../styles/components/input'
-import { Container } from '../styles/components/select'
-import theme from '../styles/theme'
+import {
+  Container,
+  AsyncReactSelect,
+  IconArea
+} from '../styles/components/select'
+import { useDebounce } from '../utils/debounce'
 
-interface Props extends AsyncProps<OptionTypeBase> {
+interface Props extends AsyncProps<OptionTypeBase, boolean> {
   name: string
   label?: string
   marginBottom?: string
   formRef?: MutableRefObject<FormHandles>
   icon?: React.ComponentType<IconBaseProps>
-  optionContent?: React.FC<{ props: any }>
-  initialValue?: string
   handleOnSelect?: (value: { label: string; value: any }) => void
-}
-
-const normalStyle = {
-  control: base => ({
-    ...base,
-    'border-radius': '5px',
-    border: `2px solid ${theme.colors.mediumTint}`,
-    color: `${theme.colors.mediumTint}`
-  })
-}
-
-const errorStyle = {
-  control: base => ({
-    ...base,
-    'border-radius': '5px',
-    border: `2px solid ${theme.colors.danger}`,
-    color: `${theme.colors.danger}`
-  })
-}
-
-const filledStyle = {
-  control: base => ({
-    ...base,
-    'border-radius': '5px',
-    border: `2px solid ${theme.colors.primary}`,
-    color: `${theme.colors.primary}`
-  })
 }
 
 const AsyncSelect: React.FC<Props> = ({
@@ -58,87 +34,64 @@ const AsyncSelect: React.FC<Props> = ({
   marginBottom,
   label,
   formRef,
-  icon,
-  optionContent: OptionContent,
-  initialValue = '',
+  icon: Icon,
   handleOnSelect,
+  loadOptions,
   ...rest
 }) => {
-  const [isFilled, setIsFilled] = useState(false)
   const selectRef = useRef(null)
-
-  // const handleOnChangeSelect = useCallback(
-  //   data => {
-  //     if (formRef) {
-  //       try {
-  //         const err = formRef.current.getErrors()
-  //         delete err[name]
-  //         formRef.current.setErrors(err)
-  //       } catch (err) {}
-  //     }
-  //     if (handleOnSelect) {
-  //       handleOnSelect(data)
-  //     }
-  //     setIsFilled(!!data)
-  //   },
-  //   [formRef, handleOnSelect, name]
-  // )
-
-  // const selectOpt = useCallback(data => {
-  //   console.log(data)
-  // }, [])
-
-  // const props = {
-  //   ref: selectRef,
-  //   classNamePrefix: 'react-select',
-  //   placeholder: 'Selecione',
-  //   menuPosition: 'fixed',
-  //   defaultValue: initialValue,
-  //   inputId: name,
-  //   selectOption: selectOpt,
-  //   onChange: handleOnChangeSelect,
-  //   ...rest
-  // }
   const { fieldName, defaultValue, registerField, error } = useField(name)
+  const [isFilled, setIsFilled] = useState(false)
 
-  useEffect(() => {
-    if (isFilled) {
-      setSelectStyle(filledStyle)
-    } else if (error) {
-      setSelectStyle(errorStyle)
-    } else {
-      setSelectStyle(normalStyle)
-    }
-  }, [error, isFilled])
-
-  const initialStyle = normalStyle
-
-  // props.defaultValue = rest.options?.find(data => data.value === defaultValue)
-  // if (props.defaultValue) initialStyle = filledStyle
-
-  const [selectStyle, setSelectStyle] = useState(initialStyle)
+  const handleOnChangeSelect = useCallback(
+    data => {
+      if (formRef) {
+        try {
+          const err = formRef.current.getErrors()
+          delete err[name]
+          formRef.current.setErrors(err)
+        } catch (err) {}
+      }
+      if (handleOnSelect) {
+        handleOnSelect(data)
+      }
+      setIsFilled(!!data)
+    },
+    [formRef, handleOnSelect, name]
+  )
 
   useEffect(() => {
     registerField({
       name: fieldName,
       ref: selectRef.current,
       setValue: (ref, value) => {
-        ref.select.select.setValue(value)
+        ref?.select?.select?.setValue(value)
       },
-      getValue: (ref: any) => {
-        const value = ref.select?.select.getValue()
-        if (value.length === 1) {
-          return value[0].value
-        } else {
+      getValue: ref => {
+        if (rest.isMulti) {
+          if (!ref?.select?.state?.value) {
+            setIsFilled(false)
+            return []
+          }
+
+          return ref?.select?.state?.value?.map(
+            (option: OptionTypeBase) => option?.value
+          )
+        }
+        if (!ref?.select?.state?.value) {
+          setIsFilled(false)
           return ''
         }
+
+        setIsFilled(!!ref?.select?.state?.value?.value)
+        return ref?.select?.state?.value?.value
       },
       clearValue: ref => {
-        ref.select.select.clearValue()
+        ref?.select?.select?.setValue()
         setIsFilled(false)
       }
     })
-  }, [fieldName, registerField])
+  }, [fieldName, registerField, rest])
 
   const props = {
     noOptionsMessage: () => 'Nenhuma opção',
@@ -150,51 +103,66 @@ const AsyncSelect: React.FC<Props> = ({
     isClearable: true,
     placeholder: 'Selecione',
     inputId: name,
+    menuPosition: 'fixed',
+    onChange: handleOnChangeSelect,
+    components: {
+      Control: ({ children, ...rest }: any) => (
+        <components.Control {...rest}>
+          <>
+            {Icon && (
+              <IconArea>
+                <Icon size={20} />
+              </IconArea>
+            )}
+            {children}
+          </>
+        </components.Control>
+      )
+    },
     ...rest,
     theme: undefined
   }
 
+  const debounceLoad = useDebounce<{
+    inputValue: string
+    callback: any
+  }>(async ({ inputValue, callback }) => {
+    const resp = []
+    const filter = (inputValue: string) => {
+      return resp
+    }
+
+    const ret: any = await loadOptions(inputValue, callback)
+
+    ret.forEach(data => {
+      resp.push(data)
+    })
+    callback(filter(inputValue))
+  })
+
+  const loadDebounce = (inputValue, callback) => {
+    debounceLoad.run({ inputValue, callback })
+  }
+
   return (
-    <Container marginBottom={marginBottom}>
-      <>
-        {label && <Label htmlFor={name}>{label}</Label>}
-        <Select
-          // cacheOptions
-          // defaultOptions
-          // isClearable
-          // className="basic-single"
-          // classNamePrefix="react-select"
-          // name={name}
-          // {...rest}
-          styles={selectStyle}
-          // cacheOptions
-          menuPosition="fixed"
-          {...props}
-          // components={{
-          //   // eslint-disable-next-line react/display-name
-          //   Control: ({ children, ...rest }) => (
-          //     <components.Control {...rest}>{children}</components.Control>
-          //   ),
-          //   // eslint-disable-next-line react/display-name
-          //   Option: props => {
-          //     return (
-          //       <components.Option {...props}>
-          //         {OptionContent && <OptionContent props={props} />}
-          //         {!OptionContent && <>{props.children}</>}
-          //       </components.Option>
-          //     )
-          //   }
-          // }}
-        />
-        {error && (
-          <Error>
-            <span>
-              <FiAlertCircle />
-            </span>{' '}
-            <span>{error}</span>
-          </Error>
-        )}
-      </>
+    <Container className={rest.className} marginBottom={marginBottom}>
+      {label && <Label htmlFor={fieldName}>{label}</Label>}
+      <AsyncReactSelect
+        loadOptions={loadDebounce}
+        defaultOptions
+        isFilled={isFilled}
+        isErrored={!!error}
+        cacheOptions
+        {...props}
+      />
+      {error && (
+        <Error>
+          <span>
+            <FiAlertCircle />
+          </span>{' '}
+          <span>{error}</span>
+        </Error>
+      )}
     </Container>
   )
 }
