@@ -55,6 +55,13 @@ export class ConfigService {
       },
       transport: Transport.TCP
     }
+    this.envConfig.storageService = {
+      options: {
+        port: process.env.STORAGE_SERVICE_PORT,
+        host: process.env.STORAGE_SERVICE_HOST
+      },
+      transport: Transport.TCP
+    }
   }
 
   get(key: string): any {

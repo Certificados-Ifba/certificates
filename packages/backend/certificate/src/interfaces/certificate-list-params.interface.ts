@@ -1,5 +1,6 @@
 export interface ICertificateListParams {
-  event: string
+  event?: string
+  user?: string
   page?: number
   perPage?: number
   sortBy: string

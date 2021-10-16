@@ -49,7 +49,7 @@ const Generic: React.FC<Props> = ({ name, plural, url, icon }) => {
 
   const handleSubmitDelete = useCallback(async () => {
     try {
-      await api.delete(`${url}/${generic.id}`)
+      await api.delete(`${url}/${generic?.id}`)
       addToast({
         title: `${name} excluída`,
         type: 'success',
@@ -142,7 +142,7 @@ const Generic: React.FC<Props> = ({ name, plural, url, icon }) => {
         </thead>
         <tbody>
           {request.data?.data?.map(generic => (
-            <tr key={generic.id}>
+            <tr key={generic?.id}>
               <td>{generic.name}</td>
               {show && (
                 <td>

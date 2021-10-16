@@ -13,12 +13,16 @@ import IActivity from '../../dtos/IActivity'
 import IEvent from '../../dtos/IEvent'
 import IGeneric from '../../dtos/IGeneric'
 import IParticipant from '../../dtos/IParticipant'
+import { useToast } from '../../providers/toast'
+import api from '../../services/axios'
 import usePaginatedRequest from '../../services/usePaginatedRequest'
 import { TableRow } from '../../styles/pages/home'
 import capitalize from '../../utils/capitalize'
+import Alert from '../alert'
 import Button from '../button'
 import Column from '../column'
 import Input from '../input'
+import DeleteModal from '../modals/deleteModal'
 import PaginatedTable from '../paginatedTable'
 
 interface Props {
@@ -49,7 +53,12 @@ const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
   const [filters, setFilters] = useState(null)
   const [column, setColumn] = useState('created_at')
   const [order, setOrder] = useState<'' | 'ASC' | 'DESC'>('DESC')
+  const [openDeleteModal, setOpenDeleteModal] = useState(false)
+  const [id, setId] = useState('')
   const searchFormRef = useRef<FormHandles>()
+
+  const { addToast } = useToast()
+
   const request = usePaginatedRequest<IRequest>({
     url: `events/${event?.id}/certificates`,
     params:
@@ -82,6 +91,31 @@ const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
     },
     [column]
   )
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setOpenDeleteModal(false)
+    setId('')
+  }, [])
+
+  const handleSubmitDelete = useCallback(async () => {
+    try {
+      await api.delete(`events/${event?.id}/certificates/${id}`)
+      addToast({
+        title: 'Certificado excluida',
+        type: 'success',
+        description: 'Certificado excluído com sucesso.'
+      })
+      request.revalidate()
+      setOpenDeleteModal(false)
+    } catch (err) {
+      addToast({
+        title: 'Erro na exclusão',
+        type: 'error',
+        description: err
+      })
+    }
+  }, [event, addToast, request, id])
+
   return (
     <>
       <header>
@@ -151,7 +185,7 @@ const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
                       color="success"
                       size="small"
                       onClick={() => {
-                        //   setActivitySelected(act.id)
+                        //   setCertificateSelected(act.id)
                         //   setNameActivitySelected(act.name)
                         //   setOpenDeleteModal(true)
                       }}
@@ -165,7 +199,7 @@ const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
                       color="info"
                       size="small"
                       onClick={() => {
-                        //   setActivitySelected(act.id)
+                        //   setCertificateSelected(act.id)
                         //   setNameActivitySelected(act.name)
                         //   setOpenDeleteModal(true)
                       }}
@@ -179,9 +213,8 @@ const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
                       color="danger"
                       size="small"
                       onClick={() => {
-                        //   setActivitySelected(act.id)
-                        //   setNameActivitySelected(act.name)
-                        //   setOpenDeleteModal(true)
+                        setId(id)
+                        setOpenDeleteModal(true)
                       }}
                     >
                       <FiMinusCircle size={20} />
@@ -193,6 +226,14 @@ const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
           )}
         </tbody>
       </PaginatedTable>
+      <DeleteModal
+        handleSubmit={handleSubmitDelete}
+        name="Participação"
+        openModal={openDeleteModal}
+        onClose={handleCloseDeleteModal}
+      >
+        <Alert>Tem certeza que você deseja excluir?</Alert>
+      </DeleteModal>
     </>
   )
 }

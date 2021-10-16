@@ -36,6 +36,10 @@ services:
     command: yarn workspace @certificates/permission dev
     volumes:
       - ./packages/backend/permission:/usr/src/app/packages/backend/permission
+  storage:
+    command: yarn workspace @certificates/storage dev
+    volumes:
+      - ./packages/backend/storage:/usr/src/app/packages/backend/storage
   user:
     command: yarn workspace @certificates/user dev
     volumes:

@@ -26,7 +26,9 @@ import IEvent from '../../dtos/IEvent'
 import IUser from '../../dtos/IUser'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
+import { Row } from '../../styles/components/grid'
 import { Group, Badge } from '../../styles/components/select'
+import capitalize from '../../utils/capitalize'
 import getValidationErrors from '../../utils/getValidationErrors'
 import AsyncSelect from '../asyncSelect'
 import Button from '../button'
@@ -67,9 +69,20 @@ const EventModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (event) {
-      formRef.current.setData(event)
+      formRef.current.setData({
+        name: event.name,
+        initials: event.initials,
+        edition: event.initials,
+        start_date: event.start_date,
+        end_date: event.end_date,
+        local: event.local,
+        user: {
+          label: capitalize(event.user.name),
+          value: event.user.id
+        }
+      })
     } else {
-      formRef.current.setErrors({})
+      formRef.current.reset()
     }
   }, [event, openModal])
 
@@ -153,7 +166,7 @@ const EventModal: React.FC<Props> = ({
     response.data?.data?.forEach(user => {
       data[user.role === 'ADMIN' ? 0 : 1].options.push({
         value: user.id,
-        label: user.name
+        label: capitalize(user.name)
       })
     })
     return data
@@ -167,7 +180,7 @@ const EventModal: React.FC<Props> = ({
   )
 
   return (
-    <Modal open={openModal} onClose={handleCloseSaveModal}>
+    <Modal open={openModal} onClose={handleCloseSaveModal} size="xl">
       <header>
         <h2>
           <FiCalendar size={20} />
@@ -184,56 +197,58 @@ const EventModal: React.FC<Props> = ({
             placeholder="Nome do Evento"
             icon={FiBookmark}
           />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="initials"
-            label="Sigla"
-            placeholder="Sigla"
-            icon={FiHash}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="edition"
-            label="Edição"
-            placeholder="Edição"
-            icon={FiTag}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="local"
-            label="Local"
-            placeholder="Local"
-            icon={FiMapPin}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="start_date"
-            label="Data Inicial"
-            placeholder="Data Inicial"
-            type="date"
-            icon={FiCalendar}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="end_date"
-            label="Data Final"
-            placeholder="Data Final"
-            type="date"
-            icon={FiCalendar}
-          />
-          <AsyncSelect
-            label="Coordenador"
-            formRef={formRef}
-            name="user"
-            loadOptions={loadUsers}
-            formatGroupLabel={formatGroupLabel}
-            icon={FiUser}
-          />
+          <Row cols={2}>
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="initials"
+              label="Sigla"
+              placeholder="Sigla"
+              icon={FiHash}
+            />
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="edition"
+              label="Edição"
+              placeholder="Edição"
+              icon={FiTag}
+            />
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="start_date"
+              label="Data Inicial"
+              placeholder="Data Inicial"
+              type="date"
+              icon={FiCalendar}
+            />
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="end_date"
+              label="Data Final"
+              placeholder="Data Final"
+              type="date"
+              icon={FiCalendar}
+            />
+            <Input
+              formRef={formRef}
+              marginBottom="sm"
+              name="local"
+              label="Local"
+              placeholder="Local"
+              icon={FiMapPin}
+            />
+            <AsyncSelect
+              label="Coordenador"
+              formRef={formRef}
+              name="user"
+              loadOptions={loadUsers}
+              formatGroupLabel={formatGroupLabel}
+              icon={FiUser}
+            />
+          </Row>
         </main>
         <footer>
           <Button

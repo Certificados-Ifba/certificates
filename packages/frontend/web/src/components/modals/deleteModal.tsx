@@ -1,5 +1,4 @@
 import { Form } from '@unform/web'
-import { useCallback } from 'react'
 import { FiTrash2, FiX } from 'react-icons/fi'
 
 import Button from '../button'
@@ -11,11 +10,8 @@ const DeleteModal: React.FC<{
   name: string
   handleSubmit: (data: any) => void
 }> = ({ openModal, onClose, name, children, handleSubmit }) => {
-  const handleCloseSaveModal = useCallback(() => {
-    onClose()
-  }, [onClose])
   return (
-    <Modal open={openModal} onClose={handleCloseSaveModal}>
+    <Modal open={openModal} onClose={onClose}>
       <header>
         <h2>
           <FiTrash2 size={20} />

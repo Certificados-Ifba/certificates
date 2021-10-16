@@ -8,6 +8,9 @@ export class ListCertificateDto {
   per_page: number
 
   @ApiProperty({ example: '', required: false })
+  event: string
+
+  @ApiProperty({ example: '', required: false })
   search: string
 
   @ApiProperty({ example: '', required: false })

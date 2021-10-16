@@ -36,6 +36,7 @@ const AsyncSelect: React.FC<Props> = ({
   formRef,
   icon: Icon,
   handleOnSelect,
+  loadOptions,
   ...rest
 }) => {
   const selectRef = useRef(null)
@@ -64,8 +65,6 @@ const AsyncSelect: React.FC<Props> = ({
       name: fieldName,
       ref: selectRef.current,
       setValue: (ref, value) => {
-        console.log(ref, value)
-
         ref?.select?.select?.setValue(value)
       },
       getValue: ref => {
@@ -88,8 +87,6 @@ const AsyncSelect: React.FC<Props> = ({
         return ref?.select?.state?.value?.value
       },
       clearValue: ref => {
-        console.log(ref)
-
         ref?.select?.select?.setValue()
         setIsFilled(false)
       }
@@ -131,12 +128,11 @@ const AsyncSelect: React.FC<Props> = ({
     callback: any
   }>(async ({ inputValue, callback }) => {
     const resp = []
-
     const filter = (inputValue: string) => {
       return resp
     }
 
-    const ret: any = await rest.loadOptions(inputValue, callback)
+    const ret: any = await loadOptions(inputValue, callback)
 
     ret.forEach(data => {
       resp.push(data)
@@ -144,7 +140,7 @@ const AsyncSelect: React.FC<Props> = ({
     callback(filter(inputValue))
   })
 
-  const loadOptions = (inputValue, callback) => {
+  const loadDebounce = (inputValue, callback) => {
     debounceLoad.run({ inputValue, callback })
   }
 
@@ -152,7 +148,7 @@ const AsyncSelect: React.FC<Props> = ({
     <Container className={rest.className} marginBottom={marginBottom}>
       {label && <Label htmlFor={fieldName}>{label}</Label>}
       <AsyncReactSelect
-        loadOptions={loadOptions}
+        loadOptions={loadDebounce}
         defaultOptions
         isFilled={isFilled}
         isErrored={!!error}

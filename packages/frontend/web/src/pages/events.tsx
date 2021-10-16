@@ -145,7 +145,7 @@ const Events: React.FC = () => {
               <tr
                 key={event?.id}
                 onClick={() => {
-                  router.push(`events/info/${event?.id}`)
+                  router.push(`events/${event?.id}/info`)
                 }}
               >
                 <td>{`${event.name} (${event.initials})`}</td>
@@ -164,7 +164,7 @@ const Events: React.FC = () => {
                       color="secondary"
                       size="small"
                       onClick={() => {
-                        router.push(`events/info/${event?.id}`)
+                        router.push(`events/${event?.id}/info`)
                       }}
                     >
                       <FiInfo size={20} />

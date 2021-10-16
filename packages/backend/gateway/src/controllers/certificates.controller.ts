@@ -21,13 +21,15 @@ import {
   ApiBearerAuth
 } from '@nestjs/swagger'
 import { Response } from 'express'
-import { IServiceCertificateListResponse } from 'src/interfaces/certificate/service-certificate-list-response.interface'
 
 import { Authorization } from '../decorators/authorization.decorator'
 import { Permission } from '../decorators/permission.decorator'
 import { CertificateIdDto } from '../interfaces/certificate/dto/certificate-id.dto'
+import { CertificateValidateResponseDto } from '../interfaces/certificate/dto/certificate-validate-response.dto'
+import { CertificateValidateDto } from '../interfaces/certificate/dto/certificate-validate.dto'
 import { CreateCertificateResponseDto } from '../interfaces/certificate/dto/create-certificate-response.dto'
 import { CreateCertificateDto } from '../interfaces/certificate/dto/create-certificate.dto'
+import { DeleteCertificateResponseDto } from '../interfaces/certificate/dto/delete-certificate-response.dto'
 import { EventIdDto } from '../interfaces/certificate/dto/event-id.dto'
 import { ListCertificateResponseDto } from '../interfaces/certificate/dto/list-certificate-response.dto'
 import { ListCertificateDto } from '../interfaces/certificate/dto/list-certificate.dto'
@@ -35,12 +37,15 @@ import { ListCertificateDto } from '../interfaces/certificate/dto/list-certifica
 // import { ListCertificateResponseDto } from '../interfaces/certificate/dto/list-certificate-response.dto'
 // import { ListCertificateDto } from '../interfaces/certificate/dto/list-certificate.dto'
 import { IServiceCertificateCreateResponse } from '../interfaces/certificate/service-certificate-create-response.interface'
+import { IServiceCertificateDeleteResponse } from '../interfaces/certificate/service-certificate-delete-response.interface'
+import { IServiceCertificateListResponse } from '../interfaces/certificate/service-certificate-list-response.interface'
+import { IServiceCertificateValidateResponse } from '../interfaces/certificate/service-certificate-validate-response.interface'
 // import { IServiceCertificateListResponse } from '../interfaces/certificate/service-certificate-list-response.interface'
 import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
 import { IServiceEventGetByIdResponse } from '../interfaces/event/service-event-get-by-id-response.interface'
 // import capitalize from '../utils/capitalize'
 
-@Controller('events/:event_id/certificates')
+@Controller('')
 @ApiBearerAuth('JWT')
 @ApiTags('certificates')
 export class CertificatesController {
@@ -51,7 +56,29 @@ export class CertificatesController {
     private readonly eventServiceClient: ClientProxy
   ) {}
 
-  @Get()
+  @Get('certificates/validate/:key')
+  // @Authorization(true)
+  // @Permission('certificate_get_by_id')
+  @ApiOkResponse({
+    type: CertificateValidateResponseDto,
+    description: 'Find certificate by id'
+  })
+  public async validateCertificate(
+    @Param() params: CertificateValidateDto
+  ): Promise<CertificateValidateResponseDto> {
+    const { key } = params
+
+    const certificateResponse: IServiceCertificateValidateResponse = await this.certificateServiceClient
+      .send('certificate_validate', { key })
+      .toPromise()
+
+    return {
+      message: certificateResponse.message,
+      data: certificateResponse?.data
+    }
+  }
+
+  @Get('events/:event_id/certificates')
   @Authorization(true)
   @Permission('certificate_list')
   @ApiOkResponse({
@@ -104,7 +131,7 @@ export class CertificatesController {
     }
   }
 
-  @Post()
+  @Post('events/:event_id/certificates')
   @Authorization(true)
   @Permission('certificate_create')
   @ApiCreatedResponse({
@@ -178,40 +205,39 @@ export class CertificatesController {
     }
   }
 
-  // @Delete(':id')
-  // @Authorization(true)
-  // @Permission('certificate_delete_by_id')
-  // @ApiOkResponse({
-  //   type: DeleteCertificateResponseDto
-  // })
-  // public async deleteCertificate(
-  //   @Req() request: IAuthorizedRequest,
-  //   @Param() params: CertificateIdDto
-  // ): Promise<DeleteCertificateResponseDto> {
-  //   const userInfo = request.user
+  @Delete('events/:event_id/certificates/:id')
+  @Authorization(true)
+  @Permission('certificate_delete_by_id')
+  @ApiOkResponse({
+    type: DeleteCertificateResponseDto
+  })
+  public async deleteCertificate(
+    // @Req() request: IAuthorizedRequest,
+    @Param() params: CertificateIdDto
+  ): Promise<DeleteCertificateResponseDto> {
+    // const userInfo = request.user
 
-  //   const deleteCertificateResponse: IServiceCertificateDeleteResponse = await this.certificateServiceClient
-  //     .send('certificate_delete_by_id', {
-  //       id: params.id,
-  //       permission: userInfo.role !== 'ADMIN' &&
-  //     })
-  //     .toPromise()
+    const deleteCertificateResponse: IServiceCertificateDeleteResponse = await this.certificateServiceClient
+      .send('certificate_delete_by_id', {
+        id: params.id
+      })
+      .toPromise()
 
-  //   if (deleteCertificateResponse.status !== HttpStatus.OK) {
-  //     throw new HttpException(
-  //       {
-  //         message: deleteCertificateResponse.message,
-  //         errors: deleteCertificateResponse.errors,
-  //         data: null
-  //       },
-  //       deleteCertificateResponse.status
-  //     )
-  //   }
+    if (deleteCertificateResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: deleteCertificateResponse.message,
+          errors: deleteCertificateResponse.errors,
+          data: null
+        },
+        deleteCertificateResponse.status
+      )
+    }
 
-  //   return {
-  //     message: deleteCertificateResponse.message,
-  //     data: null,
-  //     errors: null
-  //   }
-  // }
+    return {
+      message: deleteCertificateResponse.message,
+      data: null,
+      errors: null
+    }
+  }
 }

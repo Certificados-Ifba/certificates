@@ -35,6 +35,8 @@ const certificateReducer = (state: State, action: Action): State => {
     }
     case 'UPDATE_ITEM': {
       const newCertificates = state.certificates.map(certificate => {
+        console.log(action.values)
+
         if (certificate === action.certificate) {
           const updatedItem = Object.assign(certificate, action.values)
 
@@ -43,6 +45,7 @@ const certificateReducer = (state: State, action: Action): State => {
 
         return certificate
       })
+      console.log(action.certificate, newCertificates)
 
       return { ...state, certificates: newCertificates }
     }

@@ -7,15 +7,15 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { ActivitiesController } from './controllers/activities.controller'
 import { ActivityTypesController } from './controllers/activity-types.controller'
 import { CertificatesController } from './controllers/certificates.controller'
-import { EventActivitiesController } from './controllers/event/event-activity.controller'
-import { EventParticipantsController } from './controllers/event/event-participant.controller'
 import { EventsController } from './controllers/events.controller'
 import { FunctionsController } from './controllers/functions.controller'
 import { HealthController } from './controllers/health.controller'
+import { InfosController } from './controllers/infos.controller'
+import { ModelsController } from './controllers/models.controller'
 import { ParticipantsController } from './controllers/participants.controller'
 import { PasswordController } from './controllers/password.controller'
 import { SessionsController } from './controllers/sessions.controller'
-import { TestEventsController } from './controllers/test.controller'
+import { UploadController } from './controllers/upload.controller'
 import { UsersController } from './controllers/users.controller'
 import { ConfigService } from './services/config/config.service'
 import { ThrottlerConfigService } from './services/config/throttler.service'
@@ -35,13 +35,14 @@ import { PermissionGuard } from './services/guards/permission.guard'
     CertificatesController,
     EventsController,
     FunctionsController,
+    HealthController,
+    InfosController,
+    ModelsController,
     ParticipantsController,
-    TestEventsController,
-    UsersController,
-    EventParticipantsController,
-    SessionsController,
     PasswordController,
-    HealthController
+    SessionsController,
+    UploadController,
+    UsersController
   ],
   providers: [
     ConfigService,
@@ -96,6 +97,13 @@ import { PermissionGuard } from './services/guards/permission.guard'
         return ClientProxyFactory.create(
           configService.get('certificateService')
         )
+      },
+      inject: [ConfigService]
+    },
+    {
+      provide: 'STORAGE_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create(configService.get('storageService'))
       },
       inject: [ConfigService]
     },

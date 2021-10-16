@@ -155,11 +155,19 @@ export class ActivityController {
         const activity = await this.activityService.findActivityById(params.id)
 
         if (activity) {
-          await this.activityService.removeActivityById(params.id)
-          result = {
-            status: HttpStatus.OK,
-            message: 'activity_delete_by_id_success',
-            errors: null
+          if (params.permission) {
+            await this.activityService.removeActivityById(params.id)
+            result = {
+              status: HttpStatus.OK,
+              message: 'activity_delete_by_id_success',
+              errors: null
+            }
+          } else {
+            result = {
+              status: HttpStatus.FORBIDDEN,
+              message: 'activity_delete_by_id_forbidden',
+              errors: null
+            }
           }
         } else {
           result = {

@@ -1,6 +1,6 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import {
   FiCalendar,
   FiCheck,
@@ -16,15 +16,19 @@ import * as Yup from 'yup'
 
 import IActivity from '../../dtos/IActivity'
 import IEvent from '../../dtos/IEvent'
+import IGeneric from '../../dtos/IGeneric'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import { PaginatedRequest } from '../../services/usePaginatedRequest'
+import { Row } from '../../styles/components/grid'
+import capitalize from '../../utils/capitalize'
 import { formatData } from '../../utils/formatters'
 import getValidationErrors from '../../utils/getValidationErrors'
+import { inDateRange, minDate } from '../../utils/validators'
+import AsyncSelect from '../asyncSelect'
 import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
-import Select from '../select'
 
 interface Props {
   type: 'add' | 'update'
@@ -43,7 +47,6 @@ const ActivityModal: React.FC<Props> = ({
   activity,
   request
 }) => {
-  // const [loading, setLoading] = useState(false)
   const formRef = useRef<FormHandles>(null)
 
   const { addToast } = useToast()
@@ -56,25 +59,36 @@ const ActivityModal: React.FC<Props> = ({
 
   const handleSubmit = useCallback(
     async data => {
-      // setLoading(true)
-      console.log(event, data)
-
       const schema = Yup.object().shape({
         name: Yup.string().required('A atividade precisa ter um nome'),
         type: Yup.string().required(`Selecione um tipo da atividade`),
-        workload: Yup.string().required('Por favor, digite a carga horária'),
+        workload: Yup.number()
+          .typeError('Por favor, digite a carga horária')
+          .positive('A carga horária precisa ser positiva')
+          .required('Por favor, digite a carga horária'),
         start_date: Yup.string()
-          .min(
-            event.start_date,
+          .test(
+            'in-date-range',
             `A atividade precisa ser entre os dias ${formatData(
               event.start_date
-            )} e ${formatData(event.end_date)}`
+            )} e ${formatData(event.end_date)}`,
+            (value: string) =>
+              inDateRange(value, event.start_date, event.end_date)
           )
           .required('Selecione a data de início'),
         end_date: Yup.string()
-          .min(
-            data?.start_date,
-            'A data final precisa ser maior que a data inicial'
+          .test(
+            'in-date-range',
+            `A atividade precisa ser entre os dias ${formatData(
+              event.start_date
+            )} e ${formatData(event.end_date)}`,
+            (value: string) =>
+              inDateRange(value, event.start_date, event.end_date)
+          )
+          .test(
+            'min-date',
+            'A data final precisa ser maior que a data inicial',
+            (value: string) => minDate(value, data.start_date)
           )
           .required('Selecione a data do fim')
       })
@@ -119,16 +133,41 @@ const ActivityModal: React.FC<Props> = ({
     [type, event, activity?.id, addToast, handleCloseModal, request]
   )
 
+  const loadTypes = useCallback(async search => {
+    const response = await api.get<{ data: IGeneric[] }>('/activity_types', {
+      params: { search, sort_by: 'name', order_by: 'ASC' }
+    })
+
+    const data = []
+
+    response.data?.data?.forEach(type => {
+      data.push({
+        value: type.id,
+        label: capitalize(type.name)
+      })
+    })
+    return data
+  }, [])
+
   useEffect(() => {
     if (activity) {
-      formRef.current.setData(activity)
+      formRef.current.setData({
+        name: activity.name,
+        type: {
+          label: capitalize(activity.type.name),
+          value: activity.type.id
+        },
+        workload: activity.workload,
+        start_date: activity.start_date,
+        end_date: activity.end_date
+      })
     } else {
-      formRef.current.setErrors({})
+      formRef.current.reset()
     }
   }, [activity, openModal])
 
   return (
-    <Modal open={openModal} onClose={handleCloseModal}>
+    <Modal open={openModal} onClose={handleCloseModal} size="xl">
       <header>
         <h2>
           {activity ? (
@@ -154,42 +193,42 @@ const ActivityModal: React.FC<Props> = ({
             placeholder="Nome"
             icon={FiFileText}
           />
-          <Select
-            formRef={formRef}
-            label="Tipo de Atividade"
-            name="type"
-            isSearchable={true}
-            marginBottom="sm"
-            async={true}
-            url="activity_types"
-            icon={FiTag}
-          />
-          <Input
-            type="number"
-            formRef={formRef}
-            name="workload"
-            label="Carga Horária (Horas)"
-            marginBottom="sm"
-            placeholder="Carga Horária"
-            icon={FiClock}
-          />
-          <Input
-            type="date"
-            formRef={formRef}
-            name="start_date"
-            label="Inicia em"
-            marginBottom="sm"
-            placeholder="Data de Início"
-            icon={FiCalendar}
-          />
-          <Input
-            type="date"
-            formRef={formRef}
-            name="end_date"
-            label="Termina em"
-            placeholder="Data Final"
-            icon={FiCalendar}
-          />
+          <Row cols={2}>
+            <AsyncSelect
+              formRef={formRef}
+              label="Tipo de Atividade"
+              name="type"
+              marginBottom="sm"
+              icon={FiTag}
+              loadOptions={loadTypes}
+            />
+            <Input
+              type="number"
+              formRef={formRef}
+              name="workload"
+              label="Carga Horária (Horas)"
+              marginBottom="sm"
+              placeholder="Carga Horária"
+              icon={FiClock}
+            />
+            <Input
+              type="date"
+              formRef={formRef}
+              name="start_date"
+              label="Inicia em"
+              marginBottom="sm"
+              placeholder="Data de Início"
+              icon={FiCalendar}
+            />
+            <Input
+              type="date"
+              formRef={formRef}
+              name="end_date"
+              label="Termina em"
+              placeholder="Data Final"
+              icon={FiCalendar}
+            />
+          </Row>
         </main>
         <footer>
           <Button

@@ -20,7 +20,10 @@ import {
   ApiCreatedResponse,
   ApiBearerAuth
 } from '@nestjs/swagger'
-import { Response } from 'express'
+import { Request, Response } from 'express'
+import * as requestIp from 'request-ip'
+import { AuthParticipantDto } from 'src/interfaces/user/dto/auth-participant.dto'
+import * as parser from 'ua-parser-js'
 
 import { Authorization } from '../decorators/authorization.decorator'
 import { Permission } from '../decorators/permission.decorator'
@@ -36,9 +39,12 @@ import { IServiceParticipantCreateResponse } from '../interfaces/participant/ser
 import { IServiceParticipantGetByIdResponse } from '../interfaces/participant/service-participant-get-by-id-response.interface'
 import { IServiceParticipantListResponse } from '../interfaces/participant/service-participant-list-response.interface'
 import { IServiceParticipantUpdateByIdResponse } from '../interfaces/participant/service-participant-update-by-id-response.interface'
+import { IServiceTokenCreateResponse } from '../interfaces/token/service-token-create-response.interface'
 import { DeleteUserResponseDto } from '../interfaces/user/dto/delete-user-response.dto'
+import { LoginUserResponseDto } from '../interfaces/user/dto/login-user-response.dto'
 import { UserIdDto } from '../interfaces/user/dto/user-id.dto'
 import { IServiceUserDeleteResponse } from '../interfaces/user/service-user-delete-response.interface'
+import { IServiceUserSearchResponse } from '../interfaces/user/service-user-search-response.interface'
 import { ParticipantIdDto } from './../interfaces/participant/dto/participant-id.dto'
 
 @Controller('participants')
@@ -46,6 +52,7 @@ import { ParticipantIdDto } from './../interfaces/participant/dto/participant-id
 @ApiTags('participants')
 export class ParticipantsController {
   constructor(
+    @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy
   ) {}
 
@@ -233,6 +240,62 @@ export class ParticipantsController {
     return {
       message: deleteUserResponse.message,
       data: null,
+      errors: null
+    }
+  }
+
+  @Post('sessions')
+  @ApiCreatedResponse({
+    type: LoginUserResponseDto,
+    description: 'Performs authentication on the platform'
+  })
+  public async loginUser(
+    @Req() req: Request,
+    @Body() loginRequest: AuthParticipantDto
+  ): Promise<LoginUserResponseDto> {
+    const getUserResponse: IServiceUserSearchResponse = await this.userServiceClient
+      .send('user_auth_participant', loginRequest)
+      .toPromise()
+
+    if (getUserResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getUserResponse.message,
+          data: null,
+          errors: null
+        },
+        HttpStatus.UNAUTHORIZED
+      )
+    }
+    const agent = parser(req.headers['user-agent'])
+
+    const createTokenResponse: IServiceTokenCreateResponse = await this.tokenServiceClient
+      .send('token_create', {
+        user: getUserResponse.data.user,
+        ip: requestIp.getClientIp(req).split(':').pop(),
+        device: `${agent.device.model ? agent.device.model + ' - ' : ''}${
+          agent.os.name
+        } ${agent.os.version} - ${agent.browser.name}`,
+        where: req.headers.location
+      })
+      .toPromise()
+
+    if (createTokenResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: createTokenResponse.message,
+          errors: createTokenResponse.errors,
+          data: null
+        },
+        createTokenResponse.status
+      )
+    }
+
+    return {
+      message: createTokenResponse.message,
+      data: {
+        token: createTokenResponse.token
+      },
       errors: null
     }
   }

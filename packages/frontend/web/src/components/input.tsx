@@ -119,17 +119,7 @@ const Input: React.FC<Props> = ({
       ref: inputRef.current,
       path: 'value',
       setValue(ref: any, value) {
-        // if (value && ref.type === 'date') {
-        //   ref.value =
-        //     value.substr(6, 4) +
-        //     '-' +
-        //     value.substr(3, 2) +
-        //     '-' +
-        //     value.substr(0, 2)
-        // } else {
         ref.value = value || ''
-        // }
-
         setInputState(value ? 'isFilled' : 'isDefault')
       },
       clearValue: ref => {

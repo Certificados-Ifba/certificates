@@ -50,9 +50,6 @@ export class EventsController {
     @Inject('EVENT_SERVICE') private readonly eventServiceClient: ClientProxy
   ) {}
 
-  // @Controller()
-  // ActivitiesController
-
   @Get(':id')
   @Authorization(true)
   @Permission('event_get_by_id')

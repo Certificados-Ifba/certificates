@@ -6,7 +6,6 @@ export default interface ICertificate {
   function?: string
   participant?: IParticipant
   event?: string
-  key?: string
   workload: number
   start_date: Date
   end_date: Date
@@ -15,22 +14,49 @@ export default interface ICertificate {
 }
 
 export interface ILayout {
-  img: string
+  padding: string
+  horizontal_padding: string
+  vertical_padding: string
+  position: string
+  horizontal_position: string
+  vertical_position: string
+}
+
+interface IPage {
+  type: 'frente' | 'verso'
   text: string
+  image: string
+  layout: ILayout
 }
 
-export interface IRole {
-  number: number
-  activity: { name: string; id: string }
-  function: { name: string; id: string }
+interface ICriterion {
+  type_activity_id: string
+  function_id: string
 }
 
-export interface ICertificate {
+export interface IModelCertificate {
   name: string
-  front: ILayout
-  verse?: ILayout
-  roles: IRole[]
-  edit?: boolean
-  id: string
-  confirmed?: boolean
+  pages: IPage[]
+  criterions: ICriterion[]
 }
+
+// export interface ILayout {
+//   img: string
+//   text: string
+// }
+
+// export interface IRole {
+//   number: number
+//   activity: { name: string; id: string }
+//   function: { name: string; id: string }
+// }
+
+// export interface ICertificate {
+//   name: string
+//   front: ILayout
+//   verse?: ILayout
+//   roles: IRole[]
+//   edit?: boolean
+//   id: string
+//   confirmed?: boolean
+// }

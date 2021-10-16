@@ -77,30 +77,26 @@ const EventActivity: React.FC<Props> = ({ event }) => {
 
   const handleCloseDeleteModal = useCallback(() => {
     setOpenDeleteModal(false)
+    setActivity(null)
   }, [])
 
-  const handleSubmitDelete = useCallback(() => {
-    api
-      .delete(`events/${event?.id}/activities/${activity?.id}`)
-      .then(resp => {
-        if (resp?.data?.message === 'event_activity_delete_by_id_success') {
-          addToast({
-            title: 'Mensagem',
-            type: 'success',
-            description: 'A atividade foi excluída com sucesso.'
-          })
-          request.revalidate()
-          setOpenDeleteModal(false)
-        }
+  const handleSubmitDelete = useCallback(async () => {
+    try {
+      await api.delete(`events/${event?.id}/activities/${activity?.id}`)
+      addToast({
+        title: 'Atividade excluida',
+        type: 'success',
+        description: `${activity?.name} excluído com sucesso.`
       })
-      .catch(err => {
-        console.error(err)
-        addToast({
-          title: 'Erro desconhecido',
-          type: 'error',
-          description: 'Houve um erro ao deletar a atividade.'
-        })
+      request.revalidate()
+      setOpenDeleteModal(false)
+    } catch (err) {
+      addToast({
+        title: 'Erro na exclusão',
+        type: 'error',
+        description: err
       })
+    }
   }, [event, activity, addToast, request])
 
   return (

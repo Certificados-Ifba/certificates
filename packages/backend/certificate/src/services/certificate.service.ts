@@ -24,20 +24,26 @@ export class CertificateService {
     return await this.CertificateModel.findById(id)
   }
 
+  public async findCertificateByKey(key: string): Promise<ICertificate> {
+    return await this.CertificateModel.findOne({ key })
+  }
+
   public async removeCertificateById(id: string): Promise<ICertificate> {
     return await this.CertificateModel.findOneAndDelete({ _id: id })
   }
 
   public async listCertificates({
+    user,
     event,
     page,
     perPage,
     sortBy = 'created_at',
     orderBy = 'ASC'
   }: ICertificateListParams): Promise<DataResponse> {
-    const query = {
-      event: new Types.ObjectId(event)
-    }
+    const query: any = {}
+
+    if (event) query.event = new Types.ObjectId(event)
+    if (user) query.user = new Types.ObjectId(user)
 
     const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
 

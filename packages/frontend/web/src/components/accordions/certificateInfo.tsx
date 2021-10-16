@@ -1,3 +1,4 @@
+/* eslint-disable no-throw-literal */
 import { useCallback, useEffect, useState } from 'react'
 import { FiMinusCircle, FiUserCheck } from 'react-icons/fi'
 
@@ -22,10 +23,14 @@ interface Props {
 const CertificateInfo: React.FC<Props> = ({ eventId, certificate }) => {
   const [loading, setLoading] = useState(false)
   const { addToast } = useToast()
-  const { handleRemove } = useCertificates()
+  const { handleRemove, handleUpdate } = useCertificates()
 
   const handleRemoveCertificate = useCallback(async () => {
     try {
+      console.log(certificate)
+
+      if (!certificate.id) throw 'Erro não identificado'
+      await api.delete(`events/${eventId}/certificates/${certificate.id}`)
       handleRemove(certificate)
       addToast({
         type: 'success',
@@ -39,12 +44,12 @@ const CertificateInfo: React.FC<Props> = ({ eventId, certificate }) => {
         description: err
       })
     }
-  }, [addToast, handleRemove, certificate])
+  }, [addToast, handleRemove, certificate, eventId])
 
   useEffect(() => {
     async function load() {
-      setLoading(true)
       try {
+        setLoading(true)
         const { data } = await api.post(`events/${eventId}/certificates`, {
           activity: certificate.activity,
           function: certificate.function,
@@ -55,7 +60,10 @@ const CertificateInfo: React.FC<Props> = ({ eventId, certificate }) => {
           authorship_order: certificate.authorship_order,
           additional_field: certificate.additional_field
         })
-        console.log(data)
+        console.log(data?.data?.certificate?.id)
+
+        handleUpdate(certificate, { id: data?.data?.certificate?.id })
+        setLoading(false)
       } catch (err) {
         handleRemove(certificate)
         addToast({
@@ -64,10 +72,10 @@ const CertificateInfo: React.FC<Props> = ({ eventId, certificate }) => {
           description: err
         })
       }
-      setLoading(false)
     }
-    if (certificate) load()
-  }, [certificate, eventId, addToast, handleRemove])
+
+    if (!certificate.id) load()
+  }, [certificate, eventId, addToast, handleRemove, handleUpdate])
 
   return (
     <Container>

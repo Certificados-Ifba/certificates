@@ -169,9 +169,14 @@ const CertificateForm: React.FC<Props> = ({ event, closeAccordion }) => {
           item => item.label === activity?.type?.name
         )
         if (index !== -1) {
-          data[index].push({
+          data[index].options.push({
             value: activity.id,
-            label: activity.name
+            label: activity.name,
+            activity: {
+              workload: activity.workload,
+              start_date: activity.start_date,
+              end_date: activity.end_date
+            }
           })
         } else {
           data.push({

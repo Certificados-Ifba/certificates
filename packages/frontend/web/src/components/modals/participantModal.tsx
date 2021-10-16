@@ -21,7 +21,7 @@ import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import { PaginatedRequest } from '../../services/usePaginatedRequest'
 import getValidationErrors from '../../utils/getValidationErrors'
-import isValidCpf from '../../utils/isValidCpf'
+import { isValidCpf } from '../../utils/validators'
 import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
@@ -62,7 +62,7 @@ const ParticipantModal: React.FC<Props> = ({
             /(\d{3}).(\d{3}).(\d{3})-(\d{2})/,
             'Por favor, digite um CPF válido.'
           )
-          .test('is-jimmy', 'CPF precisa ser válido', isValidCpf)
+          .test('cpf-is-valid', 'CPF precisa ser válido', isValidCpf)
           .required('Digite o CPF do participante'),
         dob: Yup.string().required('Selecione a data de nascimento'),
         phone: Yup.string().matches(

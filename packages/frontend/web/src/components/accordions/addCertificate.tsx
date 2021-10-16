@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import { ICertificate } from '../../dtos/ICertificate'
+import { ICertificate, IModelCertificate } from '../../dtos/ICertificate'
 import IEvent from '../../dtos/IEvent'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
@@ -92,10 +92,17 @@ const AddCertificate: React.FC<Props> = ({
   }, [edit, handleOnOpen, isOpen])
 
   const submit = useCallback(() => {
-    console.log(layoutFrontFormRef)
-    console.log(layoutVerseFormRef)
-    console.log(rolesFormRef)
-    console.log(formRef)
+    const data: IModelCertificate = {
+      name: formRef?.current?.getData().name,
+      pages: [],
+      criterions: []
+    }
+    console.log(data)
+
+    console.log(layoutFrontFormRef?.current?.getData())
+    console.log(layoutVerseFormRef?.current?.getData())
+    console.log(rolesFormRef?.current?.getData())
+    console.log(formRef?.current?.getData())
   }, [formRef, layoutFrontFormRef, layoutVerseFormRef, rolesFormRef])
 
   return (

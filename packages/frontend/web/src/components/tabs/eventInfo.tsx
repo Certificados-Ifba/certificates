@@ -21,6 +21,7 @@ import IEvent from '../../dtos/IEvent'
 import { useAuth } from '../../providers/auth'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
+import { Row } from '../../styles/components/grid'
 import {
   Container,
   ButtonContainer
@@ -80,46 +81,59 @@ const EventInfo: React.FC<Props> = ({ event, setEvent, edit }) => {
 
   return (
     <Container>
-      <div>
-        <Alert marginBottom="sm" size="sm">
-          Nome do Evento:
-        </Alert>
-        <Alert icon={FiBookmark} marginBottom="md">
-          <b>{event?.name}</b>
-        </Alert>
-        <Alert marginBottom="sm" size="sm">
-          Sigla:
-        </Alert>
-        <Alert icon={FiHash} marginBottom="md">
-          <b>{event?.initials}</b>
-        </Alert>
-        <Alert marginBottom="sm" size="sm">
-          Edição:
-        </Alert>
-        <Alert icon={FiTag} marginBottom="md">
-          <b>{event?.edition}</b>
-        </Alert>
-        <Alert marginBottom="sm" size="sm">
-          Local:
-        </Alert>
-        <Alert icon={FiMapPin} marginBottom="md">
-          <b>{event?.local}</b>
-        </Alert>
-        <Alert marginBottom="sm" size="sm">
-          Período:
-        </Alert>
-        <Alert icon={FiCalendar} marginBottom="md">
-          <b>
-            De {formatData(event?.start_date)} até {formatData(event?.end_date)}
-          </b>
-        </Alert>
-        <Alert marginBottom="sm" size="sm">
-          Coordenador:
-        </Alert>
-        <Alert icon={FiUser}>
-          <b>{event?.user.name}</b>
-        </Alert>
-      </div>
+      <Row cols={2}>
+        <div>
+          <Alert marginBottom="sm" size="sm">
+            Nome do Evento:
+          </Alert>
+          <Alert icon={FiBookmark} marginBottom="md">
+            <b>{event?.name}</b>
+          </Alert>
+        </div>
+        <div>
+          <Alert marginBottom="sm" size="sm">
+            Sigla:
+          </Alert>
+          <Alert icon={FiHash} marginBottom="md">
+            <b>{event?.initials}</b>
+          </Alert>
+        </div>
+        <div>
+          <Alert marginBottom="sm" size="sm">
+            Edição:
+          </Alert>
+          <Alert icon={FiTag} marginBottom="md">
+            <b>{event?.edition}</b>
+          </Alert>
+        </div>
+        <div>
+          <Alert marginBottom="sm" size="sm">
+            Local:
+          </Alert>
+          <Alert icon={FiMapPin} marginBottom="md">
+            <b>{event?.local}</b>
+          </Alert>
+        </div>
+        <div>
+          <Alert marginBottom="sm" size="sm">
+            Período:
+          </Alert>
+          <Alert icon={FiCalendar} marginBottom="md">
+            <b>
+              De {formatData(event?.start_date)} até{' '}
+              {formatData(event?.end_date)}
+            </b>
+          </Alert>
+        </div>
+        <div>
+          <Alert marginBottom="sm" size="sm">
+            Coordenador:
+          </Alert>
+          <Alert icon={FiUser}>
+            <b>{event?.user?.name}</b>
+          </Alert>
+        </div>
+      </Row>
       {show && (
         <ButtonContainer>
           <Button

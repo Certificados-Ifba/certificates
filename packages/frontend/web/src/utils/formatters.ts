@@ -22,3 +22,6 @@ export const formatData = (value: string): string => {
   const anoF = data.toISOString().substr(0, 4)
   return `${diaF}/${mesF}/${anoF}`
 }
+
+export const removeMask = (value: string): string =>
+  value.replace(/[^\d]+/g, '')

@@ -23,6 +23,54 @@ export class UserController {
     @Inject('MAILER_SERVICE') private readonly mailerServiceClient: ClientProxy
   ) {}
 
+  @MessagePattern('user_auth_participant')
+  public async userAuthParticipant(searchParams: {
+    cpf: string
+    dob: Date
+  }): Promise<IUserSearchResponse> {
+    let result: IUserSearchResponse
+
+    if (searchParams.cpf && searchParams.dob) {
+      const user = await this.userService.searchUserByCpf(searchParams.cpf)
+
+      if (user && user.role === 'PARTICIPANT') {
+        if (
+          new Date(user.personal_data.dob).getTime() ===
+          new Date(searchParams.dob).getTime()
+        ) {
+          const userUpdeted = await this.userService.updateUserById(user.id, {
+            last_login: new Date()
+          })
+          result = {
+            status: HttpStatus.OK,
+            message: 'user_search_by_credentials_success',
+            data: { user: userUpdeted }
+          }
+        } else {
+          result = {
+            status: HttpStatus.NOT_FOUND,
+            message: 'user_search_by_credentials_not_match',
+            data: null
+          }
+        }
+      } else {
+        result = {
+          status: HttpStatus.NOT_FOUND,
+          message: 'user_search_by_credentials_not_found',
+          data: null
+        }
+      }
+    } else {
+      result = {
+        status: HttpStatus.NOT_FOUND,
+        message: 'user_search_by_credentials_not_found',
+        data: null
+      }
+    }
+
+    return result
+  }
+
   @MessagePattern('user_search_by_credentials')
   public async searchUserByCredentials(searchParams: {
     email: string
@@ -323,7 +371,7 @@ export class UserController {
             userParams.is_confirmed = false
             userParams.password = Math.random().toString(16).replace('0.', '')
           } else {
-            const usersWithCPF = await this.userService.searchUserByCPF(
+            const usersWithCPF = await this.userService.searchUserByCpf(
               userParams.personal_data.cpf
             )
             if (usersWithCPF) {

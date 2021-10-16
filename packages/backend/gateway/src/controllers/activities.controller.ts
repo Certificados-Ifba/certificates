@@ -22,7 +22,12 @@ import {
 } from '@nestjs/swagger'
 import { Response } from 'express'
 import { ActivityIdDto } from 'src/interfaces/activity/dto/activity-id.dto'
+import { DeleteActivityResponseDto } from 'src/interfaces/activity/dto/delete-activity-response.dto'
 import { EventIdDto } from 'src/interfaces/activity/dto/event-id.dto'
+import { UpdateActivityResponseDto } from 'src/interfaces/activity/dto/update-activity-response.dto'
+import { UpdateActivityDto } from 'src/interfaces/activity/dto/update-activity.dto'
+import { IServiceActivityDeleteResponse } from 'src/interfaces/activity/service-activity-delete-response.interface'
+import { IServiceActivityUpdateByIdResponse } from 'src/interfaces/activity/service-activity-update-by-id-response.interface'
 import { IAuthorizedRequest } from 'src/interfaces/common/authorized-request.interface'
 import { IServiceEventGetByIdResponse } from 'src/interfaces/event/service-event-get-by-id-response.interface'
 import capitalize from 'src/utils/capitalize'
@@ -194,80 +199,100 @@ export class ActivitiesController {
     }
   }
 
-  // @Delete(':id')
-  // @Authorization(true)
-  // @Permission('activity_delete_by_id')
-  // @ApiOkResponse({
-  //   type: DeleteActivityResponseDto
-  // })
-  // public async deleteActivity(
-  //   @Req() request: IAuthorizedRequest,
-  //   @Param() params: ActivityIdDto
-  // ): Promise<DeleteActivityResponseDto> {
-  //   const userInfo = request.user
+  @Delete(':id')
+  @Authorization(true)
+  @Permission('activity_delete_by_id')
+  @ApiOkResponse({
+    type: DeleteActivityResponseDto
+  })
+  public async deleteActivity(
+    @Req() request: IAuthorizedRequest,
+    @Param() params: ActivityIdDto
+  ): Promise<DeleteActivityResponseDto> {
+    const userInfo = request.user
 
-  //   const deleteActivityResponse: IServiceActivityDeleteResponse = await this.activityServiceClient
-  //     .send('activity_delete_by_id', {
-  //       id: params.id,
-  //       permission: userInfo.role !== 'ADMIN' &&
-  //     })
-  //     .toPromise()
+    const eventResponse: IServiceEventGetByIdResponse = await this.eventServiceClient
+      .send('event_get_by_id', {
+        id: params.event_id,
+        user: request.user
+      })
+      .toPromise()
 
-  //   if (deleteActivityResponse.status !== HttpStatus.OK) {
-  //     throw new HttpException(
-  //       {
-  //         message: deleteActivityResponse.message,
-  //         errors: deleteActivityResponse.errors,
-  //         data: null
-  //       },
-  //       deleteActivityResponse.status
-  //     )
-  //   }
+    if (eventResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: eventResponse.message,
+          data: null,
+          errors: null
+        },
+        eventResponse.status
+      )
+    }
 
-  //   return {
-  //     message: deleteActivityResponse.message,
-  //     data: null,
-  //     errors: null
-  //   }
-  // }
+    const deleteActivityResponse: IServiceActivityDeleteResponse = await this.activityServiceClient
+      .send('activity_delete_by_id', {
+        id: params.id,
+        permission:
+          userInfo.role === 'ADMIN' ||
+          userInfo.id === eventResponse.data.event.id
+      })
+      .toPromise()
 
-  // @Put(':id')
-  // @Authorization(true)
-  // @Permission('activity_update_by_id')
-  // @ApiOkResponse({
-  //   type: UpdateActivityResponseDto
-  // })
-  // public async updateActivity(
-  //   @Req() request: IAuthorizedRequest,
-  //   @Param() params: ActivityIdDto,
-  //   @Body() activityRequest: UpdateActivityDto
-  // ): Promise<UpdateActivityResponseDto> {
-  //   const userInfo = request.user
-  //   const updateActivityResponse: IServiceActivityUpdateByIdResponse = await this.activityServiceClient
-  //     .send('activity_update_by_id', {
-  //       id: params.id,
-  //       user: userInfo,
-  //       activity: activityRequest
-  //     })
-  //     .toPromise()
+    if (deleteActivityResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: deleteActivityResponse.message,
+          errors: deleteActivityResponse.errors,
+          data: null
+        },
+        deleteActivityResponse.status
+      )
+    }
 
-  //   if (updateActivityResponse.status !== HttpStatus.OK) {
-  //     throw new HttpException(
-  //       {
-  //         message: updateActivityResponse.message,
-  //         errors: updateActivityResponse.errors,
-  //         data: null
-  //       },
-  //       updateActivityResponse.status
-  //     )
-  //   }
+    return {
+      message: deleteActivityResponse.message,
+      data: null,
+      errors: null
+    }
+  }
 
-  //   return {
-  //     message: updateActivityResponse.message,
-  //     data: {
-  //       activity: updateActivityResponse.activity
-  //     },
-  //     errors: null
-  //   }
-  // }
+  @Put(':id')
+  @Authorization(true)
+  @Permission('activity_update_by_id')
+  @ApiOkResponse({
+    type: UpdateActivityResponseDto
+  })
+  public async updateActivity(
+    @Req() request: IAuthorizedRequest,
+    @Param() params: ActivityIdDto,
+    @Body() activityRequest: UpdateActivityDto
+  ): Promise<UpdateActivityResponseDto> {
+    const userInfo = request.user
+    const updateActivityResponse: IServiceActivityUpdateByIdResponse = await this.activityServiceClient
+      .send('activity_update_by_id', {
+        id: params.id,
+        user: userInfo,
+        activity: activityRequest
+      })
+      .toPromise()
+
+    if (updateActivityResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: updateActivityResponse.message,
+          errors: updateActivityResponse.errors,
+          data: null
+        },
+        updateActivityResponse.status
+      )
+    }
+
+    return {
+      message: updateActivityResponse.message,
+      data: {
+        activity: updateActivityResponse.activity
+      },
+      errors: null
+    }
+  }
 }

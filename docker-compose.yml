@@ -98,6 +98,15 @@ services:
       - .env
     networks:
       - backend
+  storage:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.storage
+    hostname: storage
+    env_file:
+      - .env
+    networks:
+      - backend
   user:
     build:
       context: .
