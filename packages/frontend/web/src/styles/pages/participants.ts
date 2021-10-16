@@ -1,10 +1,21 @@
 import { Form } from '@unform/web'
 import styled, { css } from 'styled-components'
 
-interface ContainerProps {
-  login: boolean
-  maxWidth: number
-}
+export const FooterContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  > div {
+    max-width: 500px;
+  }
+`
+
+export const InfoContainer = styled.div`
+  margin: 10px;
+`
+
+export const ButtonContainer = styled.div`
+  margin-top: 10px;
+`
 
 export const ImageContainer = styled.div`
   margin-bottom: 20px;
@@ -15,7 +26,20 @@ export const ImageContainer = styled.div`
   }
 `
 
+interface ContainerProps {
+  login: boolean
+  maxWidth: number
+  marginTopSm?: boolean
+}
+
 export const Container = styled.div<ContainerProps>`
+  ${props =>
+    props.marginTopSm &&
+    css`
+      @media (min-width: ${props => props.theme.responsive.smDown}) {
+        margin-top: 70px;
+      }
+    `}
   ${props =>
     props.login &&
     css`
