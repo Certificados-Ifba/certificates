@@ -56,7 +56,8 @@ const CertificateValid: React.FC = () => {
     workload: 10,
     start_date: '2021-08-14T02:58:03.079Z',
     end_date: '2021-08-14T02:58:03.079Z',
-    function: 'Ouvinte'
+    function: 'Ouvinte',
+    event: 'Evento 1'
   }
 
   return (
@@ -77,6 +78,12 @@ const CertificateValid: React.FC = () => {
             <GridRow cols={2}>
               <div>
                 <InfoContainer>
+                  <Alert marginBottom="sm" size="sm">
+                    Evento:
+                  </Alert>
+                  <Alert marginBottom="sm" icon={FiCalendar}>
+                    <b>{certificate.event} </b>
+                  </Alert>
                   <Alert marginBottom="sm" size="sm">
                     Atividade:
                   </Alert>

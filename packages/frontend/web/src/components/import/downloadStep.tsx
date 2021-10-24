@@ -66,9 +66,9 @@ const DownloadStep: React.FC<Props> = ({
       for (let index1 = 0; index1 < element.values.length; index1++) {
         enumSheet['A' + (index1 + 1)] = {
           t: 's',
-          v: element.values[index1],
-          h: element.values[index1],
-          w: element.values[index1]
+          v: element.values[index1].name,
+          h: element.values[index1].name,
+          w: element.values[index1].name
         }
       }
 

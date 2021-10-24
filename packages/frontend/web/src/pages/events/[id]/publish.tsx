@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FiChevronLeft, FiSend, FiChevronRight, FiCheck } from 'react-icons/fi'
 
 import Alert from '../../../components/alert'
@@ -38,6 +38,7 @@ const Publish: React.FC = () => {
   const { id } = router?.query
   const [event, setEvent] = useState(null)
   const { addToast } = useToast()
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
@@ -62,6 +63,23 @@ const Publish: React.FC = () => {
   }, [id, addToast])
 
   const [steps, setSteps] = useState(getStepList(stepConfig, 0))
+
+  const publish = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await api.post(`events/${id}/publish`, {})
+      setLoading(false)
+      return true
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: 'Erro ao publicar evento',
+        description: err
+      })
+      setLoading(false)
+      return false
+    }
+  }, [addToast, id])
 
   return (
     <Container>
@@ -107,12 +125,20 @@ const Publish: React.FC = () => {
             color={'primary'}
             size="default"
             type="button"
+            loading={loading}
+            disabled={loading}
             onClick={() => {
               const selected = getSelected(steps)
               if (selected.name === endName) {
                 router.push(`/events/${event.id}/info`)
+              } else if (selected.name === modelName) {
+                publish()
+                  .then(publish => {
+                    if (publish)
+                      setSteps(getStepList(stepConfig, selected.id + 1))
+                  })
+                  .catch()
               } else {
-                console.log()
                 setSteps(getStepList(stepConfig, selected.id + 1))
               }
             }}

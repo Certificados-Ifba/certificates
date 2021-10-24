@@ -37,6 +37,8 @@ interface Props {
 }
 
 const EventActivity: React.FC<Props> = ({ event }) => {
+  const router = useRouter()
+
   const [activity, setActivity] = useState<IActivity>(null)
   const [openModal, setOpenModal] = useState(false)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)

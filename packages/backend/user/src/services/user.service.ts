@@ -70,8 +70,8 @@ export class UserService {
     userParams: IUserUpdateParams
   ): Promise<IUser> {
     const UserModel = await this.UserModel.findById(id)
-
     if (userParams.name) UserModel.name = userParams.name
+    if (userParams.role) UserModel.role = userParams.role
     if (userParams.password) UserModel.password = userParams.password
     if (userParams.is_confirmed)
       UserModel.is_confirmed = userParams.is_confirmed

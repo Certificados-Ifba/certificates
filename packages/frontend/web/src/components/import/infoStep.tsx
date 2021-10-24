@@ -143,7 +143,7 @@ const InfoStep: React.FC<Props> = ({
                 </Alert>
                 <ul style={{ marginLeft: '30px' }}>
                   {e.values.map((value, index1) => {
-                    return <li key={index1}>{value}</li>
+                    return <li key={index1}>{value.name}</li>
                   })}
                 </ul>
               </Section>

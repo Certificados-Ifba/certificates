@@ -20,8 +20,9 @@ import IParticipant from '../../dtos/IParticipant'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import { PaginatedRequest } from '../../services/usePaginatedRequest'
+import { Row } from '../../styles/components/grid'
 import getValidationErrors from '../../utils/getValidationErrors'
-import { isValidCpf } from '../../utils/validators'
+import { getParticipantSchema } from '../../utils/schemas'
 import Button from '../button'
 import Input from '../input'
 import Modal from '../modal'
@@ -54,25 +55,7 @@ const ParticipantModal: React.FC<Props> = ({
 
   const handleSubmit = useCallback(
     async data => {
-      const schema = Yup.object().shape({
-        name: Yup.string().required('O usuário precisa ter um nome'),
-        email: Yup.string().email('Por favor, digite um e-mail válido'),
-        cpf: Yup.string()
-          .matches(
-            /(\d{3}).(\d{3}).(\d{3})-(\d{2})/,
-            'Por favor, digite um CPF válido.'
-          )
-          .test('cpf-is-valid', 'CPF precisa ser válido', isValidCpf)
-          .required('Digite o CPF do participante'),
-        dob: Yup.string().required('Selecione a data de nascimento'),
-        phone: Yup.string().matches(
-          /(^$|\((\d{2})\) (\d{4}|\d{5})-(\d{4}))/,
-          'Por favor, digite um telefone válido.'
-        ),
-        institution: Yup.string().required(
-          'Selecione se o participante é da instituição.'
-        )
-      })
+      const schema = getParticipantSchema()
       try {
         await schema.validate(data, {
           abortEarly: false
@@ -135,7 +118,7 @@ const ParticipantModal: React.FC<Props> = ({
   }, [participant, openModal])
 
   return (
-    <Modal open={openModal} onClose={handleCloseSaveModal}>
+    <Modal size="xl" open={openModal} onClose={handleCloseSaveModal}>
       <header>
         <h2>
           {type === 'update' ? (
@@ -153,68 +136,74 @@ const ParticipantModal: React.FC<Props> = ({
       </header>
       <Form ref={formRef} onSubmit={handleSubmit}>
         <main>
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="name"
-            label="Nome"
-            placeholder="Nome"
-            icon={FiUser}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="cpf"
-            label="CPF"
-            placeholder="CPF"
-            type="cpf"
-            icon={FiCreditCard}
-            disabled={type === 'update'}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="dob"
-            label="Data de Nascimento"
-            type="date"
-            icon={FiCalendar}
-          />
-          <Select
-            formRef={formRef}
-            marginBottom={'sm'}
-            label="É da Instituição?"
-            name="institution"
-            isSearchable={false}
-            icon={FiBook}
-            options={[
-              {
-                value: true,
-                label: 'Sim'
-              },
-              {
-                value: false,
-                label: 'Não'
-              }
-            ]}
-          />
-          <Input
-            formRef={formRef}
-            marginBottom={'sm'}
-            name="email"
-            label={'E-mail'}
-            placeholder="email@exemplo.com"
-            icon={FiMail}
-            type="text"
-          />
-          <Input
-            formRef={formRef}
-            marginBottom="sm"
-            name="phone"
-            label="Telefone"
-            placeholder="Telefone"
-            type="phone"
-            icon={FiPhoneCall}
-          />
+          <Row cols={2}>
+            <div>
+              <Input
+                formRef={formRef}
+                marginBottom="sm"
+                name="name"
+                label="Nome"
+                placeholder="Nome"
+                icon={FiUser}
+              />
+              <Input
+                formRef={formRef}
+                marginBottom="sm"
+                name="cpf"
+                label="CPF"
+                placeholder="CPF"
+                type="cpf"
+                icon={FiCreditCard}
+                disabled={type === 'update'}
+              />
+              <Input
+                formRef={formRef}
+                marginBottom="sm"
+                name="dob"
+                label="Data de Nascimento"
+                type="date"
+                icon={FiCalendar}
+              />
+            </div>
+            <div>
+              <Select
+                formRef={formRef}
+                marginBottom={'sm'}
+                label="É da Instituição?"
+                name="institution"
+                isSearchable={false}
+                icon={FiBook}
+                options={[
+                  {
+                    value: true,
+                    label: 'Sim'
+                  },
+                  {
+                    value: false,
+                    label: 'Não'
+                  }
+                ]}
+              />
+              <Input
+                formRef={formRef}
+                marginBottom={'sm'}
+                name="email"
+                label={'E-mail'}
+                placeholder="email@exemplo.com"
+                icon={FiMail}
+                type="text"
+              />
+              <Input
+                formRef={formRef}
+                marginBottom="sm"
+                name="phone"
+                label="Telefone"
+                placeholder="Telefone"
+                type="phone"
+                icon={FiPhoneCall}
+              />
+            </div>
+          </Row>
         </main>
         <footer>
           <Button

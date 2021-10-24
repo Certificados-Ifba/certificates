@@ -91,6 +91,11 @@ export const Container = styled.div<ContainerProps>`
 export const FormArea = styled(Form)`
   grid-area: form;
 `
+export const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+`
 
 export const TopButton = styled.span`
   position: absolute;

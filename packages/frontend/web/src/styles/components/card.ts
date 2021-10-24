@@ -18,6 +18,9 @@ export const Container = styled.div`
     button {
       margin-left: 20px;
     }
+    form {
+      min-width: 300px;
+    }
     @media (max-width: ${props => props.theme.responsive.mdDown}) {
       h2 {
         margin-bottom: ${props => props.theme.margins.sm};
@@ -29,6 +32,7 @@ export const Container = styled.div`
       }
 
       form {
+        min-width: 0;
         width: 100%;
         margin-bottom: ${props => props.theme.margins.sm};
       }

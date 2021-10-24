@@ -6,9 +6,10 @@ import { FiFilePlus } from 'react-icons/fi'
 import { Container } from '../../styles/pages/home'
 import Card from '../card'
 import { FileSelected } from '../fileChooser'
+import Spinner from '../spinner'
 import Stepper, { getSelected, getStepList, StepConfig } from '../stepper'
 import DownloadStep from './downloadStep'
-import { Column, Enum, Rows } from './importObjects'
+import { Column, Enum, ExtraBody, Rows } from './importObjects'
 import ImportStep from './importStep'
 import InfoStep from './infoStep'
 
@@ -31,6 +32,9 @@ export interface Props {
   examples?: Rows[]
   enums?: Enum[]
   sendURL: string
+  extraBody?: ExtraBody[]
+  loading?: boolean
+  createSchema?: (item: any) => any
 }
 
 const Import: React.FC<Props> = ({
@@ -41,7 +45,10 @@ const Import: React.FC<Props> = ({
   columns,
   examples,
   enums,
-  sendURL
+  sendURL,
+  loading,
+  extraBody,
+  createSchema
 }) => {
   const router = useRouter()
   const [steps, setSteps] = useState(getStepList(stepConfig, 0))
@@ -84,34 +91,53 @@ const Import: React.FC<Props> = ({
         </header>
         <Stepper steps={steps}></Stepper>
         <Card>
-          {getSelected(steps).name === infoName && (
-            <InfoStep
-              onPrevious={back}
-              onNext={file => {
-                setFile(file)
-                next()
+          {loading && (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '20px'
               }}
-              columns={columns}
-              enums={enums}
-              examples={examples}
-            ></InfoStep>
+            >
+              <Spinner size={70}></Spinner>
+            </div>
           )}
-          {getSelected(steps).name === downloadName && (
-            <DownloadStep
-              columns={columns}
-              enums={enums}
-              onPrevious={back}
-              onNext={next}
-            ></DownloadStep>
-          )}
-          {getSelected(steps).name === importName && (
-            <ImportStep
-              onPrevious={back}
-              onNext={next}
-              file={file}
-              sendURL={sendURL}
-              columns={columns}
-            ></ImportStep>
+          {!loading && (
+            <>
+              {getSelected(steps).name === infoName && (
+                <InfoStep
+                  onPrevious={back}
+                  onNext={file => {
+                    setFile(file)
+                    next()
+                  }}
+                  columns={columns}
+                  enums={enums}
+                  examples={examples}
+                ></InfoStep>
+              )}
+              {getSelected(steps).name === downloadName && (
+                <DownloadStep
+                  columns={columns}
+                  enums={enums}
+                  onPrevious={back}
+                  onNext={next}
+                ></DownloadStep>
+              )}
+              {getSelected(steps).name === importName && (
+                <ImportStep
+                  createSchema={createSchema}
+                  title={title}
+                  enums={enums}
+                  extraParams={extraBody}
+                  onPrevious={back}
+                  onNext={next}
+                  file={file}
+                  sendURL={sendURL}
+                  columns={columns}
+                ></ImportStep>
+              )}
+            </>
           )}
         </Card>
       </Container>

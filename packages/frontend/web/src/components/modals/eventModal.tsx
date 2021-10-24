@@ -114,7 +114,7 @@ const EventModal: React.FC<Props> = ({
 
         if (type === 'add') {
           const response = await api.post('events', data)
-          router.push(`events/info/${response.data?.data?.event.id}`)
+          router.push(`events/${response.data?.data?.event.id}/info`)
         } else {
           const response = await api.put(`events/${event?.id}`, data)
           setEvent(response.data?.data?.event)
