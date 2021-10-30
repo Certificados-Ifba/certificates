@@ -20,6 +20,8 @@ import Card from '../../components/card'
 import Input from '../../components/input'
 import Help from '../../components/login/help'
 import LogoArea from '../../components/login/logoArea'
+import CertificateInvalid from '../../components/participant/invalid'
+import CertificateValid from '../../components/participant/valid'
 import withoutAuth from '../../hocs/withoutAuth'
 import ParticipantLoginLayout from '../../layouts/participantLogin'
 import { useToast } from '../../providers/toast'
@@ -39,8 +41,9 @@ const Validate: React.FC = () => {
   const router = useRouter()
 
   const query = router.query
-  let uuid
-  if (query.uuid) uuid = query.uuid[0]
+  let uuidRouter
+  if (query.uuid) uuidRouter = query.uuid[0]
+  const [uuid, setUuid] = useState(null)
 
   const [valid, setValid] = useState(false)
 
@@ -98,8 +101,11 @@ const Validate: React.FC = () => {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (uuid) validateCode(uuid)
-  }, [uuid, validateCode])
+    if (uuidRouter) {
+      validateCode(uuidRouter)
+    }
+    setUuid(uuidRouter)
+  }, [uuid, uuidRouter, validateCode])
 
   return (
     <>
@@ -128,104 +134,112 @@ const Validate: React.FC = () => {
           </Button>
         </div>
       </TopButton>
-      <Container maxWidth={500} login={true}>
-        <Head>
-          <title>Validar | Certificados</title>
-        </Head>
-        <LogoArea />
-        <FormArea ref={formRef} onSubmit={handleSubmit}>
-          <Card>
-            <header>
-              <h2>
+      {uuid && !valid && <CertificateInvalid></CertificateInvalid>}
+      {uuid && valid && <CertificateValid></CertificateValid>}
+      {!uuid && (
+        <Container maxWidth={500} login={true}>
+          <Head>
+            <title>Validar | Certificados</title>
+          </Head>
+          <LogoArea />
+          <FormArea ref={formRef} onSubmit={handleSubmit}>
+            <Card>
+              <header>
+                <h2>
+                  {uuid && (
+                    <>
+                      {valid && (
+                        <>
+                          <span style={{ color: theme.colors.success }}>
+                            Esse certificado é VÁLIDO!
+                          </span>
+                        </>
+                      )}
+                      {!valid && (
+                        <>
+                          <span style={{ color: theme.colors.danger }}>
+                            Esse certificado é INVÁLIDO!
+                          </span>
+                        </>
+                      )}
+                    </>
+                  )}
+                  {!uuid && 'Digite o código para validar'}
+                </h2>
+              </header>
+              <FormContainer padding={true}>
                 {uuid && (
                   <>
                     {valid && (
-                      <>
-                        <span style={{ color: theme.colors.success }}>
-                          Esse certificado é VÁLIDO!
-                        </span>
-                      </>
+                      <ImageContainer>
+                        <Image src="/valid.svg" width="" height="200px"></Image>
+                      </ImageContainer>
                     )}
                     {!valid && (
-                      <>
-                        <span style={{ color: theme.colors.danger }}>
-                          Esse certificado é INVÁLIDO!
-                        </span>
-                      </>
+                      <ImageContainer>
+                        <Image
+                          src="/invalid.svg"
+                          width=""
+                          height="200px"
+                        ></Image>
+                      </ImageContainer>
                     )}
-                  </>
-                )}
-                {!uuid && 'Digite o código para validar'}
-              </h2>
-            </header>
-            <FormContainer padding={true}>
-              {uuid && (
-                <>
-                  {valid && (
-                    <ImageContainer>
-                      <Image src="/valid.svg" width="" height="200px"></Image>
-                    </ImageContainer>
-                  )}
-                  {!valid && (
-                    <ImageContainer>
-                      <Image src="/invalid.svg" width="" height="200px"></Image>
-                    </ImageContainer>
-                  )}
-                  <Button
-                    onClick={() => {
-                      router.push(`/participants/login`)
-                    }}
-                    size="default"
-                    type="button"
-                  >
-                    <FiEye size={20}></FiEye>
-                    <span>Visualizar Certificado</span>
-                  </Button>
-                </>
-              )}
-              {!uuid && (
-                <>
-                  <Input
-                    formRef={formRef}
-                    marginBottom="md"
-                    name="code"
-                    label="Código de Validação do Certificado"
-                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                    type="text"
-                    icon={FiHash}
-                  />
-                  <Row>
-                    <Button size="big" color="primary" type="submit">
-                      <FiCheck size={20} />
-                      <span>Validar Certificado</span>
-                    </Button>
-                  </Row>
-                </>
-              )}
-              <div style={{ marginTop: '10px' }}>
-                <Row>
-                  {uuid && (
                     <Button
                       onClick={() => {
-                        router.push(`/validate`)
+                        router.push(`/participants/login`)
                       }}
-                      size="small"
+                      size="default"
                       type="button"
-                      ghost
                     >
-                      <FiRepeat size={20} />
-                      <span>
-                        {valid ? 'Verificar outro' : 'Digitar novamente'}
-                      </span>
+                      <FiEye size={20}></FiEye>
+                      <span>Visualizar Certificado</span>
                     </Button>
-                  )}
-                </Row>
-              </div>
-              <Help />
-            </FormContainer>
-          </Card>
-        </FormArea>
-      </Container>
+                  </>
+                )}
+                {!uuid && (
+                  <>
+                    <Input
+                      formRef={formRef}
+                      marginBottom="md"
+                      name="code"
+                      label="Código de Validação do Certificado"
+                      placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                      type="text"
+                      icon={FiHash}
+                    />
+                    <Row>
+                      <Button size="big" color="primary" type="submit">
+                        <FiCheck size={20} />
+                        <span>Validar Certificado</span>
+                      </Button>
+                    </Row>
+                  </>
+                )}
+                <div style={{ marginTop: '10px' }}>
+                  <Row>
+                    {uuid && (
+                      <Button
+                        onClick={() => {
+                          router.push(`/validate`)
+                        }}
+                        size="small"
+                        type="button"
+                        ghost
+                      >
+                        <FiRepeat size={20} />
+                        <span>
+                          {valid ? 'Verificar outro' : 'Digitar novamente'}
+                        </span>
+                      </Button>
+                    )}
+                  </Row>
+                </div>
+                <Help />
+              </FormContainer>
+            </Card>
+          </FormArea>
+        </Container>
+      )}
     </>
   )
 }

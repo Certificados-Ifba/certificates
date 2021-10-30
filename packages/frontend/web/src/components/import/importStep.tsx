@@ -15,11 +15,15 @@ import {
 } from 'react-icons/fi'
 import async from 'react-select/async'
 import XLSX from 'xlsx'
+import * as Yup from 'yup'
 
 import api from '../../services/axios'
 import { Info, Section } from '../../styles/components/import/import'
+import { TableRow } from '../../styles/pages/home'
 import { CardHeader } from '../../styles/pages/publish'
 import theme from '../../styles/theme'
+import { formatPhone } from '../../utils/formatters'
+import getValidationErrors from '../../utils/getValidationErrors'
 import Accordion from '../accordion'
 import Alert from '../alert'
 import Button from '../button'
@@ -28,20 +32,81 @@ import ProgressBar from '../progressbar'
 import Spinner from '../spinner'
 import Table from '../table'
 import Tooltip from '../tooltip'
-import { column_value_enum, Column } from './importObjects'
+import { column_value_enum, Column, ExtraBody, Enum } from './importObjects'
 
 export interface Props {
   columns?: Column[]
+  extraParams?: ExtraBody[]
   sendURL: string
+  enums: Enum[]
   file: FileSelected
+  title: string
   onNext: () => void
   onPrevious: () => void
+  createSchema?: (item: any) => any
+}
+
+const ColumnValueResponse: React.FC<{
+  col: Column
+  value: any
+  enums: Enum[]
+  errors: any
+}> = ({ col, value, enums, errors }) => {
+  let val: string
+  let messageError: string
+  if (errors[col.key]) {
+    messageError = errors[col.key]
+  } else if (col.type === 'date') {
+    val = value[col.key] ? value[col.key].toLocaleDateString() : ''
+  } else {
+    if (value[col.key]) {
+      let en: Enum
+      for (const e of enums) {
+        if (e.key === col.key) {
+          en = e
+          break
+        }
+      }
+      if (en) {
+        let found = false
+        for (const v of en.values) {
+          if (v.value === value[col.key]) {
+            val = v.name
+            found = true
+            break
+          }
+        }
+        if (!found) {
+          messageError = `O valor do(a) ${col.name} tem que ser algum da lista disponível.`
+        }
+      } else {
+        val = value[col.key]
+      }
+    }
+  }
+  return (
+    <>
+      {messageError && (
+        <TableRow>
+          <FiAlertCircle color={theme.colors.danger}></FiAlertCircle>
+          <span>
+            <small>{messageError}</small>
+          </span>
+        </TableRow>
+      )}
+      {val}
+    </>
+  )
 }
 
 const ImportStep: React.FC<Props> = ({
   columns,
   sendURL,
+  extraParams,
+  enums,
+  title,
   file,
+  createSchema,
   onNext,
   onPrevious
 }) => {
@@ -64,6 +129,8 @@ const ImportStep: React.FC<Props> = ({
     type: 'loading'
   })
 
+  const [errors, setErrors] = useState({})
+
   const sleep = ms => {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
@@ -75,18 +142,52 @@ const ImportStep: React.FC<Props> = ({
 
   const handleSend = useCallback(
     async (item: any, current: number, total: number, errorCount: number) => {
-      let success: boolean
-      try {
-        const response = await api.post(sendURL, item)
-        item.status = 'ok'
-        item.message = response.data.message
-        if (item.name === 'Atividade 1') {
-          throw new Error('Erro')
+      let success = true
+      if (enums)
+        enums.forEach(e => {
+          const value = item[e.key]
+          let hasValue = false
+          if (value) {
+            for (const v of e.values) {
+              hasValue = v.name.toUpperCase() === value.toUpperCase()
+              if (hasValue) {
+                item[e.key] = v.value
+                break
+              }
+            }
+          }
+          success = hasValue
+          if (!success) {
+            item.message = 'O valor do(a) ' + e.name + ' não está correto.'
+            item.status = 'error'
+          }
+        })
+      if (success) {
+        try {
+          if (createSchema)
+            await createSchema(item).validate(item, {
+              abortEarly: false
+            })
+          const response = await api.post(sendURL, item)
+          item.status = 'ok'
+          item.message = 'Cadastrado com sucesso.'
+          success = true
+        } catch (e) {
+          if (e instanceof Yup.ValidationError) {
+            const errors = getValidationErrors(e)
+            item.message = 'Ocorreu um erro com esse registro'
+            setErrors(errors)
+          } else {
+            if (typeof e === 'string') {
+              item.message = e
+            } else {
+              item.message = 'Erro desconhecido'
+            }
+          }
+          console.error(e)
+          item.status = 'error'
+          success = false
         }
-        success = true
-      } catch (e) {
-        item.status = 'error'
-        success = false
       }
       setStatus({
         percentage: ((current / total) * 100) | 0,
@@ -96,7 +197,7 @@ const ImportStep: React.FC<Props> = ({
       })
       return success
     },
-    [sendURL]
+    [createSchema, enums, sendURL]
   )
 
   const handleSheetValue = useCallback(
@@ -124,7 +225,23 @@ const ImportStep: React.FC<Props> = ({
               +dateParts[0]
             )
           } else {
-            obj[columnKey] = sheet[key].v
+            if (
+              sheet[key].v &&
+              columns[column_value_enum[column]].type === 'cpf'
+            ) {
+              console.log(1)
+
+              obj[columnKey] = (sheet[key].v + '').replace(/\D/g, '')
+            } else if (
+              sheet[key].v &&
+              columns[column_value_enum[column]].type === 'phone'
+            ) {
+              obj[columnKey] = formatPhone(
+                (sheet[key].v + '').replace(/\D/g, '')
+              )
+            } else {
+              obj[columnKey] = sheet[key].v
+            }
           }
         } catch (error) {}
       }
@@ -165,6 +282,11 @@ const ImportStep: React.FC<Props> = ({
 
         if (ignore) {
           list.splice(list.indexOf(item), 1)
+        } else {
+          if (extraParams)
+            extraParams.forEach(param => {
+              item[param.name] = param.value
+            })
         }
       }
 
@@ -189,6 +311,8 @@ const ImportStep: React.FC<Props> = ({
       setNextDisabled(false)
       setPreviousDisabled(false)
     } catch (error) {
+      console.error(error)
+
       setNextDisabled(false)
       setPreviousDisabled(false)
       setStatus({
@@ -197,7 +321,7 @@ const ImportStep: React.FC<Props> = ({
         type: 'error'
       })
     }
-  }, [file, handleSend, handleSheetValue])
+  }, [extraParams, file.file, handleSend, handleSheetValue])
 
   if (!start) handleReadFile().then()
   return (
@@ -302,10 +426,12 @@ const ImportStep: React.FC<Props> = ({
                   >
                     {columns.map((col, index1) => (
                       <td key={index1}>
-                        {col.type === 'date' && value[col.key]
-                          ? value[col.key].toLocaleDateString()
-                          : ''}
-                        {col.type !== 'date' && '' + value[col.key]}
+                        <ColumnValueResponse
+                          errors={errors}
+                          col={col}
+                          enums={enums}
+                          value={value}
+                        ></ColumnValueResponse>
                       </td>
                     ))}
 

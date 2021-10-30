@@ -149,7 +149,6 @@ export class ActivitiesController {
     @Body() activityRequest: CreateActivityDto
   ): Promise<CreateActivityResponseDto> {
     const { name, workload, start_date, end_date, type } = activityRequest
-
     const eventResponse: IServiceEventGetByIdResponse = await this.eventServiceClient
       .send('event_get_by_id', {
         id: params.event_id,

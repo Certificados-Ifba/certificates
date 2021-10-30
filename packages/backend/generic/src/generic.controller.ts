@@ -175,7 +175,7 @@ export class GenericController {
           )
           if (!exists || exists.name === params.generic.name) {
             const updatedGeneric = Object.assign(generic, params.generic)
-            await updatedGeneric.save()
+            this.genericService.updateGenericById(params.id, updatedGeneric)
             result = {
               status: HttpStatus.OK,
               message: 'generic_update_by_id_success',

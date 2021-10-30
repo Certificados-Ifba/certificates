@@ -9,7 +9,10 @@ const api = axios.create({
 })
 
 api.interceptors.request.use(config => {
-  config.headers.authorization = `Bearer ${Cookie.get('certificates.session')}`
+  if (!config.headers.authorization)
+    config.headers.authorization = `Bearer ${Cookie.get(
+      'certificates.session'
+    )}`
 
   return config
 })

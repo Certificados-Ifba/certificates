@@ -24,6 +24,7 @@ import { Row } from '../../styles/components/grid'
 import capitalize from '../../utils/capitalize'
 import { formatData } from '../../utils/formatters'
 import getValidationErrors from '../../utils/getValidationErrors'
+import { getActivitySchema } from '../../utils/schemas'
 import { inDateRange, minDate } from '../../utils/validators'
 import AsyncSelect from '../asyncSelect'
 import Button from '../button'
@@ -59,39 +60,11 @@ const ActivityModal: React.FC<Props> = ({
 
   const handleSubmit = useCallback(
     async data => {
-      const schema = Yup.object().shape({
-        name: Yup.string().required('A atividade precisa ter um nome'),
-        type: Yup.string().required(`Selecione um tipo da atividade`),
-        workload: Yup.number()
-          .typeError('Por favor, digite a carga horária')
-          .positive('A carga horária precisa ser positiva')
-          .required('Por favor, digite a carga horária'),
-        start_date: Yup.string()
-          .test(
-            'in-date-range',
-            `A atividade precisa ser entre os dias ${formatData(
-              event.start_date
-            )} e ${formatData(event.end_date)}`,
-            (value: string) =>
-              inDateRange(value, event.start_date, event.end_date)
-          )
-          .required('Selecione a data de início'),
-        end_date: Yup.string()
-          .test(
-            'in-date-range',
-            `A atividade precisa ser entre os dias ${formatData(
-              event.start_date
-            )} e ${formatData(event.end_date)}`,
-            (value: string) =>
-              inDateRange(value, event.start_date, event.end_date)
-          )
-          .test(
-            'min-date',
-            'A data final precisa ser maior que a data inicial',
-            (value: string) => minDate(value, data.start_date)
-          )
-          .required('Selecione a data do fim')
-      })
+      const schema = getActivitySchema(
+        data.start_date,
+        event.start_date,
+        event.end_date
+      )
 
       try {
         await schema.validate(data, {

@@ -21,6 +21,7 @@ import withoutAuth from '../../hocs/withoutAuth'
 import ParticipantLoginLayout from '../../layouts/participantLogin'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
+import { saveToken } from '../../services/participant'
 import Row from '../../styles/components/row'
 import {
   TopButton,
@@ -57,7 +58,7 @@ const Login: React.FC = () => {
           cpf: removeMask(data.cpf),
           dob: data.dob
         })
-        console.log(response.data?.data.token)
+        saveToken(response.data?.data.token)
         router.push('/participants/home')
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -65,6 +66,8 @@ const Login: React.FC = () => {
           formRef.current?.setErrors(errors)
           return
         }
+        console.log(err)
+
         addToast({
           type: 'error',
           title: 'Erro ao consultar certificado',
@@ -148,7 +151,7 @@ const Login: React.FC = () => {
                 label="Data de Nascimento"
                 type="date"
               />
-              <HCaptcha
+              {/* <HCaptcha
                 // This is testing sitekey, will autopass
                 // Make sure to replace
                 sitekey="e450f35b-0ccd-4460-aec7-68cb9c7dc08a"
@@ -156,7 +159,7 @@ const Login: React.FC = () => {
                 onError={onError}
                 onExpire={onExpire}
                 ref={captchaRef}
-              />
+              /> */}
               <Row>
                 <Button size="big" color="primary" type="submit">
                   <FiSearch size={20} />

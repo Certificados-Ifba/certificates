@@ -1,34 +1,109 @@
-import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { FiChevronLeft, FiSend, FiChevronRight, FiCheck } from 'react-icons/fi'
+import { useState, useCallback } from 'react'
 
-import Alert from '../../../../components/alert'
 import Import from '../../../../components/import/import'
-import { Column, Enum, Rows } from '../../../../components/import/importObjects'
-import Table from '../../../../components/table'
+import {
+  Column,
+  Enum,
+  ExtraBody,
+  Rows,
+  ValueEnum
+} from '../../../../components/import/importObjects'
+import Spinner from '../../../../components/spinner'
 import withAuth from '../../../../hocs/withAuth'
-import usePaginatedRequest from '../../../../services/usePaginatedRequest'
+import api from '../../../../services/axios'
+import { getActivitySchema } from '../../../../utils/schemas'
+
+const getActivityTypes = async () => {
+  const resp = await api.get(`activity_types`)
+  const list = resp?.data?.data ? resp.data.data : []
+  const enums: ValueEnum[] = []
+  list.forEach(act => {
+    enums.push({ name: act.name, value: act.id })
+  })
+  return enums
+}
+
+const getFunctionTypes = async () => {
+  const resp = await api.get(`functions`)
+  const list = resp?.data?.data ? resp.data.data : []
+  const enums: ValueEnum[] = []
+  list.forEach(act => {
+    enums.push({ name: act.name, value: act.id })
+  })
+  return enums
+}
+
+const getActivity = async (id: string) => {
+  const resp = await api.get(`events/${id}/activities`)
+  const list = resp?.data?.data ? resp.data.data : []
+  const enums: ValueEnum[] = []
+  list.forEach(act => {
+    enums.push({ name: act.name, value: act.id })
+  })
+  return enums
+}
+
+const getEvent = async (id: string) => {
+  const response = await api.get(`events/${id}`)
+  return response?.data?.data
+}
+
+const getActivityConfig = async (id: string) => {
+  const activityTypeEnum = await getActivityTypes()
+  const event = await getEvent(id)
+  return { activityTypeEnum, event }
+}
+
+const getCertificateConfig = async (id: string) => {
+  const activityEnum = await getActivity(id)
+  const functionTypeEnum = await getFunctionTypes()
+  const event = await getEvent(id)
+  return { activityEnum, event, functionTypeEnum }
+}
 
 const ImportEvent: React.FC = () => {
   const router = useRouter()
   const { id, type } = router?.query
-  const event = {
-    name: 'Evento 1'
-  }
+  const [event, setEvent] = useState(null)
+  const [createSchema, setCreateSchema] = useState<(item: any) => any>(null)
+
   let title: string
   let sendURL: string
   let columns: Column[]
   let examples: Rows[]
-  let enums: Enum[]
+  let extraBody: ExtraBody[]
+
+  const [enums, setEnums] = useState<Enum[]>(null)
+  const [loading, setLoading] = useState(true)
+
   switch (type) {
     case 'activities':
       title = 'Atividades'
-      sendURL = 'test/import'
+      sendURL = `events/${id}/activities`
+
       columns = [
-        { name: 'Nome da Atividade', key: 'name', type: 'string' },
-        { name: 'Carga Horária', key: 'workload', type: 'number' },
-        { name: 'Tipo', color: 'primary', key: 'type', type: 'string' },
-        { name: 'Data Inicial', key: 'start_date', type: 'date' },
+        {
+          name: 'Nome da Atividade',
+          key: 'name',
+          type: 'string'
+        },
+        {
+          name: 'Carga Horária',
+          key: 'workload',
+          type: 'number'
+        },
+        {
+          name: 'Tipo',
+          color: 'primary',
+          key: 'type',
+          type: 'string'
+        },
+        {
+          name: 'Data Inicial',
+          key: 'start_date',
+          type: 'date'
+        },
         { name: 'Data Final', key: 'end_date', type: 'date' }
       ]
       examples = [
@@ -40,24 +115,46 @@ const ImportEvent: React.FC = () => {
         },
         { values: ['Atividade 3', '4', 'Curso', '11/09/2021', '11/09/2021'] }
       ]
-      enums = [
-        {
-          color: 'primary',
-          name: 'Tipo',
-          values: ['Minicurso', 'Curso', 'Palestra']
-        }
-      ]
+      if (loading)
+        getActivityConfig(id + '').then(resp => {
+          setEvent(resp.event)
+          setCreateSchema(() => (item: any) => {
+            console.log(item)
+
+            return item
+              ? getActivitySchema(
+                  item.start_date,
+                  resp.event.start_date,
+                  resp.event.end_date
+                )
+              : null
+          })
+          setEnums([
+            {
+              color: 'primary',
+              name: 'Tipo',
+              values: resp.activityTypeEnum,
+              key: 'type'
+            }
+          ])
+          setLoading(false)
+        })
       break
-    case 'participants':
+    case 'certificates':
       title = 'Certificados'
-      sendURL = 'test/import'
+      sendURL = `events/${id}/certificates`
       columns = [
         { name: 'CPF', key: 'cpf', type: 'string' },
-        { name: 'Atividade', color: 'info', key: 'activity', type: 'string' },
+        {
+          name: 'Atividade',
+          color: 'primary',
+          key: 'activity',
+          type: 'string'
+        },
         { name: 'Carga Horária', key: 'workload', type: 'string' },
         { name: 'Data Inicial', key: 'start_date', type: 'date' },
         { name: 'Data Final', key: 'end_date', type: 'date' },
-        { name: 'Função', color: 'primary', key: 'function', type: 'string' }
+        { name: 'Função', color: 'info', key: 'function', type: 'string' }
       ]
       examples = [
         {
@@ -91,32 +188,42 @@ const ImportEvent: React.FC = () => {
           ]
         }
       ]
-      enums = [
-        {
-          color: 'info',
-          name: 'Atividade',
-          values: ['Atividade 1', 'Atividade 2', 'Atividade 3']
-        },
-        {
-          color: 'primary',
-          name: 'Função',
-          values: ['Ouvinte', 'Palestrante']
-        }
-      ]
-      break
-    default:
+      if (loading)
+        getCertificateConfig(id + '').then(resp => {
+          setEvent(resp.event)
+          setEnums([
+            {
+              color: 'primary',
+              name: 'Atividade',
+              values: resp.activityEnum,
+              key: 'activity'
+            },
+            {
+              color: 'info',
+              name: 'Função',
+              values: resp.functionTypeEnum,
+              key: 'function'
+            }
+          ])
+          setLoading(false)
+        })
       break
   }
 
   return (
     <Import
+      createSchema={createSchema}
+      loading={loading}
+      extraBody={extraBody}
       sendURL={sendURL}
       columns={columns}
       examples={examples}
-      enums={enums}
-      backRoute={`/events/${type}/${id}`}
-      title={`Importar ${title} em ${event?.name}`}
-      windowTitle={`Importar ${title} | ${event?.name}`}
+      enums={enums || []}
+      backRoute={`/events/${id}/${type}`}
+      title={loading ? 'Carregando...' : `Importar ${title} em ${event?.name}`}
+      windowTitle={
+        loading ? 'Carregando...' : `Importar ${title} | ${event?.name}`
+      }
     ></Import>
   )
 }

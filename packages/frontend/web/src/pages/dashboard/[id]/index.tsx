@@ -66,15 +66,16 @@ const Home: React.FC = () => {
   const formRef = useRef<FormHandles>(null)
   formRef.current?.setData({ event: '1' })
 
-  const request = usePaginatedRequest<any>({
-    url: 'events',
-    params:
-      filters && order !== ''
-        ? Object.assign(filters, { sort_by: column, order_by: order })
-        : order !== ''
-        ? { sort_by: column, order_by: order }
-        : filters
-  })
+  const request = null
+  // usePaginatedRequest<any>({
+  //   url: 'events',
+  //   params:
+  //     filters && order !== ''
+  //       ? Object.assign(filters, { sort_by: column, order_by: order })
+  //       : order !== ''
+  //       ? { sort_by: column, order_by: order }
+  //       : filters
+  // })
 
   const handleFilter = useCallback(
     data => {
@@ -252,7 +253,7 @@ const Home: React.FC = () => {
             <Input name="search" placeholder="Buscar evento" icon={FiSearch} />
           </Form>
         </header>
-        <PaginatedTable request={request}>
+        {/* <PaginatedTable request={request}>
           <thead>
             <tr>
               <th onClick={() => handleOrder('name')}>
@@ -300,7 +301,7 @@ const Home: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {request.data?.data?.map(event => (
+            {request?.data?.data?.map(event => (
               <tr
                 key={event.id}
                 onClick={() => {
@@ -342,7 +343,7 @@ const Home: React.FC = () => {
               </tr>
             ))}
           </tbody>
-        </PaginatedTable>
+        </PaginatedTable> */}
       </Card>
     </Container>
   )

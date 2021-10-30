@@ -4,6 +4,7 @@ export interface IUserUpdateParams {
   password?: string
   is_confirmed?: boolean
   last_login?: Date
+  role?: string
   personal_data?: {
     cpf: String
     dob: Date

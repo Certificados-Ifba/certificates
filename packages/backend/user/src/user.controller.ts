@@ -471,7 +471,8 @@ export class UserController {
             updatedUser.is_confirmed = false
             updatedUser.password = Math.random().toString(16).replace('0.', '')
           }
-          await updatedUser.save()
+          this.userService.updateUserById(updatedUser.id, updatedUser)
+          // await updatedUser.save()
           if (params.user.email) {
             const userLink = await this.userService.createUserLink(user.id)
             this.mailerServiceClient
