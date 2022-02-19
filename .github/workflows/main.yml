@@ -1,0 +1,24 @@
+name: Deploy CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deployment:
+    runs-on: self-hosted
+    environment: 
+      name: production
+      url: http://vca.ifba.edu.br:81/certificados
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Destroy docker
+      run: bash ./destroy.sh
+      id: docker_destroy
+    - name: Docker deploy
+      env:
+        DOMAIN: ${{ secrets.DOMAIN }}
+      run: |
+        bash ./deploy.sh
+      id: docker_deploy
