@@ -1,11 +1,10 @@
+import { DefaultLayout } from '@layouts'
+import { useAuth } from '@providers'
 import Cookie from 'js-cookie'
 import { useRouter } from 'next/router'
 import { ElementType, useEffect } from 'react'
 
-import DefaultLayout from '../layouts/default'
-import { useAuth } from '../providers/auth'
-
-const withAuth = (
+export const withAuth = (
   WrappedComponent: ElementType,
   onlyAdmin?: boolean
 ): ((props: unknown) => JSX.Element) => {
@@ -31,5 +30,3 @@ const withAuth = (
   }
   return Wrapper
 }
-
-export default withAuth

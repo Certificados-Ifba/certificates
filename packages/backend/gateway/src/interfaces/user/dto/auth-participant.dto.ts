@@ -6,4 +6,7 @@ export class AuthParticipantDto {
 
   @ApiProperty({ example: new Date('2000-01-01') })
   dob: string
+
+  @ApiProperty({ example: '00000000000' })
+  token: string
 }

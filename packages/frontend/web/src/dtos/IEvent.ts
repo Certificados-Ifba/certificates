@@ -1,6 +1,6 @@
-import IUser from './IUser'
+import { IUser } from './IUser'
 
-export default interface IEvent {
+export interface IEvent {
   id: string
   name: string
   local: string

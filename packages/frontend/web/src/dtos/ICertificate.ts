@@ -1,6 +1,6 @@
-import IParticipant from './IParticipant'
+import { IParticipant } from './IParticipant'
 
-export default interface ICertificate {
+export interface ICertificate {
   id?: string
   activity?: string
   function?: string
@@ -22,14 +22,14 @@ export interface ILayout {
   vertical_position: string
 }
 
-interface IPage {
+export interface IPage {
   type: 'frente' | 'verso'
   text: string
   image: string
   layout: ILayout
 }
 
-interface ICriterion {
+export interface ICriterion {
   type_activity_id: string
   function_id: string
 }

@@ -1,6 +1,5 @@
+import { ICertificate } from '@dtos'
 import { createContext, useCallback, useContext, useReducer } from 'react'
-
-import ICertificate from '../dtos/ICertificate'
 
 interface CertificatesContextData {
   certificates: ICertificate[]
@@ -66,7 +65,7 @@ const CertificatesContext = createContext<CertificatesContextData>(
   {} as CertificatesContextData
 )
 
-const CertificatesProvider: React.FC = ({ children }) => {
+export const CertificatesProvider: React.FC = ({ children }) => {
   const [listData, dispatchListData] = useReducer(
     certificateReducer,
     initialState
@@ -104,7 +103,7 @@ const CertificatesProvider: React.FC = ({ children }) => {
   )
 }
 
-function useCertificates(): CertificatesContextData {
+export const useCertificates = (): CertificatesContextData => {
   const context = useContext(CertificatesContext)
 
   if (!context) {
@@ -115,5 +114,3 @@ function useCertificates(): CertificatesContextData {
 
   return context
 }
-
-export { CertificatesProvider, useCertificates }

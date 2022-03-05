@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useState, useEffect } from 'react'
+import { createContext, useState, useEffect } from 'react'
 
 export interface SidebarContextData {
   isActive: boolean
@@ -9,7 +9,7 @@ export interface SidebarContextData {
 
 export const SidebarContext = createContext({} as SidebarContextData)
 
-const SidebarProvider: React.FC = ({ children }): JSX.Element => {
+export const SidebarProvider: React.FC = ({ children }): JSX.Element => {
   const [isActive, setIsActive] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -44,5 +44,3 @@ const SidebarProvider: React.FC = ({ children }): JSX.Element => {
     </>
   )
 }
-
-export default SidebarProvider

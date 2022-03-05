@@ -1,10 +1,9 @@
+import { AuthLayout } from '@layouts'
 import Cookie from 'js-cookie'
 import { useRouter } from 'next/router'
 import { ElementType, useEffect } from 'react'
 
-import AuthLayout from '../layouts/auth'
-
-const withoutAuth = (
+export const withoutAuth = (
   WrappedComponent: ElementType,
   Layout: React.FC = AuthLayout
 ): ((props: unknown) => JSX.Element) => {
@@ -26,5 +25,3 @@ const withoutAuth = (
   }
   return Wrapper
 }
-
-export default withoutAuth

@@ -1,7 +1,5 @@
+import { inDateRange, isValidCpf, minDate, formatData } from '@utils'
 import * as Yup from 'yup'
-
-import { formatData } from './formatters'
-import inDateRange, { isValidCpf, minDate } from './validators'
 
 export const getParticipantSchema: () => any = () => {
   const schema = Yup.object().shape({

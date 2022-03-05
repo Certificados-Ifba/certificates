@@ -1,4 +1,4 @@
-const getErrorMessage = (
+export const getErrorMessage = (
   error: string,
   errors?: { [key: string]: any } | null
 ): string => {
@@ -29,12 +29,13 @@ const getErrorMessage = (
     case 'generic_update_by_id_conflict_name':
       message = 'Este nome já está cadastrado, tente com um diferente.'
       break
-
+    case 'certificate_validate_not_found':
+      message =
+        'Certificado não encontrado, verifique o código e tente novamente.'
+      break
     default:
       message = 'Erro desconhecido, favor entrar em contato com o adminstrador.'
       break
   }
   return message
 }
-
-export default getErrorMessage

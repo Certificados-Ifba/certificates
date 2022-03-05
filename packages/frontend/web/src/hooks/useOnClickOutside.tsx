@@ -1,6 +1,6 @@
 import { ReactEventHandler, RefObject, useEffect } from 'react'
 
-const useOnClickOutside = (
+export const useOnClickOutside = (
   ref: RefObject<any>,
   handler: ReactEventHandler
 ): void => {
@@ -22,5 +22,3 @@ const useOnClickOutside = (
     }
   }, [ref, handler])
 }
-
-export { useOnClickOutside }

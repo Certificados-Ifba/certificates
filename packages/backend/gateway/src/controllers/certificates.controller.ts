@@ -72,6 +72,16 @@ export class CertificatesController {
       .send('certificate_validate', { key })
       .toPromise()
 
+    if (certificateResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: certificateResponse.message,
+          data: null
+        },
+        certificateResponse.status
+      )
+    }
+
     return {
       message: certificateResponse.message,
       data: certificateResponse?.data

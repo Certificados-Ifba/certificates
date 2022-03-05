@@ -1,4 +1,4 @@
-export default interface IGeneric {
+export interface IGeneric {
   id: string
   type: string
   name: string
