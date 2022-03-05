@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { verify } from 'hcaptcha'
 import { Model } from 'mongoose'
 
 import { IUserLink } from '../interfaces/user-link.interface'
@@ -70,18 +71,22 @@ export class UserService {
     userParams: IUserUpdateParams
   ): Promise<IUser> {
     const UserModel = await this.UserModel.findById(id)
-    if (userParams.name) UserModel.name = userParams.name
-    if (userParams.role) UserModel.role = userParams.role
-    if (userParams.password) UserModel.password = userParams.password
-    if (userParams.is_confirmed)
+    if (userParams.name !== undefined) UserModel.name = userParams.name
+    if (userParams.role !== undefined) UserModel.role = userParams.role
+    if (userParams.password !== undefined)
+      UserModel.password = userParams.password
+    if (userParams.is_confirmed !== undefined)
       UserModel.is_confirmed = userParams.is_confirmed
-    if (userParams.last_login) UserModel.last_login = userParams.last_login
-    if (userParams?.personal_data?.cpf)
+    if (userParams.last_login !== undefined)
+      UserModel.last_login = userParams.last_login
+    if (userParams?.personal_data?.cpf !== undefined)
       UserModel.personal_data.cpf = userParams.personal_data.cpf
-    if (userParams?.personal_data?.dob)
+    if (userParams?.personal_data?.dob !== undefined)
       UserModel.personal_data.dob = userParams.personal_data.dob
-    if (userParams?.personal_data?.institution)
+    if (userParams?.personal_data?.institution !== undefined)
       UserModel.personal_data.institution = userParams.personal_data.institution
+    if (userParams?.personal_data?.phone !== undefined)
+      UserModel.personal_data.phone = userParams.personal_data.phone
 
     return UserModel.save()
   }
@@ -131,5 +136,10 @@ export class UserService {
 
   public getWebUrl(): string {
     return this.configService.get('webUrl')
+  }
+
+  public async validToken(token: string): Promise<boolean> {
+    const { success } = await verify(this.configService.get('secret'), token)
+    return success
   }
 }

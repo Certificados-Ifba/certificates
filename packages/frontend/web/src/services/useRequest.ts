@@ -1,7 +1,6 @@
+import { api } from '@services'
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 import useSWR, { SWRConfiguration, SWRResponse } from 'swr'
-
-import axios from './axios'
 
 export type GetRequest = AxiosRequestConfig
 
@@ -23,7 +22,7 @@ export interface Config<Data = unknown, Error = unknown>
   initialData?: Data
 }
 
-export default function useRequest<Data = unknown, Error = unknown>(
+export function useRequest<Data = unknown, Error = unknown>(
   request: GetRequest,
   { initialData, ...config }: Config<Data, Error> = {}
 ): Return<Data, Error> {
@@ -32,7 +31,7 @@ export default function useRequest<Data = unknown, Error = unknown>(
   const { data: response, error, isValidating, revalidate } = useSWR<
     AxiosResponse<Data>,
     AxiosError<Error>
-  >(requestKey, () => axios(request), {
+  >(requestKey, () => api(request), {
     ...config,
     initialData: initialData && {
       status: 200,

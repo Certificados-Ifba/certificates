@@ -1,7 +1,6 @@
+import { useRequest, Return } from '@services'
 import { AxiosRequestConfig } from 'axios'
 import { useState, useCallback, useMemo } from 'react'
-
-import useRequest, { Return } from './useRequest'
 
 export interface OptionType {
   label: string
@@ -20,7 +19,7 @@ export interface PaginatedRequest<Data, Error> extends Return<Data, Error> {
   hasNextPage: boolean
 }
 
-export default function usePaginatedRequest<Data = any, Error = any>(
+export function usePaginatedRequest<Data = any, Error = any>(
   request: AxiosRequestConfig
 ): PaginatedRequest<Data, Error> {
   const [page, setPage] = useState(1)

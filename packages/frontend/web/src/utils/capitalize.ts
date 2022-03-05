@@ -3,7 +3,7 @@ const abbreviation = (value: string): boolean => /^([A-Z]\.)+$/.test(value)
 const romanNumeral = (value: string): boolean =>
   /^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/.test(value)
 
-const capitalize = (value: string): string => {
+export const capitalize = (value: string): string => {
   const preposition = ['da', 'do', 'das', 'dos', 'a', 'e', 'de']
   if (!value) return ''
   return value
@@ -22,5 +22,3 @@ const capitalize = (value: string): string => {
     })
     .join(' ')
 }
-
-export default capitalize

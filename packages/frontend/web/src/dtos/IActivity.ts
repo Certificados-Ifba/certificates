@@ -1,7 +1,7 @@
-import { IEvent } from './../../../../backend/event/src/interfaces/event.interface'
-import IGeneric from './IGeneric'
+import { IEvent } from './IEvent'
+import { IGeneric } from './IGeneric'
 
-export default interface IActivity {
+export interface IActivity {
   id: string
   name: string
   type: IGeneric

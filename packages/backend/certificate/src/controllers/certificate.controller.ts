@@ -47,16 +47,37 @@ export class CertificateController {
       const certificate = await this.certificateService.findCertificateByKey(
         params.key
       )
-      result = {
-        status: HttpStatus.OK,
-        message: 'certificate_validate_success',
-        data: !!certificate
+
+      if (certificate) {
+        const activityType = await this.certificateService.findGenericById(
+          certificate.activity.type
+        )
+        result = {
+          status: HttpStatus.OK,
+          message: 'certificate_validate_success',
+          data: {
+            participant: certificate.participant.name,
+            activity: certificate.activity.name,
+            activityType: activityType.name,
+            workload: certificate.workload,
+            start_date: certificate.start_date,
+            end_date: certificate.end_date,
+            function: certificate.function.name,
+            event: certificate.event.name
+          }
+        }
+      } else {
+        result = {
+          status: HttpStatus.NOT_FOUND,
+          message: 'certificate_validate_not_found',
+          data: null
+        }
       }
     } else {
       result = {
         status: HttpStatus.BAD_REQUEST,
         message: 'certificate_validate_bad_request',
-        data: false
+        data: null
       }
     }
 

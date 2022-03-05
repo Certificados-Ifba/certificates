@@ -15,6 +15,7 @@ export class ConfigService {
       },
       transport: Transport.TCP
     }
+    this.envConfig.secret = process.env.HCAPTCHA_SECRET
   }
 
   get(key: string): any {

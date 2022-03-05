@@ -1,7 +1,7 @@
 import Cookie from 'js-cookie'
 import { useEffect, useState } from 'react'
 
-function useStickyState(defaultValue: string, key: string): any {
+export const useStickyState = (defaultValue: string, key: string): any => {
   const [value, setValue] = useState(() => {
     const stickyValue = Cookie.get(key)
 
@@ -26,5 +26,3 @@ function useStickyState(defaultValue: string, key: string): any {
 
   return [value, setValue]
 }
-
-export default useStickyState

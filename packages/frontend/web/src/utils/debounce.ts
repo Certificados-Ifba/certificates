@@ -24,6 +24,3 @@ export function useDebounce<T>(
   }
   return { run }
 }
-
-// export const debouncedLoadOptions = (loadOptions: any, wait: number) =>
-//   _.debounce(loadOptions, wait)

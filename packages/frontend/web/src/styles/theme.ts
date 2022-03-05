@@ -1,4 +1,4 @@
-const theme = {
+export const theme = {
   colors: {
     primary: '#379936',
     primaryShade: '#2E802D',
@@ -47,5 +47,3 @@ const theme = {
     smDown: '426px'
   }
 }
-
-export default theme

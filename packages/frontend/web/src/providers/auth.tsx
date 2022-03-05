@@ -1,9 +1,8 @@
+import { IUser } from '@dtos'
+import { useStickyState } from '@hooks'
+import { api } from '@services'
 import { decode } from 'jsonwebtoken'
 import { createContext, useCallback, useContext, useState } from 'react'
-
-import IUser from '../dtos/IUser'
-import useStickyState from '../hooks/useStickyState'
-import api from '../services/axios'
 
 interface AuthState {
   user: IUser
@@ -21,17 +20,29 @@ interface ResetCredentials {
   password: string
 }
 
+interface AuthCredentials {
+  cpf: string
+  dob: string
+  token: string
+}
+
 export interface AuthContextData {
   user: IUser
   resetPassword(data: ResetCredentials): Promise<void>
   signIn(data: SignInCredentials): Promise<void>
   signOut(): void
   isAdmin: boolean
+  auth(data: AuthCredentials): Promise<void>
+  getToken(): string
 }
 
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData)
 
-const AuthProvider: React.FC = ({ children }) => {
+export const AuthProvider: React.FC = ({ children }) => {
+  const [participantToken, setParticipantToken] = useStickyState(
+    '',
+    'certificates.participant.token'
+  )
   const [token, setToken] = useStickyState('', 'certificates.session')
   const [data, setData] = useState<AuthState>(() => {
     const payload: any = decode(token || '', { json: false })
@@ -61,6 +72,24 @@ const AuthProvider: React.FC = ({ children }) => {
     },
     [setToken]
   )
+
+  const auth = useCallback(
+    async ({ cpf, dob, token }: AuthCredentials) => {
+      const { data } = await api.post('participants/sessions', {
+        cpf,
+        dob,
+        token
+      })
+      setParticipantToken(data.data.token)
+    },
+    [setParticipantToken]
+  )
+
+  const getToken = useCallback(() => {
+    const token = participantToken
+    setParticipantToken(null)
+    return token
+  }, [participantToken, setParticipantToken])
 
   const signIn = useCallback(
     async (data: SignInCredentials) => {
@@ -95,7 +124,9 @@ const AuthProvider: React.FC = ({ children }) => {
         resetPassword,
         signIn,
         signOut,
-        isAdmin: data?.user?.role === 'ADMIN'
+        isAdmin: data?.user?.role === 'ADMIN',
+        auth,
+        getToken
       }}
     >
       {children}
@@ -112,5 +143,3 @@ export const useAuth = (): AuthContextData => {
 
   return context
 }
-
-export default AuthProvider
