@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
+import { IGeneric } from 'src/interfaces/generic.interface'
 
 import { ICertificateListParams } from '../interfaces/certificate-list-params.interface'
 import { DataResponse } from '../interfaces/certificate-list-response.interface'
@@ -10,7 +11,9 @@ import { ICertificate } from '../interfaces/certificate.interface'
 export class CertificateService {
   constructor(
     @InjectModel('Certificate')
-    private readonly CertificateModel: Model<ICertificate>
+    private readonly CertificateModel: Model<ICertificate>,
+    @InjectModel('Generic')
+    private readonly GenericModel: Model<IGeneric>
   ) {}
 
   public async createCertificate(
@@ -26,6 +29,10 @@ export class CertificateService {
 
   public async findCertificateByKey(key: string): Promise<ICertificate> {
     return await this.CertificateModel.findOne({ key })
+      .populate('function')
+      .populate('activity')
+      .populate('participant')
+      .populate('event')
   }
 
   public async removeCertificateById(id: string): Promise<ICertificate> {
@@ -63,5 +70,9 @@ export class CertificateService {
       totalPages: Math.ceil(count / perPage),
       totalCount: count
     }
+  }
+
+  public async findGenericById(id: string): Promise<IGeneric> {
+    return this.GenericModel.findById(id).exec()
   }
 }

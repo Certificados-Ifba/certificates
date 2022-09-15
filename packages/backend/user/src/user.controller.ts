@@ -27,6 +27,7 @@ export class UserController {
   public async userAuthParticipant(searchParams: {
     cpf: string
     dob: Date
+    token: string
   }): Promise<IUserSearchResponse> {
     let result: IUserSearchResponse
 
@@ -41,10 +42,20 @@ export class UserController {
           const userUpdeted = await this.userService.updateUserById(user.id, {
             last_login: new Date()
           })
-          result = {
-            status: HttpStatus.OK,
-            message: 'user_search_by_credentials_success',
-            data: { user: userUpdeted }
+
+          const isValid = await this.userService.validToken(searchParams.token)
+          if (isValid) {
+            result = {
+              status: HttpStatus.OK,
+              message: 'user_search_by_credentials_success',
+              data: { user: userUpdeted }
+            }
+          } else {
+            result = {
+              status: HttpStatus.UNAUTHORIZED,
+              message: 'user_search_by_credentials_invalid',
+              data: null
+            }
           }
         } else {
           result = {
@@ -473,7 +484,7 @@ export class UserController {
           }
           this.userService.updateUserById(updatedUser.id, updatedUser)
           // await updatedUser.save()
-          if (params.user.email) {
+          if (params.user.role !== 'PARTICIPANT') {
             const userLink = await this.userService.createUserLink(user.id)
             this.mailerServiceClient
               .send('mail_send', {

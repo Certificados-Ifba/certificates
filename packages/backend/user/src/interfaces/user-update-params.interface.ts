@@ -6,8 +6,9 @@ export interface IUserUpdateParams {
   last_login?: Date
   role?: string
   personal_data?: {
-    cpf: String
+    cpf: string
     dob: Date
-    institution: Boolean
+    institution: boolean
+    phone: string
   }
 }

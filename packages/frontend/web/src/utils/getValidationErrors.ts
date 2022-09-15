@@ -1,11 +1,11 @@
 import { ValidationError } from 'yup'
 
-interface Errors {
+interface IErrors {
   [key: string]: string
 }
 
-const getValidationErrors = (err: ValidationError): Errors => {
-  const validationErrors: Errors = {}
+export const getValidationErrors = (err: ValidationError): IErrors => {
+  const validationErrors: IErrors = {}
 
   err.inner.forEach(error => {
     validationErrors[error.path] = error.message
@@ -13,5 +13,3 @@ const getValidationErrors = (err: ValidationError): Errors => {
 
   return validationErrors
 }
-
-export default getValidationErrors

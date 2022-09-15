@@ -48,5 +48,3 @@ export function maxDate(value: string, max: string): boolean {
 
   return value <= max
 }
-
-export default inDateRange

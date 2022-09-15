@@ -1,8 +1,7 @@
+import { getErrorMessage } from '@utils'
 import axios from 'axios'
 import Cookie from 'js-cookie'
 import router from 'next/router'
-
-import getErrorMessage from '../utils/getErrorMessage'
 
 const api = axios.create({
   baseURL: process.env.baseURL

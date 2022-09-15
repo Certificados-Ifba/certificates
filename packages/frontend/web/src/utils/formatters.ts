@@ -14,13 +14,13 @@ export const formatPhone = (phone: string): string =>
     .replace(/^\((\d{2})\) (\d{4})-(\d{1})(\d{4})/, '($1) $2$3-$4')
     .replace(/^\((\d{2})\) (\d{5})-(\d{4})(\d{1,})/, '($1) $2-$3')
 
-export const formatData = (value: string): string => {
+export const formatData = (value: string | Date, isForm = false): string => {
   if (!value) return ''
   const data = new Date(value)
   const diaF = data.toISOString().substr(8, 2)
   const mesF = data.toISOString().substr(5, 2)
   const anoF = data.toISOString().substr(0, 4)
-  return `${diaF}/${mesF}/${anoF}`
+  return isForm ? `${anoF}-${mesF}-${diaF}` : `${diaF}/${mesF}/${anoF}`
 }
 
 export const removeMask = (value: string): string =>

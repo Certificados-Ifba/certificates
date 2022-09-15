@@ -9,9 +9,10 @@ export interface IUser extends Document {
   is_confirmed: boolean
   last_login?: Date
   personal_data?: {
-    cpf: String
+    cpf: string
     dob: Date
-    institution: Boolean
+    institution: boolean
+    phone: string
   }
   compareEncryptedPassword: (password: string) => boolean
   getEncryptedPassword: (password: string) => string

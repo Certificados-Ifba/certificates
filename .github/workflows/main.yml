@@ -1,0 +1,70 @@
+name: Deploy CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deployment:
+    runs-on: self-hosted
+    environment:
+      name: production
+      url: http://vca.ifba.edu.br:81
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Destroy docker
+      run: bash ./destroy.sh
+      id: docker_destroy
+    - name: Docker deploy
+      env:
+        DOMAIN: ${{ secrets.DOMAIN }}
+        APP_SECRET: ${{ secrets.APP_SECRET}}
+        HCAPTCHA_SITEKEY: ${{ secrets.HCAPTCHA_SITEKEY}}
+        HCAPTCHA_SECRET: ${{ secrets.HCAPTCHA_SECRET}}
+        MONGO_USER: ${{ secrets.MONGO_USER}}
+        MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD}}
+        MONGO_DATABASE: ${{ secrets.MONGO_DATABASE}}
+        MONGO_PORT: ${{ secrets.MONGO_PORT}}
+        MONGO_HOST: ${{ secrets.MONGO_HOST}}
+        WEB_URL: ${{ secrets.WEB_URL}}
+        THROTTLE_TTL: ${{ secrets.THROTTLE_TTL}}
+        THROTTLE_LIMIT: ${{ secrets.THROTTLE_LIMIT}}
+        TOKEN_EXPIRES_IN: ${{ secrets.TOKEN_EXPIRES_IN}}
+        WEB_PORT: ${{ secrets.WEB_PORT}}
+        WEB_HOST: ${{ secrets.WEB_HOST}}
+        API_GATEWAY_PORT: ${{ secrets.API_GATEWAY_PORT}}
+        API_GATEWAY_HOST: ${{ secrets.API_GATEWAY_HOST}}
+        EVENT_SERVICE_PORT: ${{ secrets.EVENT_SERVICE_PORT}}
+        EVENT_SERVICE_HOST: ${{ secrets.EVENT_SERVICE_HOST}}
+        TOKEN_SERVICE_PORT: ${{ secrets.TOKEN_SERVICE_PORT}}
+        TOKEN_SERVICE_HOST: ${{ secrets.TOKEN_SERVICE_HOST}}
+        USER_SERVICE_PORT: ${{ secrets.USER_SERVICE_PORT}}
+        USER_SERVICE_HOST: ${{ secrets.USER_SERVICE_HOST}}
+        MAILER_SERVICE_PORT: ${{ secrets.MAILER_SERVICE_PORT}}
+        MAILER_SERVICE_HOST: ${{ secrets.MAILER_SERVICE_HOST}}
+        PERMISSION_SERVICE_PORT: ${{ secrets.PERMISSION_SERVICE_PORT}}
+        PERMISSION_SERVICE_HOST: ${{ secrets.PERMISSION_SERVICE_HOST}}
+        GENERIC_SERVICE_PORT: ${{ secrets.GENERIC_SERVICE_PORT}}
+        GENERIC_SERVICE_HOST: ${{ secrets.GENERIC_SERVICE_HOST}}
+        ACTIVITY_SERVICE_PORT: ${{ secrets.ACTIVITY_SERVICE_PORT}}
+        ACTIVITY_SERVICE_HOST: ${{ secrets.ACTIVITY_SERVICE_HOST}}
+        CERTIFICATE_SERVICE_PORT: ${{ secrets.CERTIFICATE_SERVICE_PORT}}
+        CERTIFICATE_SERVICE_HOST: ${{ secrets.CERTIFICATE_SERVICE_HOST}}
+        STORAGE_SERVICE_PORT: ${{ secrets.STORAGE_SERVICE_PORT}}
+        STORAGE_SERVICE_HOST: ${{ secrets.STORAGE_SERVICE_HOST}}
+        MAILER_DISABLED: ${{ secrets.MAILER_DISABLED}}
+        MAILER_HOST: ${{ secrets.MAILER_HOST}}
+        MAILER_PORT: ${{ secrets.MAILER_PORT}}
+        MAILER_TLS: ${{ secrets.MAILER_TLS}}
+        MAILER_SECURE: ${{ secrets.MAILER_SECURE}}
+        MAILER_USER: ${{ secrets.MAILER_USER}}
+        MAILER_PASS: ${{ secrets.MAILER_PASS}}
+        MAILER_FROM: ${{ secrets.MAILER_FROM}}
+        MONGO_GUI_USER: ${{ secrets.MONGO_GUI_USER}}
+        MONGO_GUI_PASSWORD: ${{ secrets.MONGO_GUI_PASSWORD}}
+        MONGO_GUI_PORT: ${{ secrets.MONGO_GUI_PORT}}
+        MONGODB_ROOT_PASSWORD: ${{ secrets.MONGODB_ROOT_PASSWORD}}
+      run: |
+        bash ./deploy.sh
+      id: docker_deploy

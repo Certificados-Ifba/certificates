@@ -10,6 +10,7 @@ import { AppModule } from './app.module'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   const options = new DocumentBuilder()
+    .addServer('/')
     .setTitle('API certificates')
     .setDescription('API for certificate system information')
     .addTag('users')
@@ -21,7 +22,7 @@ async function bootstrap() {
     )
     .build()
   const document = SwaggerModule.createDocument(app, options)
-  SwaggerModule.setup('api', app, document)
+  SwaggerModule.setup('', app, document)
   // app.use(csurf())
   app.use(helmet())
   app.use(requestIp.mw())

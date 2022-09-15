@@ -1,4 +1,4 @@
-const getRole = (role: string): string =>
+export const getRole = (role: string): string =>
   role === 'ADMIN'
     ? 'Administrador'
     : role === 'COORDINATOR'
@@ -6,5 +6,3 @@ const getRole = (role: string): string =>
     : role === 'PARTICIPANT'
     ? 'Participante'
     : 'Desconhecido'
-
-export default getRole

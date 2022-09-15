@@ -1,11 +1,11 @@
-FROM node:alpine
+FROM node:14-alpine
 
 WORKDIR /usr/src/app
 
 COPY package.json yarn.lock prettier.config.js tsconfig.json .eslintrc.js .eslintignore ./
 COPY packages/shared ./packages/shared
-COPY packages/backend/event/package.json ./packages/backend/event/
+COPY packages/backend/activity/package.json ./packages/backend/activity/
 
 RUN yarn && yarn cache clean
 
-COPY packages/backend/event/ ./packages/backend/event/
+COPY packages/backend/activity/ ./packages/backend/activity/
