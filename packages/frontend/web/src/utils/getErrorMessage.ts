@@ -18,6 +18,7 @@ export const getErrorMessage = (
     case 'user_get_by_link_expired':
       message = 'Link expirado, favor tente novamente.'
       break
+    case 'user_search_by_credentials_invalid':
     case 'user_search_by_credentials_not_match':
     case 'user_search_by_credentials_not_found':
       message = 'Por favor, verifique seu usuário e sua senha.'
@@ -32,6 +33,9 @@ export const getErrorMessage = (
     case 'certificate_validate_not_found':
       message =
         'Certificado não encontrado, verifique o código e tente novamente.'
+      break
+    case 'activity_create_conflict':
+      message = 'Atividade já cadastrada, tente com o nome ou tipo diferente.'
       break
     default:
       message = 'Erro desconhecido, favor entrar em contato com o adminstrador.'

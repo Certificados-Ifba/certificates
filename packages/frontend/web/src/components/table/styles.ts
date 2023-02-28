@@ -1,10 +1,7 @@
-import { TableProps } from '@components'
+import SimpleBar from 'simplebar-react'
 import styled from 'styled-components'
 
-export const Container = styled.div<TableProps>`
-  ${props => props.overflowY && 'overflow-y: auto;'}
-`
-export const DataTable = styled.table`
+export const Container = styled.table`
   width: 100%;
   border-collapse: collapse;
   tr {
@@ -30,4 +27,8 @@ export const DataTable = styled.table`
       background-color: ${props => props.theme.colors.lightShade};
     }
   }
+`
+
+export const ScrollWrapper = styled(SimpleBar)`
+  width: 100%;
 `

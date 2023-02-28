@@ -90,7 +90,7 @@ export const DownloadStep: React.FC<Props> = ({
     return workbook
   }, [columns, enums])
 
-  const downloadFile = useCallback((workbook: WorkBook) => {
+  const downloadSheet = useCallback((workbook: WorkBook) => {
     const wopts: WritingOptions = {
       bookType: 'xlsx',
       type: 'array'
@@ -141,7 +141,7 @@ export const DownloadStep: React.FC<Props> = ({
           <Button
             onClick={async () => {
               const workbook = await loadFile()
-              downloadFile(workbook)
+              downloadSheet(workbook)
               setDownload(true)
               setNextText('Avançar')
             }}

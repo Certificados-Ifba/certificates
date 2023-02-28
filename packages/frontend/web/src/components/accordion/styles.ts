@@ -1,10 +1,11 @@
 import styled from 'styled-components'
 
-interface AccordionProps {
+interface Props {
   open: boolean
 }
 
-export const Content = styled.div`
+export const Content = styled.div<Props>`
+  ${({ open }) => open && 'display: none;'};
   header {
     min-height: 50px;
     padding: 25px 30px;
@@ -13,6 +14,9 @@ export const Content = styled.div`
 `
 
 export const Footer = styled.div`
+  display: flex;
+  border-top: 2px solid ${props => props.theme.colors.lightShade};
+  padding: 25px 30px;
   div {
     display: inline;
     margin-left: auto;
@@ -21,24 +25,16 @@ export const Footer = styled.div`
       margin: 0;
     }
   }
-  .first {
-    display: inline;
+  div:last-child {
     margin-left: 10px;
-    @media (max-width: ${props => props.theme.responsive.smDown}) {
-      display: block;
-      margin: 0;
-    }
   }
-  display: flex;
   @media (max-width: ${props => props.theme.responsive.smDown}) {
     display: block;
   }
-  border-top: 2px solid ${props => props.theme.colors.lightShade};
-  padding: 25px 30px;
 `
 
-export const Header = styled.div<AccordionProps>`
-  ${props => (props.open ? 'border-bottom: 2px solid #eef0f6;' : '')};
+export const Header = styled.div<Props>`
+  ${({ open }) => !open && 'border-bottom: 2px solid #eef0f6;'};
 
   cursor: pointer;
   padding: 15px;

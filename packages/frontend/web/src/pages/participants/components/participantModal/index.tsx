@@ -1,10 +1,20 @@
-import { Button, Grid, Input, Modal, NewSelect } from '@components'
+import {
+  Button,
+  FooterModal,
+  Grid,
+  HeaderModal,
+  Input,
+  MainModal,
+  Modal,
+  NewSelect,
+  ScrollWrapper
+} from '@components'
 import { IParticipant } from '@dtos'
 import { useToast } from '@providers'
 import { api, PaginatedRequest } from '@services'
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
-import { formatData, getParticipantSchema, getValidationErrors } from '@utils'
+import { formatDate, getParticipantSchema, getValidationErrors } from '@utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   FiBook,
@@ -52,8 +62,7 @@ export const ParticipantModal: React.FC<Props> = ({
       try {
         setLoading(true)
         formRef.current?.setErrors({})
-        const schema = getParticipantSchema()
-        await schema.validate(data, {
+        await getParticipantSchema().validate(data, {
           abortEarly: false
         })
 
@@ -103,7 +112,7 @@ export const ParticipantModal: React.FC<Props> = ({
         name: participant.name,
         email: participant.email,
         cpf: participant.personal_data.cpf,
-        dob: formatData(participant.personal_data.dob, true),
+        dob: formatDate(participant.personal_data.dob, true, false),
         phone: participant.personal_data.phone,
         institution: participant.personal_data.institution
       })
@@ -114,7 +123,7 @@ export const ParticipantModal: React.FC<Props> = ({
 
   return (
     <Modal size="xl" open={openModal} onClose={handleCloseSaveModal}>
-      <header>
+      <HeaderModal>
         <h2>
           {type === 'update' ? (
             <>
@@ -128,74 +137,76 @@ export const ParticipantModal: React.FC<Props> = ({
             </>
           )}
         </h2>
-      </header>
+      </HeaderModal>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <main>
-          <Grid cols={2}>
-            <Input
-              marginBottom="sm"
-              name="name"
-              label="Nome"
-              placeholder="Nome"
-              icon={FiUser}
-              disabled={loading}
-            />
-            <Input
-              marginBottom="sm"
-              name="cpf"
-              label="CPF"
-              placeholder="CPF"
-              type="cpf"
-              icon={FiCreditCard}
-              disabled={type === 'update' || loading}
-            />
-            <Input
-              marginBottom="sm"
-              name="dob"
-              label="Data de Nascimento"
-              type="date"
-              icon={FiCalendar}
-              disabled={loading}
-            />
-            <NewSelect
-              marginBottom={'sm'}
-              label="É da Instituição?"
-              name="institution"
-              isSearchable={false}
-              icon={FiBook}
-              isDisabled={loading}
-              options={[
-                {
-                  value: true,
-                  label: 'Sim'
-                },
-                {
-                  value: false,
-                  label: 'Não'
-                }
-              ]}
-            />
-            <Input
-              marginBottom={'sm'}
-              name="email"
-              label={'E-mail'}
-              placeholder="email@exemplo.com"
-              type="text"
-              icon={FiMail}
-              disabled={loading}
-            />
-            <Input
-              marginBottom="sm"
-              name="phone"
-              label="Telefone"
-              placeholder="Telefone"
-              type="phone"
-              icon={FiPhoneCall}
-              disabled={loading}
-            />
-          </Grid>
-        </main>
-        <footer>
+        <ScrollWrapper>
+          <MainModal>
+            <Grid cols={2}>
+              <Input
+                marginBottom="sm"
+                name="name"
+                label="Nome"
+                placeholder="Nome"
+                icon={FiUser}
+                disabled={loading}
+              />
+              <Input
+                marginBottom="sm"
+                name="cpf"
+                label="CPF"
+                placeholder="CPF"
+                type="cpf"
+                icon={FiCreditCard}
+                disabled={type === 'update' || loading}
+              />
+              <Input
+                marginBottom="sm"
+                name="dob"
+                label="Data de Nascimento"
+                type="date"
+                icon={FiCalendar}
+                disabled={loading}
+              />
+              <NewSelect
+                marginBottom={'sm'}
+                label="É da Instituição?"
+                name="institution"
+                isSearchable={false}
+                icon={FiBook}
+                isDisabled={loading}
+                options={[
+                  {
+                    value: true,
+                    label: 'Sim'
+                  },
+                  {
+                    value: false,
+                    label: 'Não'
+                  }
+                ]}
+              />
+              <Input
+                marginBottom={'sm'}
+                name="email"
+                label={'E-mail'}
+                placeholder="email@exemplo.com"
+                type="text"
+                icon={FiMail}
+                disabled={loading}
+              />
+              <Input
+                marginBottom="sm"
+                name="phone"
+                label="Telefone"
+                placeholder="Telefone"
+                type="phone"
+                icon={FiPhoneCall}
+                disabled={loading}
+              />
+            </Grid>
+          </MainModal>
+        </ScrollWrapper>
+        <FooterModal inline>
           <Button
             onClick={() => {
               handleCloseSaveModal()
@@ -225,7 +236,7 @@ export const ParticipantModal: React.FC<Props> = ({
               </>
             )}
           </Button>
-        </footer>
+        </FooterModal>
       </Form>
     </Modal>
   )

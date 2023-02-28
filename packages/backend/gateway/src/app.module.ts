@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 import { APP_GUARD } from '@nestjs/core'
 import { ClientProxyFactory } from '@nestjs/microservices'
 import { TerminusModule } from '@nestjs/terminus'
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 
 import { ActivitiesController } from './controllers/activities.controller'
 import { ActivityTypesController } from './controllers/activity-types.controller'
@@ -14,11 +13,11 @@ import { InfosController } from './controllers/infos.controller'
 import { ModelsController } from './controllers/models.controller'
 import { ParticipantsController } from './controllers/participants.controller'
 import { PasswordController } from './controllers/password.controller'
+import { ResumeController } from './controllers/resume.controller'
 import { SessionsController } from './controllers/sessions.controller'
 import { UploadController } from './controllers/upload.controller'
 import { UsersController } from './controllers/users.controller'
 import { ConfigService } from './services/config/config.service'
-import { ThrottlerConfigService } from './services/config/throttler.service'
 import { AuthGuard } from './services/guards/authorization.guard'
 import { PermissionGuard } from './services/guards/permission.guard'
 
@@ -40,6 +39,7 @@ import { PermissionGuard } from './services/guards/permission.guard'
     ModelsController,
     ParticipantsController,
     PasswordController,
+    ResumeController,
     SessionsController,
     UploadController,
     UsersController

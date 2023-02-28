@@ -1,5 +1,5 @@
 import { Alert, Button, Card, Grid, Help } from '@components'
-import { ICertificateValid } from '@dtos'
+import { useValidate } from '@providers'
 import { theme } from '@styles'
 import { capitalize } from '@utils'
 import Head from 'next/head'
@@ -24,13 +24,9 @@ import {
   InfoContainer
 } from './styles'
 
-interface Props {
-  certificate: ICertificateValid
-  removeCertificate: () => void
-}
-
-export const Valid: React.FC<Props> = ({ certificate, removeCertificate }) => {
+export const Valid: React.FC = () => {
   const router = useRouter()
+  const { certificate, setCertificate } = useValidate()
 
   return (
     <Container marginTopSm={true} maxWidth={1000} login={false}>
@@ -112,7 +108,7 @@ export const Valid: React.FC<Props> = ({ certificate, removeCertificate }) => {
               <Button
                 onClick={() => {
                   router.push(`/validate`)
-                  removeCertificate()
+                  setCertificate(null)
                 }}
                 type="button"
                 outline

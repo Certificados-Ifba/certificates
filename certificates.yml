@@ -7,6 +7,7 @@ services:
     environment:
       - HCAPTCHA_SITEKEY=${HCAPTCHA_SITEKEY}
       - API_URI=${API_URI}
+      - SHEET_PASSWORD=${SHEET_PASSWORD}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.web

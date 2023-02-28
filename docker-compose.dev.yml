@@ -1,46 +1,57 @@
 version: '3'
 services:
-  # web:
-  #   command: yarn workspace @certificates/web dev
-  #   volumes:
-  #     - ./packages/frontend/web:/usr/src/app/packages/frontend/web
+  web:
+    command: yarn workspace @certificates/web dev
+    volumes:
+      - ./packages/frontend/web:/usr/src/app/packages/frontend/web
+      - ./node_modules:/usr/src/app/node_modules
   gateway:
     command: yarn workspace @certificates/gateway dev
     volumes:
       - ./packages/backend/gateway:/usr/src/app/packages/backend/gateway
+      - ./node_modules:/usr/src/app/node_modules
   event:
     command: yarn workspace @certificates/event dev
     volumes:
       - ./packages/backend/event:/usr/src/app/packages/backend/event
+      - ./node_modules:/usr/src/app/node_modules
   generic:
     command: yarn workspace @certificates/generic dev
     volumes:
       - ./packages/backend/generic:/usr/src/app/packages/backend/generic
+      - ./node_modules:/usr/src/app/node_modules
   activity:
     command: yarn workspace @certificates/activity dev
     volumes:
       - ./packages/backend/activity:/usr/src/app/packages/backend/activity
+      - ./node_modules:/usr/src/app/node_modules
   certificate:
     command: yarn workspace @certificates/certificate dev
     volumes:
       - ./packages/backend/certificate:/usr/src/app/packages/backend/certificate
+      - ./node_modules:/usr/src/app/node_modules
   token:
     command: yarn workspace @certificates/token dev
     volumes:
       - ./packages/backend/token:/usr/src/app/packages/backend/token
+      - ./node_modules:/usr/src/app/node_modules
   mailer:
     command: yarn workspace @certificates/mailer dev
     volumes:
       - ./packages/backend/mailer:/usr/src/app/packages/backend/mailer
+      - ./node_modules:/usr/src/app/node_modules
   permission:
     command: yarn workspace @certificates/permission dev
     volumes:
       - ./packages/backend/permission:/usr/src/app/packages/backend/permission
+      - ./node_modules:/usr/src/app/node_modules
   storage:
     command: yarn workspace @certificates/storage dev
     volumes:
       - ./packages/backend/storage:/usr/src/app/packages/backend/storage
+      - ./node_modules:/usr/src/app/node_modules
   user:
     command: yarn workspace @certificates/user dev
     volumes:
       - ./packages/backend/user:/usr/src/app/packages/backend/user
+      - ./node_modules:/usr/src/app/node_modules

@@ -1,7 +1,7 @@
 args = $(foreach a,$($(subst -,_,$1)_args),$(if $(value $a),$a="$($a)"))
 
 dev.build:
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache --force-rm && docker system prune -a
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache --force-rm
 
 dev.up:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans
@@ -13,7 +13,7 @@ dev.logs:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f $(container)
 
 prod.build:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache --force-rm && docker system prune -a
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache --force-rm
 
 prod.up:
 	make prod.build && docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans

@@ -7,7 +7,7 @@ import { Container, Label, Error } from './styles'
 interface BaseProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
   name: string
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   formRef?: MutableRefObject<FormHandles>
 }
 
@@ -59,7 +59,7 @@ export const SliderBar: React.FC<Props> = ({
           <Error>
             <span>
               <FiAlertCircle />
-            </span>{' '}
+            </span>
             <span>{error}</span>
           </Error>
         )}

@@ -15,7 +15,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
     | 'dark'
     | 'medium'
     | 'light'
-  size?: 'small' | 'default' | 'big'
+  size?: 'extra-small' | 'small' | 'default' | 'big'
   ghost?: boolean
   outline?: boolean
   inline?: boolean

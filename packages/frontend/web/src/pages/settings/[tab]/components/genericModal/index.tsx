@@ -1,4 +1,11 @@
-import { Button, Input, Modal } from '@components'
+import {
+  Button,
+  FooterModal,
+  HeaderModal,
+  Input,
+  MainModal,
+  Modal
+} from '@components'
 import { IGeneric } from '@dtos'
 import { useToast } from '@providers'
 import { api, PaginatedRequest } from '@services'
@@ -99,7 +106,7 @@ export const GenericModal: React.FC<Props> = ({
 
   return (
     <Modal open={openModal} onClose={handleCloseModal}>
-      <header>
+      <HeaderModal>
         <h2>
           {type === 'update' ? (
             <>
@@ -113,9 +120,9 @@ export const GenericModal: React.FC<Props> = ({
             </>
           )}
         </h2>
-      </header>
+      </HeaderModal>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <main>
+        <MainModal>
           <Input
             name="name"
             label="Nome"
@@ -123,8 +130,8 @@ export const GenericModal: React.FC<Props> = ({
             icon={Icon}
             disabled={loading}
           />
-        </main>
-        <footer>
+        </MainModal>
+        <FooterModal>
           <Button
             onClick={() => {
               handleCloseModal()
@@ -154,7 +161,7 @@ export const GenericModal: React.FC<Props> = ({
               </>
             )}
           </Button>
-        </footer>
+        </FooterModal>
       </Form>
     </Modal>
   )

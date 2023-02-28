@@ -1,8 +1,8 @@
-import * as bcrypt from 'bcrypt'
+import { compareSync, hashSync } from 'bcrypt'
 import * as mongoose from 'mongoose'
-import { formatCpf, formatData } from 'src/utils/formatters'
 
 import { IUser } from '../interfaces/user.interface'
+import { formatCpf, formatDate } from '../utils/formatters'
 
 const SALT_ROUNDS = 10
 
@@ -10,7 +10,7 @@ function transformValue(doc, ret: { [key: string]: any }) {
   if (ret?.personal_data?.cpf)
     ret.personal_data.cpf = formatCpf(ret.personal_data.cpf)
   if (ret?.personal_data?.dob)
-    ret.personal_data.dob = formatData(ret.personal_data.dob)
+    ret.personal_data.dob = formatDate(ret.personal_data.dob)
   delete ret._id
   delete ret.password
 }
@@ -83,18 +83,18 @@ export const UserSchema = new mongoose.Schema(
 )
 
 UserSchema.methods.getEncryptedPassword = (password: string) => {
-  return bcrypt.hash(String(password), SALT_ROUNDS)
+  return hashSync(String(password), SALT_ROUNDS)
 }
 
 UserSchema.methods.compareEncryptedPassword = function (password: string) {
-  return bcrypt.compare(password, this.password)
+  return compareSync(password, this.password)
 }
 
-UserSchema.pre('save', async function (next) {
+UserSchema.pre('save', function (next) {
   const self = this as IUser
   if (!this.isModified('password')) {
     return next()
   }
-  self.password = await self.getEncryptedPassword(self.password)
+  self.password = self.getEncryptedPassword(self.password)
   next()
 })

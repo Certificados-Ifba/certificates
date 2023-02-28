@@ -1,6 +1,6 @@
 import { Alert, Button, Card, Grid, Loading } from '@components'
 import { withoutAuth } from '@hocs'
-import { ParticipantHomeLayout } from '@layouts'
+import { ParticipantLayout } from '@layouts'
 import { useAuth } from '@providers'
 import { api, getToken } from '@services'
 import { capitalize } from '@utils'
@@ -45,12 +45,9 @@ const Home: React.FC = () => {
         const { data } = await api.get('me', {
           headers: { authorization: `Bearer ${token}` }
         })
-        console.log(data)
 
         const participant = data?.data?.user
         if (participant) {
-          console.log(participant)
-
           setParticipant({
             name: participant.name,
             email: participant.email,
@@ -154,10 +151,10 @@ const Home: React.FC = () => {
           </FormContainer>
         )}
       </Card>
-      {!loading && <Events token={token} loading={loading} />}
+      {/* {!loading && <Events token={token} loading={loading} />} */}
       {!loading && <Certificates token={token} loading={loading} />}
     </Container>
   )
 }
 
-export default withoutAuth(Home, ParticipantHomeLayout)
+export default withoutAuth(Home, ParticipantLayout)

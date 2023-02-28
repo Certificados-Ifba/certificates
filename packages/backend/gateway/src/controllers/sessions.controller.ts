@@ -40,50 +40,59 @@ export class SessionsController {
     @Req() req: Request,
     @Body() loginRequest: LoginUserDto
   ): Promise<LoginUserResponseDto> {
-    const getUserResponse: IServiceUserSearchResponse = await this.userServiceClient
-      .send('user_search_by_credentials', loginRequest)
-      .toPromise()
+    try {
+      const getUserResponse: IServiceUserSearchResponse = await this.userServiceClient
+        .send('user_search_by_credentials', loginRequest)
+        .toPromise()
 
-    if (getUserResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: getUserResponse.message,
-          data: null,
-          errors: null
+      if (getUserResponse.status !== HttpStatus.OK) {
+        throw new HttpException(
+          {
+            message: getUserResponse.message,
+            data: null,
+            errors: null
+          },
+          HttpStatus.UNAUTHORIZED
+        )
+      }
+      const agent = parser(req.headers['user-agent'])
+      const createTokenResponse: IServiceTokenCreateResponse = await this.tokenServiceClient
+        .send('token_create', {
+          user: getUserResponse.data.user,
+          ip: requestIp.getClientIp(req).split(':').pop(),
+          device: `${agent.device.model ? agent.device.model + ' - ' : ''}${
+            agent.os.name
+          } ${agent.os.version} - ${agent.browser.name}`,
+          where: req.headers.location
+        })
+        .toPromise()
+
+      if (createTokenResponse.status !== HttpStatus.CREATED) {
+        throw new HttpException(
+          {
+            message: createTokenResponse.message,
+            errors: createTokenResponse.errors,
+            data: null
+          },
+          createTokenResponse.status
+        )
+      }
+
+      return {
+        message: createTokenResponse.message,
+        data: {
+          token: createTokenResponse.token
         },
-        HttpStatus.UNAUTHORIZED
-      )
-    }
-    const agent = parser(req.headers['user-agent'])
-
-    const createTokenResponse: IServiceTokenCreateResponse = await this.tokenServiceClient
-      .send('token_create', {
-        user: getUserResponse.data.user,
-        ip: requestIp.getClientIp(req).split(':').pop(),
-        device: `${agent.device.model ? agent.device.model + ' - ' : ''}${
-          agent.os.name
-        } ${agent.os.version} - ${agent.browser.name}`,
-        where: req.headers.location
-      })
-      .toPromise()
-
-    if (createTokenResponse.status !== HttpStatus.CREATED) {
+        errors: null
+      }
+    } catch (e) {
       throw new HttpException(
         {
-          message: createTokenResponse.message,
-          errors: createTokenResponse.errors,
+          message: 'user_search_by_credentials_not_match',
           data: null
         },
-        createTokenResponse.status
+        HttpStatus.INTERNAL_SERVER_ERROR
       )
-    }
-
-    return {
-      message: createTokenResponse.message,
-      data: {
-        token: createTokenResponse.token
-      },
-      errors: null
     }
   }
 

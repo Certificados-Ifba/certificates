@@ -24,8 +24,8 @@ export function usePaginatedRequest<Data = any, Error = any>(
 ): PaginatedRequest<Data, Error> {
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<OptionType>({
-    value: 10,
-    label: '10'
+    value: request?.params?.per_page || 10,
+    label: request?.params?.per_page || '10'
   })
 
   const { response, requestKey, ...rest } = useRequest<any, Error>({

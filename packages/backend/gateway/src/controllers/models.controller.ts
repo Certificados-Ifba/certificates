@@ -71,7 +71,7 @@ export class ModelsController {
     }
 
     const createModelResponse: IServiceModelCreateResponse = await this.certificateServiceClient
-      .send('certificate_create', {
+      .send('model_create', {
         event: eventResponse.data.event.id,
         name,
         pages,

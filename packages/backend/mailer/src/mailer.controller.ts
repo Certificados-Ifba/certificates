@@ -14,25 +14,39 @@ export class MailerController {
   ) {}
 
   @MessagePattern('mail_send')
-  mailSend(data: IEmailData): IMailSendResponse {
+  async mailSend(data: IEmailData): Promise<IMailSendResponse> {
     data.template = process.cwd() + data.template
-    console.log('Credentials obtained, sending message...', data.template)
+    console.log('Credentials obtained, sending message...')
 
     if (!this.configService.get('emailsDisabled')) {
-      this.mailerService
-        .sendMail(data)
-        .then(info => {
-          console.log('Message sent: %s', info.messageId)
-          console.log(
-            'Preview URL: https://ethereal.email/message/%s',
-            info.response
-              .replace('250 Accepted [STATUS=new MSGID=', '')
-              .replace(']', '')
-          )
-        })
-        .catch(err => {
-          console.log('Error occurred. ' + err.message)
-        })
+      try {
+        const info = await this.mailerService.sendMail(data)
+        console.log(info)
+
+        console.log('Message sent: %s', info.messageId)
+        console.log(
+          'Preview URL: https://ethereal.email/message/%s',
+          info.response
+            .replace('250 Accepted [STATUS=new MSGID=', '')
+            .replace(']', '')
+        )
+      } catch (err) {
+        console.error('Error occurred. ' + err.message)
+      }
+      // this.mailerService
+      //   .sendMail(data)
+      //   .then(info => {
+      //     console.log('Message sent: %s', info.messageId)
+      //     console.log(
+      //       'Preview URL: https://ethereal.email/message/%s',
+      //       info.response
+      //         .replace('250 Accepted [STATUS=new MSGID=', '')
+      //         .replace(']', '')
+      //     )
+      //   })
+      //   .catch(err => {
+      //     console.error('Error occurred. ' + err.message)
+      //   })
     }
     return {
       status: HttpStatus.ACCEPTED,

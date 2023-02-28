@@ -16,7 +16,7 @@ export const GlobalStyle = createGlobalStyle`
     }
   }
 
-  @media (max-width: ${props => props.theme.responsive.mdDown}) {
+  @media (max-width: ${({ theme }) => theme.responsive.mdDown}) {
     html {
       font-size: 87.5%;
     }
@@ -26,8 +26,8 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    background-color: ${props => props.theme.colors.light};
-    color: ${props => props.theme.colors.darkShade};
+    background-color: ${({ theme }) => theme.colors.light};
+    color: ${({ theme }) => theme.colors.darkShade};
   }
 
   body,
@@ -52,7 +52,20 @@ export const GlobalStyle = createGlobalStyle`
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    box-shadow: 0 0 0 30px ${props =>
-      props.theme.colors.lightTint}  inset !important;
+    box-shadow: 0 0 0 30px ${({ theme }) =>
+      theme.colors.lightTint}  inset !important;
+  }
+
+  #nprogress .bar {
+    background: ${({ theme }) => theme.colors.secondary} !important;
+  }
+
+  #nprogress .peg {
+    box-shadow: 0 0 10px ${({ theme }) => theme.colors.secondary} , 0 0 5px ${({
+  theme
+}) => theme.colors.secondary} ;
+  }
+  .public-DraftStyleDefault-block {
+    padding: 0 16px;
   }
 `

@@ -2,7 +2,7 @@ import Select from 'react-select'
 import styled, { css } from 'styled-components'
 
 interface Props {
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   isFilled?: boolean
   isErrored?: boolean
   hidden?: boolean

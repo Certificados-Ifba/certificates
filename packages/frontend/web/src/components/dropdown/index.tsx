@@ -27,6 +27,7 @@ interface Props extends ButtonProps {
   onChangeState?: ({ active: boolean }) => void
   active: boolean
   setActive: Dispatch<SetStateAction<boolean>>
+  align?: 'left' | 'right'
 }
 
 export type { Props as DropdownProps }
@@ -40,6 +41,7 @@ export const Dropdown: React.FC<Props> = ({ ...rest }) => {
     children,
     dropdownChildren,
     onChangeState,
+    align = 'left',
     ...restButton
   } = rest
 
@@ -78,13 +80,14 @@ export const Dropdown: React.FC<Props> = ({ ...rest }) => {
   }, [handleEvt])
 
   return (
-    <Container className="dropdown" active={active}>
+    <Container className="dropdown" active={active} align={align}>
       <Button
         onClick={() => {
           setActive(!active)
           if (onChangeState) onChangeState({ active: !active })
         }}
         type="button"
+        style={{ justifyContent: 'space-between' }}
         {...restButton}
       >
         {Icon && (
