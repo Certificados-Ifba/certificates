@@ -44,7 +44,6 @@ import { IServiceUserResendResponse } from '../interfaces/user/service-user-rese
 import { IServiceUserUpdateByIdResponse } from '../interfaces/user/service-user-update-by-id-response.interface'
 
 @Controller('users')
-@ApiBearerAuth('JWT')
 @ApiTags('users')
 export class UsersController {
   constructor(
@@ -108,8 +107,6 @@ export class UsersController {
   }
 
   @Post()
-  @Authorization(true)
-  @Permission('user_create')
   @ApiCreatedResponse({
     type: CreateUserResponseDto
   })

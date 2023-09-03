@@ -280,6 +280,13 @@ export class UserController {
         message: 'user_forgot_password_success',
         errors: null
       }
+      console.log({
+        name: user.name,
+        email: user.email,
+        link: this.userService.getConfirmationLink(userLink.link),
+        site: this.userService.getWebUrl()
+      })
+
       this.mailerServiceClient
         .send('mail_send', {
           to: user.email,
