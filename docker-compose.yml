@@ -1,16 +1,16 @@
 version: '3'
 services:
-  # web:
-  #   build:
-  #     context: .
-  #     dockerfile: ./docker/Dockerfile.web
-  #   hostname: web
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - '${WEB_PORT}:${WEB_PORT}'
-  #   networks:
-  #     - frontend
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.web
+    hostname: web
+    env_file:
+      - .env
+    ports:
+      - '${WEB_PORT}:${WEB_PORT}'
+    networks:
+      - frontend
   gateway:
     build:
       context: .
@@ -128,7 +128,7 @@ services:
       - 'MONGODB_USERNAME=${MONGO_USER}'
       - 'MONGODB_PASSWORD=${MONGO_PASSWORD}'
       - 'MONGODB_DATABASE=${MONGO_DATABASE}'
-      - MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+      - 'MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}'
     volumes:
       - './docker/db:/bitnami/mongodb'
     ports:
