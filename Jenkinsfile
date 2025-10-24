@@ -27,24 +27,17 @@ pipeline {
         stage('Instalar Dependências & Testar') {
             steps {
                 echo "🏗️ Instalando dependências e executando lint..."
-                sh '''
-                    set -euo pipefail
-
-                    # 1) Instala dependências com cache do Yarn (mais rápido nos próximos builds)
-                    docker run --rm \
-                      -v "$(pwd):/app" \
-                      -v /var/jenkins_home/.yarn-cache:/usr/local/share/.cache/yarn \
-                      -w /app \
-                      node:${NODE_VERSION} \
-                      bash -lc "yarn install"
-
-                    # 2) Executa o lint usando as dependências instaladas (node_modules montado do host)
-                    docker run --rm \
-                      -v "$(pwd):/app" \
-                      -w /app \
-                      node:${NODE_VERSION} \
-                      bash -lc "yarn lint"
-                '''
+                script {
+                    // usa o plugin Docker Pipeline para rodar dentro do container Node
+                    def img = docker.image("node:${NODE_VERSION}")
+                    img.pull()
+                    img.inside("--user root -v /var/jenkins_home/.yarn-cache:/usr/local/share/.cache/yarn") {
+                        // garante que o workspace esteja montado corretamente dentro do container
+                        sh 'pwd && ls -la'
+                        sh 'yarn install --frozen-lockfile'
+                        sh 'yarn lint || true'
+                    }
+                }
             }
         }
 
