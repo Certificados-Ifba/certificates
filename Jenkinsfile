@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         PROJECT_NAME = "certificates-ifba"
-        DOCKER_COMPOSE_FILE = "docker-compose.prod.yml"
+        DOCKER_COMPOSE_FILE = "docker-compose.dev.yml"
         DOCKER_NETWORK = "infrastructure"
         NODE_VERSION = "16"
         GIT_REPO = "https://github.com/Certificados-Ifba/certificates.git"
@@ -26,16 +26,15 @@ pipeline {
         }
 
         stage('Instalar Dependências & Testar') {
-            agent {
-                dockerContainer {
-                    image "node:${NODE_VERSION}"
-                    args '--user root'
-                }
-            }
             steps {
                 echo "🏗️ Instalando dependências e executando lint..."
-                sh 'yarn install --frozen-lockfile'
-                sh 'yarn lint || true'
+                sh """
+                    docker run --rm \
+                        -v \$(pwd):/app \
+                        -w /app \
+                        node:${NODE_VERSION} \
+                        bash -c "yarn install && yarn lint"
+                """
             }
         }
 
