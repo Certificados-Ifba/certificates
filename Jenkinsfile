@@ -28,13 +28,13 @@ pipeline {
         stage('Instalar Dependências & Testar') {
             steps {
                 echo "🏗️ Instalando dependências e executando lint..."
-                sh """
+                sh '''
                     docker run --rm \
-                        -v \$(pwd):/app \
+                        -v $(pwd):/app \
                         -w /app \
-                        node:${NODE_VERSION} \
+                        node:16 \
                         bash -c "yarn install && yarn lint"
-                """
+                '''
             }
         }
 
@@ -47,7 +47,7 @@ pipeline {
 
         stage('Deploy Local') {
             steps {
-                echo "🚀 Subindo containers de produção..."
+                echo "🚀 Subindo containers de desenvolvimento..."
                 sh """
                     docker network inspect ${DOCKER_NETWORK} >/dev/null 2>&1 || docker network create ${DOCKER_NETWORK}
                     docker compose -f ${DOCKER_COMPOSE_FILE} down
