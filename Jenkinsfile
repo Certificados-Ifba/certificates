@@ -5,7 +5,7 @@ pipeline {
         PROJECT_NAME = "certificates-ifba"
         DOCKER_COMPOSE_FILE = "docker-compose.prod.yml"
         DOCKER_NETWORK = "infrastructure"
-        NODE_VERSION = "20"
+        NODE_VERSION = "14"
         GIT_REPO = "https://github.com/Certificados-Ifba/certificates.git"
         BRANCH = "develop"
     }
