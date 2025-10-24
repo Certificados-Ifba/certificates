@@ -33,7 +33,7 @@ pipeline {
                         -v \$(pwd):/app \
                         -w /app \
                         node:${NODE_VERSION} \
-                        bash -c \\"yarn install && yarn lint\\"
+                        bash -c "yarn install && yarn lint"
                 """
             }
         }
