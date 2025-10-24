@@ -19,7 +19,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo "📥 Clonando código do repositório..."
-                deleteDir()
+                deleteDir() // limpa o workspace antes do clone
                 git branch: "${BRANCH}", url: "${GIT_REPO}"
                 sh 'ls -la'
             }
@@ -27,13 +27,13 @@ pipeline {
 
         stage('Instalar Dependências & Testar') {
             steps {
-                echo "🏗️ Instalando dependências e executando testes..."
+                echo "🏗️ Instalando dependências e executando lint..."
                 sh """
                     docker run --rm \
                         -v \$(pwd):/app \
                         -w /app \
                         node:${NODE_VERSION} \
-                        bash -c "npm install -g yarn && yarn install && yarn lint"
+                        bash -c "yarn install && yarn lint"
                 """
             }
         }
