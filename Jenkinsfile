@@ -28,13 +28,13 @@ pipeline {
         stage('Instalar Dependências & Testar') {
             steps {
                 echo "🏗️ Instalando dependências e executando lint..."
-                sh '''
+                sh """
                     docker run --rm \
-                        -v $(pwd):/app \
+                        -v \$(pwd):/app \
                         -w /app \
-                        node:16 \
-                        bash -c "yarn install && yarn lint"
-                '''
+                        node:${NODE_VERSION} \
+                        bash -c \\"yarn install && yarn lint\\"
+                """
             }
         }
 
