@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_NAME = "certificates-ifba"
+        PROJECT_NAME        = "certificates-ifba"
         DOCKER_COMPOSE_FILE = "docker-compose.dev.yml"
-        DOCKER_NETWORK = "infrastructure"
-        NODE_VERSION = "16"
-        GIT_REPO = "https://github.com/Certificados-Ifba/certificates.git"
-        BRANCH = "develop"
+        DOCKER_NETWORK      = "infrastructure"
+        NODE_VERSION        = "16"
+        GIT_REPO            = "https://github.com/Certificados-Ifba/certificates.git"
+        BRANCH              = "develop"
     }
 
     options {
@@ -28,12 +28,22 @@ pipeline {
             steps {
                 echo "🏗️ Instalando dependências e executando lint..."
                 sh '''
-                    set -e
+                    set -euo pipefail
+
+                    # 1) Instala dependências com cache do Yarn (mais rápido nos próximos builds)
                     docker run --rm \
-                        -v "$(pwd):/app" \
-                        -w /app \
-                        node:${NODE_VERSION} \
-                        bash -lc "yarn install && yarn lint"
+                      -v "$(pwd):/app" \
+                      -v /var/jenkins_home/.yarn-cache:/usr/local/share/.cache/yarn \
+                      -w /app \
+                      node:${NODE_VERSION} \
+                      bash -lc "yarn install"
+
+                    # 2) Executa o lint usando as dependências instaladas (node_modules montado do host)
+                    docker run --rm \
+                      -v "$(pwd):/app" \
+                      -w /app \
+                      node:${NODE_VERSION} \
+                      bash -lc "yarn lint"
                 '''
             }
         }
@@ -49,6 +59,7 @@ pipeline {
             steps {
                 echo "🚀 Subindo containers de desenvolvimento..."
                 sh """
+                    set -euo pipefail
                     docker network inspect ${DOCKER_NETWORK} >/dev/null 2>&1 || docker network create ${DOCKER_NETWORK}
                     docker compose -f ${DOCKER_COMPOSE_FILE} down
                     docker compose -f ${DOCKER_COMPOSE_FILE} up -d --build
@@ -59,7 +70,7 @@ pipeline {
         stage('Healthcheck') {
             steps {
                 echo "🩺 Verificando se o serviço está online..."
-                sh "sleep 10 && curl -f http://localhost:3000/api || (echo '❌ Falha no healthcheck!' && exit 1)"
+                sh "sleep 10 && curl -fsS http://localhost:3000/api >/dev/null || (echo '❌ Falha no healthcheck!' && exit 1)"
             }
         }
     }
