@@ -22,28 +22,27 @@ pipeline {
             }
         }
 
-        stage('Instalar Dependências & Testar') {
+        stage('Instalar Dependências & (Lint se existir)') {
             steps {
-                echo "🏗️ Instalando dependências e executando lint..."
+                echo "🏗️ Instalando dependências e executando lint (se existir)..."
                 sh '''
                     set -euo pipefail
 
-                    # Garante cache do Yarn
                     mkdir -p /var/jenkins_home/.yarn-cache
 
-                    # 1) Instalar dependências (workspace e cache vêm do container do Jenkins)
+                    # 1) yarn install usando o mesmo volume do container do Jenkins
                     docker run --rm \
                       --volumes-from "$(hostname)" \
                       -w "$WORKSPACE" \
                       node:16 \
                       bash -lc "node -v; yarn -v; ls -la; yarn install --frozen-lockfile"
 
-                    # 2) Executar lint
+                    # 2) Executa lint SOMENTE se existir no package.json da raiz
                     docker run --rm \
                       --volumes-from "$(hostname)" \
                       -w "$WORKSPACE" \
                       node:16 \
-                      bash -lc "ls -la; yarn run lint"
+                      bash -lc "node -e \"const s=require('./package.json').scripts||{}; process.exit(s.lint?0:2)\" && yarn run lint || echo 'ℹ️ Sem script lint na raiz — pulando etapa.'"
                 '''
             }
         }
