@@ -10,9 +10,7 @@ pipeline {
         BRANCH              = "develop"
     }
 
-    options {
-        timestamps()
-    }
+    options { timestamps() }
 
     stages {
         stage('Checkout') {
@@ -27,17 +25,24 @@ pipeline {
         stage('Instalar Dependências & Testar') {
             steps {
                 echo "🏗️ Instalando dependências e executando lint..."
-                script {
-                    // usa o plugin Docker Pipeline para rodar dentro do container Node
-                    def img = docker.image("node:${NODE_VERSION}")
-                    img.pull()
-                    img.inside("--user root -v /var/jenkins_home/.yarn-cache:/usr/local/share/.cache/yarn") {
-                        // garante que o workspace esteja montado corretamente dentro do container
-                        sh 'pwd && ls -la'
-                        sh 'yarn install --frozen-lockfile'
-                        sh 'yarn lint || true'
-                    }
-                }
+                sh '''
+                    set -euo pipefail
+
+                    # 1) Instalar dependências (com cache do Yarn)
+                    docker run --rm \
+                      -v "$(pwd):/app" \
+                      -v /var/jenkins_home/.yarn-cache:/usr/local/share/.cache/yarn \
+                      -w /app \
+                      node:16 \
+                      bash -lc "node -v; yarn -v; ls -la; yarn install --frozen-lockfile"
+
+                    # 2) Executar lint (ASPAS dentro do -lc são essenciais)
+                    docker run --rm \
+                      -v "$(pwd):/app" \
+                      -w /app \
+                      node:16 \
+                      bash -lc "ls -la; yarn run lint"
+                '''
             }
         }
 
@@ -69,11 +74,7 @@ pipeline {
     }
 
     post {
-        success {
-            echo "✅ Deploy do ${PROJECT_NAME} concluído com sucesso!"
-        }
-        failure {
-            echo "🚨 Falha no pipeline. Verifique os logs no Jenkins."
-        }
+        success { echo "✅ Deploy do ${PROJECT_NAME} concluído com sucesso!" }
+        failure { echo "🚨 Falha no pipeline. Verifique os logs no Jenkins." }
     }
 }
