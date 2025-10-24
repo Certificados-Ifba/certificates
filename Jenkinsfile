@@ -5,7 +5,7 @@ pipeline {
         PROJECT_NAME = "certificates-ifba"
         DOCKER_COMPOSE_FILE = "docker-compose.prod.yml"
         DOCKER_NETWORK = "infrastructure"
-        NODE_VERSION = "14"
+        NODE_VERSION = "16"
         GIT_REPO = "https://github.com/Certificados-Ifba/certificates.git"
         BRANCH = "develop"
     }
@@ -15,52 +15,51 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    echo "📥 Clonando código..."
-                    git branch: "${BRANCH}", url: "${GIT_REPO}"
-                }
+                echo "📥 Clonando código do repositório..."
+                deleteDir()
+                git branch: "${BRANCH}", url: "${GIT_REPO}"
+                sh 'ls -la'
             }
         }
 
         stage('Instalar Dependências & Testar') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    echo "🏗️ Instalando dependências e executando testes..."
-                    sh "docker run --rm -v \$(pwd):/app -w /app node:${NODE_VERSION} bash -c 'npm ci && npm run lint && npm test'"
-                }
+                echo "🏗️ Instalando dependências e executando testes..."
+                sh """
+                    docker run --rm \
+                        -v \$(pwd):/app \
+                        -w /app \
+                        node:${NODE_VERSION} \
+                        bash -c "npm install -g yarn && yarn install && yarn lint"
+                """
             }
         }
 
         stage('Build Docker') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    echo "🐳 Construindo imagens Docker..."
-                    sh "docker compose -f ${DOCKER_COMPOSE_FILE} build"
-                }
+                echo "🐳 Construindo imagens Docker..."
+                sh "docker compose -f ${DOCKER_COMPOSE_FILE} build"
             }
         }
 
         stage('Deploy Local') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    echo "🚀 Subindo containers..."
-                    sh """
-                        docker network inspect ${DOCKER_NETWORK} >/dev/null 2>&1 || docker network create ${DOCKER_NETWORK}
-                        docker compose -f ${DOCKER_COMPOSE_FILE} down
-                        docker compose -f ${DOCKER_COMPOSE_FILE} up -d --build
-                    """
-                }
+                echo "🚀 Subindo containers de produção..."
+                sh """
+                    docker network inspect ${DOCKER_NETWORK} >/dev/null 2>&1 || docker network create ${DOCKER_NETWORK}
+                    docker compose -f ${DOCKER_COMPOSE_FILE} down
+                    docker compose -f ${DOCKER_COMPOSE_FILE} up -d --build
+                """
             }
         }
 
         stage('Healthcheck') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    echo "🩺 Verificando se o serviço está online..."
-                    sh "sleep 10 && curl -f http://localhost:3000/health || (echo '❌ Falha no healthcheck!' && exit 1)"
-                }
+                echo "🩺 Verificando se o serviço está online..."
+                sh "sleep 10 && curl -f http://localhost:3000/api || (echo '❌ Falha no healthcheck!' && exit 1)"
             }
         }
     }
