@@ -27,7 +27,7 @@ pipeline {
 
         stage('Instalar Dependências & Testar') {
             agent {
-                docker {
+                dockerContainer {
                     image "node:${NODE_VERSION}"
                     args '--user root'
                 }
