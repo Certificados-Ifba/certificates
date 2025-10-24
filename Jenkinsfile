@@ -5,9 +5,9 @@ pipeline {
         PROJECT_NAME = "certificates-ifba"
         DOCKER_COMPOSE_FILE = "docker-compose.prod.yml"
         DOCKER_NETWORK = "infrastructure"
-        GIT_REPO = "https://github.com/Certificados-Ifba/certificates.git"
         NODE_VERSION = "20"
-        BRANCH = "main"
+        GIT_REPO = "https://github.com/Certificados-Ifba/certificates.git"
+        BRANCH = "develop"
     }
 
     options {
@@ -16,15 +16,14 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                echo "📥 Clonando código do repositório..."
+                echo "📥 Clonando código..."
                 git branch: "${BRANCH}", url: "${GIT_REPO}"
             }
         }
 
-        stage('Build & Test') {
+        stage('Instalar Dependências & Testar') {
             steps {
                 echo "🏗️ Instalando dependências e executando testes..."
                 sh "docker run --rm -v \$(pwd):/app -w /app node:${NODE_VERSION} bash -c 'npm ci && npm run lint && npm test'"
@@ -33,14 +32,14 @@ pipeline {
 
         stage('Build Docker') {
             steps {
-                echo "🐳 Construindo imagem Docker..."
+                echo "🐳 Construindo imagens Docker..."
                 sh "docker compose -f ${DOCKER_COMPOSE_FILE} build"
             }
         }
 
         stage('Deploy Local') {
             steps {
-                echo "🚀 Subindo containers localmente..."
+                echo "🚀 Subindo containers..."
                 sh """
                     docker network inspect ${DOCKER_NETWORK} >/dev/null 2>&1 || docker network create ${DOCKER_NETWORK}
                     docker compose -f ${DOCKER_COMPOSE_FILE} down
@@ -52,17 +51,17 @@ pipeline {
         stage('Healthcheck') {
             steps {
                 echo "🩺 Verificando se o serviço está online..."
-                sh "sleep 15 && curl -f http://localhost:3000/health || (echo '❌ Falha no healthcheck!' && exit 1)"
+                sh "sleep 10 && curl -f http://localhost:3000/health || (echo '❌ Falha no healthcheck!' && exit 1)"
             }
         }
     }
 
     post {
         success {
-            echo "✅ Deploy local concluído com sucesso!"
+            echo "✅ Deploy do ${PROJECT_NAME} concluído com sucesso!"
         }
         failure {
-            echo "🚨 Falha no deploy. Verifique os logs no Jenkins."
+            echo "🚨 Falha no pipeline. Verifique os logs no Jenkins."
         }
     }
 }
