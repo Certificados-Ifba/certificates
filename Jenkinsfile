@@ -28,18 +28,20 @@ pipeline {
                 sh '''
                     set -euo pipefail
 
-                    # 1) Instalar dependências (com cache do Yarn)
+                    # Garante cache do Yarn
+                    mkdir -p /var/jenkins_home/.yarn-cache
+
+                    # 1) Instalar dependências (workspace e cache vêm do container do Jenkins)
                     docker run --rm \
-                      -v "$(pwd):/app" \
-                      -v /var/jenkins_home/.yarn-cache:/usr/local/share/.cache/yarn \
-                      -w /app \
+                      --volumes-from "$(hostname)" \
+                      -w "$WORKSPACE" \
                       node:16 \
                       bash -lc "node -v; yarn -v; ls -la; yarn install --frozen-lockfile"
 
-                    # 2) Executar lint (ASPAS dentro do -lc são essenciais)
+                    # 2) Executar lint
                     docker run --rm \
-                      -v "$(pwd):/app" \
-                      -w /app \
+                      --volumes-from "$(hostname)" \
+                      -w "$WORKSPACE" \
                       node:16 \
                       bash -lc "ls -la; yarn run lint"
                 '''
