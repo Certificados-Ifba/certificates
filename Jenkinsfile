@@ -28,12 +28,13 @@ pipeline {
         stage('Instalar Dependências & Testar') {
             steps {
                 echo "🏗️ Instalando dependências e executando lint..."
+                // 🔧 Usa aspas ESCAPADAS corretamente
                 sh """
                     docker run --rm \
                         -v \$(pwd):/app \
                         -w /app \
                         node:${NODE_VERSION} \
-                        bash -c "yarn install && yarn lint"
+                        bash -c \\"yarn install && yarn lint\\"
                 """
             }
         }
