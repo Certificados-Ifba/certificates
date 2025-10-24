@@ -19,7 +19,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo "📥 Clonando código do repositório..."
-                deleteDir() // limpa o workspace antes do clone
+                deleteDir()
                 git branch: "${BRANCH}", url: "${GIT_REPO}"
                 sh 'ls -la'
             }
