@@ -1,4 +1,4 @@
-#!/usr/bin/env bashnknlknlk
+#!/usr/bin/env bash
 DOMAIN=${DOMAIN-localhost}
 
 echo "building certificates"

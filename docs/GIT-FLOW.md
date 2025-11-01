@@ -187,7 +187,7 @@ jobs:
 ```bash
 # subir stack de exemplo
 cp .env.example .env
-Docker network create infrastructure 2>/dev/null || true
+docker network create infrastructure 2>/dev/null || true
 docker compose up -d
 # API: http://localhost:3000 | Swagger: /api
 ```
