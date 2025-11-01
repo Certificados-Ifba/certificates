@@ -17,7 +17,7 @@ prod.build:
 	$(composecli) -f docker-compose.yml -f docker-compose.prod.yml build --no-cache --force-rm && docker system prune -a
 
 prod.up:
-	make prod.build && $(COMPOSE) -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
+	make prod.build && $(composecli) -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
 
 prod.down:
 	$(composecli) -f docker-compose.yml -f docker-compose.prod.yml down
