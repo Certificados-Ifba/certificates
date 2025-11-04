@@ -91,12 +91,12 @@ Padrões após o `init`:
 git flow feature start IFBA-42-user-reset-senha
 
 # Instale as bibliotecas do Node.js usando yarn como gerenciador de dependências
-nvm use && yarn
+nvm use && yarn install
 # desenvolver no(s) pacote(s) em packages/* (user, token, gateway, mailer, permission, events)
 cd packages/[architecture]/[service] # ex: `cd packages/backend/user`
 # fazer build do TypeScript e rodar o CLI do nest.JS
-sudo yarn build
-yarn nest
+yarn run build
+yarn run dev
 
 # opção A (recomendada): PR para develop
 git push -u origin feature/IFBA-42-user-reset-senha
