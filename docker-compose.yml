@@ -7,12 +7,11 @@ services:
     hostname: web
     env_file:
       - .env
-    environment:
-      - PORT=3000
     ports:
-      - '${WEB_PORT}:3000'
+      - "${WEB_PORT}:3000"
     networks:
       - frontend
+
   gateway:
     build:
       context: .
@@ -21,10 +20,11 @@ services:
     env_file:
       - .env
     ports:
-      - '${API_GATEWAY_PORT}:${API_GATEWAY_PORT}'
+      - "${API_GATEWAY_PORT}:3001"
     networks:
       - backend
       - frontend
+
   event:
     build:
       context: .
@@ -32,10 +32,11 @@ services:
     hostname: event
     env_file:
       - .env
-    links:
+    depends_on:
       - db
     networks:
       - backend
+
   generic:
     build:
       context: .
@@ -43,10 +44,11 @@ services:
     hostname: generic
     env_file:
       - .env
-    links:
+    depends_on:
       - db
     networks:
       - backend
+
   activity:
     build:
       context: .
@@ -54,10 +56,11 @@ services:
     hostname: activity
     env_file:
       - .env
-    links:
+    depends_on:
       - db
     networks:
       - backend
+
   certificate:
     build:
       context: .
@@ -65,10 +68,11 @@ services:
     hostname: certificate
     env_file:
       - .env
-    links:
+    depends_on:
       - db
     networks:
       - backend
+
   token:
     build:
       context: .
@@ -76,10 +80,11 @@ services:
     hostname: token
     env_file:
       - .env
-    links:
+    depends_on:
       - db
     networks:
       - backend
+
   mailer:
     build:
       context: .
@@ -87,10 +92,11 @@ services:
     hostname: mailer
     env_file:
       - .env
-    links:
+    depends_on:
       - db
     networks:
       - backend
+
   permission:
     build:
       context: .
@@ -100,6 +106,7 @@ services:
       - .env
     networks:
       - backend
+
   storage:
     build:
       context: .
@@ -109,6 +116,7 @@ services:
       - .env
     networks:
       - backend
+
   user:
     build:
       context: .
@@ -116,50 +124,46 @@ services:
     hostname: user
     env_file:
       - .env
+    depends_on:
+      - db
     networks:
       - backend
-  fix-db-permissions:
-    image: 'bitnami/mongodb:latest'
-    user: root
-    command: 'chown -R 1001:1001 /bitnami/mongodb'
-    volumes:
-      - './docker/db:/bitnami/mongodb'
+
   db:
-    image: 'bitnami/mongodb:latest'
+    image: mongo:6
     environment:
-      - 'MONGODB_USERNAME=${MONGO_USER}'
-      - 'MONGODB_PASSWORD=${MONGO_PASSWORD}'
-      - 'MONGODB_DATABASE=${MONGO_DATABASE}'
-      - 'MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}'
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
+    command: mongod --bind_ip_all --port ${MONGO_PORT}
     volumes:
-      - './docker/db:/bitnami/mongodb'
+      - './docker/db:/data/db'
     ports:
-      # publish host port (HOST_MONGO_PORT) -> container 27017
-      - '${HOST_MONGO_PORT}:27017'
-    depends_on:
-      - fix-db-permissions
+      - "${HOST_MONGO_PORT}:${MONGO_PORT}"
     networks:
       - backend
     restart: always
+
   gui-db:
     image: mongo-express
     restart: always
     ports:
-      - '${MONGO_GUI_PORT}:8081'
+      - "${MONGO_GUI_PORT}:8081"
     environment:
-      - 'ME_CONFIG_BASICAUTH_USERNAME=${MONGO_GUI_USER}'
-      - 'ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_GUI_PASSWORD}'
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_GUI_USER}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_GUI_PASSWORD}
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
-      - 'ME_CONFIG_MONGODB_SERVER=${MONGO_HOST}'
-      - 'ME_CONFIG_MONGODB_PORT=${MONGO_PORT}'
-      - 'ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGO_DATABASE}'
-      - 'ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_USER}'
-      - 'ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_PASSWORD}'
-    links:
+      - ME_CONFIG_MONGODB_SERVER=${MONGO_HOST}
+      - ME_CONFIG_MONGODB_PORT=${MONGO_PORT}
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGO_DATABASE}
+      - ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_USER}
+      - ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_PASSWORD}
+    depends_on:
       - db
     networks:
       - backend
       - frontend
+
 networks:
   backend:
     driver: bridge
