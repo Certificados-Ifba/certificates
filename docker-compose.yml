@@ -7,8 +7,10 @@ services:
     hostname: web
     env_file:
       - .env
+    environment:
+      - PORT=3000
     ports:
-      - '${WEB_PORT}:${WEB_PORT}'
+      - '${WEB_PORT}:3000'
     networks:
       - frontend
   gateway:
@@ -132,7 +134,8 @@ services:
     volumes:
       - './docker/db:/bitnami/mongodb'
     ports:
-      - '${MONGO_PORT}:27017'
+      # publish host port (HOST_MONGO_PORT) -> container 27017
+      - '${HOST_MONGO_PORT}:27017'
     depends_on:
       - fix-db-permissions
     networks:
