@@ -1,4 +1,4 @@
-name: Deploy Certificates IFBA (dev.up)
+name: Deploy Certificates IFBA (prod.up)
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
             "echo '✅ Conexão SSH funcionando no servidor remoto!'"
 
-      - name: 🧩 Gerar e enviar .env (mesmo conteúdo que você já usa)
+      - name: 🧩 Gerar e enviar .env (conteúdo existente)
         env:
           DOMAIN: ${{ vars.DOMAIN }}
           API_URI: ${{ vars.API_URI }}
@@ -43,7 +43,6 @@ jobs:
           MAILER_TLS: ${{ vars.MAILER_TLS }}
           MAILER_SECURE: ${{ vars.MAILER_SECURE }}
           MAILER_DISABLED: ${{ vars.MAILER_DISABLED }}
-
           USER_SERVICE_HOST: ${{ vars.USER_SERVICE_HOST }}
           USER_SERVICE_PORT: ${{ vars.USER_SERVICE_PORT }}
           EVENT_SERVICE_HOST: ${{ vars.EVENT_SERVICE_HOST }}
@@ -62,7 +61,6 @@ jobs:
           CERTIFICATE_SERVICE_PORT: ${{ vars.CERTIFICATE_SERVICE_PORT }}
           STORAGE_SERVICE_HOST: ${{ vars.STORAGE_SERVICE_HOST }}
           STORAGE_SERVICE_PORT: ${{ vars.STORAGE_SERVICE_PORT }}
-
           APP_SECRET: ${{ secrets.APP_SECRET }}
           HCAPTCHA_SECRET: ${{ secrets.HCAPTCHA_SECRET }}
           MONGO_USER: ${{ secrets.MONGO_USER }}
@@ -138,17 +136,16 @@ jobs:
           scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
 
-      - name: 🚀 Atualizar repo e executar docker-compose (dev.up)
+      - name: 🚀 Build e Deploy (substitui make)
         run: |
           ssh -T -p ${{ secrets.SERVER_SSH_PORT }} \
             -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
-            -o ServerAliveInterval=30 -o ServerAliveCountMax=4 \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} <<'EOSSH'
           set -euo pipefail
           cd ~
 
-          # clone/atualiza
+          # Clonar ou atualizar repositório
           if [ ! -d "certificates/.git" ]; then
             git clone https://github.com/Certificados-Ifba/certificates.git certificates
           else
@@ -162,18 +159,19 @@ jobs:
 
           cd certificates
 
-          # (opcional) parar os serviços desse compose antes
-          docker-compose -f docker-compose.yml -f docker-compose.dev.yml down || true
+          echo "🛠️  Executando build de produção..."
+          docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache --force-rm
+          docker system prune -a -f
 
-          # ⚙️ EXATAMENTE O QUE O dev.up FAZ:
-          docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans
+          echo "🚀 Subindo containers de produção..."
+          docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
 
-          echo "✅ dev.up concluído em $(date)" > ~/deploy_log.txt
+          echo "✅ Deploy finalizado em $(date)" > ~/deploy_log.txt
           EOSSH
 
-      - name: 🩺 Healthcheck gateway (porta dev)
+      - name: 🩺 Healthcheck gateway (produção)
         run: |
-          curl -fsS http://200.128.9.4:4001/status || (
+          curl -fsS http://200.128.9.4:4000/status || (
             echo "❌ Healthcheck falhou" && exit 1
           )
           echo "✅ OK"
