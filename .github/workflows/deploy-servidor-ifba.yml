@@ -136,38 +136,16 @@ jobs:
           scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
 
-      - name: 🚀 Build e Deploy (substitui make)
+      - name: 🚀 Build e Deploy (assíncrono)
         run: |
-          ssh -T -p ${{ secrets.SERVER_SSH_PORT }} \
-            -i ~/.ssh/id_rsa \
-            -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} <<'EOSSH'
-          set -euo pipefail
-          cd ~
+          echo "🚀 Enviando script de deploy e .env para o servidor e executando em background..."
+          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa deploy.sh ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/deploy.sh
+          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/.env.cleaned
 
-          # Clonar ou atualizar repositório
-          if [ ! -d "certificates/.git" ]; then
-            git clone https://github.com/Certificados-Ifba/certificates.git certificates
-          else
-            cd certificates
-            git fetch --all --prune
-            git reset --hard origin/main
-            git checkout main || true
-            git pull origin main || true
-            cd ..
-          fi
-
-          cd certificates
-
-          echo "🛠️  Executando build de produção..."
-          docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache --force-rm
-          docker system prune -a -f
-
-          echo "🚀 Subindo containers de produção..."
-          docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
-
-          echo "✅ Deploy finalizado em $(date)" > ~/deploy_log.txt
-          EOSSH
+          ssh -p ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=30 -o ServerAliveCountMax=4 \
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
+            "chmod +x ~/deploy.sh && nohup ~/deploy.sh > ~/deploy_run.log 2>&1 & echo \$! > ~/deploy_pid && sleep 2 && tail -n 200 ~/deploy_run.log || true"
 
       - name: 🩺 Healthcheck gateway (produção)
         run: |
