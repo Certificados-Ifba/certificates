@@ -158,10 +158,12 @@ jobs:
           EOF
 
           echo "📤 Enviando .env para o servidor..."
+          # remove possíveis espaços de indentação criados pelo heredoc e envia o arquivo limpo
+          sed -e 's/^[[:space:]]*//' .env.deploy > .env.cleaned
           scp -P ${{ secrets.SERVER_SSH_PORT }} \
-              -i ~/.ssh/id_rsa \
-              .env.deploy \
-              ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
+            -i ~/.ssh/id_rsa \
+            .env.cleaned \
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
 
       # 5️⃣ Atualiza o repositório e sobe containers
       - name: 🚀 Atualizar repositório e subir containers
@@ -174,16 +176,27 @@ jobs:
                 set -euo pipefail
                 cd ~
 
-                # 📁 Clona ou atualiza o repositório
-                if [ ! -d "certificates/.git" ]; then
+                # 📁 Clona ou atualiza o repositório (mais robusto)
+                if [ ! -d "certificates" ]; then
                   echo "📥 Clonando repositório pela primeira vez..."
-                  git clone https://github.com/Certificados-Ifba/certificates.git
+                  git clone https://github.com/Certificados-Ifba/certificates.git certificates
                 else
-                  echo "🔄 Atualizando repositório existente..."
-                  cd certificates
-                  git fetch --all --prune
-                  git reset --hard origin/main
-                  git pull origin main
+                  # existe o diretório certificates
+                  if [ -d "certificates/.git" ]; then
+                    echo "🔄 Diretório já é um repositório git — atualizando (main)..."
+                    cd certificates
+                    git fetch --all --prune
+                    git reset --hard origin/main
+                    git checkout main || true
+                    git pull origin main || true
+                    cd ..
+                  else
+                    # diretório existe mas não é um repo git — faz backup e clona novamente
+                    ts=$(date +%s)
+                    echo "⚠️ Diretório ~/certificates existe e não é um repo git — movendo para ~/certificates.bak.$ts"
+                    mv certificates "certificates.bak.$ts"
+                    git clone https://github.com/Certificados-Ifba/certificates.git certificates
+                  fi
                 fi
 
                 cd certificates
