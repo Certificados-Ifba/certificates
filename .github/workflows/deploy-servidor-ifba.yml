@@ -1,4 +1,4 @@
-name: Deploy Servidor IFBA
+name: Deploy Certificates IFBA
 
 on:
   workflow_dispatch:
@@ -8,50 +8,204 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
+      url: http://200.128.9.4:4000
 
     steps:
-      - name: Checkout código
+      # 1️⃣ Clona o repositório (necessário pro Actions pegar estrutura)
+      - name: 📦 Checkout código
         uses: actions/checkout@v3
 
-      - name: Criar diretório SSH
-        run: mkdir -p ~/.ssh
-
-      - name: Adicionar chave SSH
+      # 2️⃣ Configura o SSH (chave privada vinda do secret)
+      - name: 🔑 Configurar acesso SSH
         run: |
+          mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Testar conexão SSH
+      # 3️⃣ Testa se a conexão SSH com o servidor remoto funciona
+      - name: 🌐 Testar conexão SSH
         run: |
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
               -i ~/.ssh/id_rsa \
               -o StrictHostKeyChecking=no \
               ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-              'echo ✅ Conexão SSH funcionando!'
+              "echo '✅ Conexão SSH funcionando no servidor remoto!'"
 
-      - name: Exibir variáveis (debug)
-        run: |
-          echo "------ VARIÁVEIS DO AMBIENTE ------"
-          echo "DOMAIN: ${{ vars.DOMAIN }}"
-          echo "WEB_URL: ${{ vars.WEB_URL }}"
-          echo "API_URI: ${{ vars.API_URI }}"
-          echo "WEB_PORT: ${{ vars.WEB_PORT }}"
-          echo "MONGO_HOST: ${{ secrets.MONGO_HOST }}"
-          echo "MONGO_USER: ${{ secrets.MONGO_USER }}"
-          echo "HOST_MONGO_PORT: ${{ vars.HOST_MONGO_PORT }}"
-          echo "HCAPTCHA_SITEKEY: ${{ vars.HCAPTCHA_SITEKEY }}"
-          echo "-----------------------------------"
-
-      - name: Criar arquivo remoto (teste)
+      # 4️⃣ Gera e envia o arquivo .env completo
+      - name: 🧩 Gerar e enviar arquivo .env
         env:
+          # 🔧 Variáveis de ambiente (não secretas)
           DOMAIN: ${{ vars.DOMAIN }}
+          API_URI: ${{ vars.API_URI }}
+          WEB_URL: ${{ vars.WEB_URL }}
+          WEB_PORT: ${{ vars.WEB_PORT }}
+          API_GATEWAY_PORT: ${{ vars.API_GATEWAY_PORT }}
+          API_GATEWAY_HOST: ${{ vars.API_GATEWAY_HOST }}
+          HOST_MONGO_PORT: ${{ vars.HOST_MONGO_PORT }}
+          MONGO_PORT: ${{ vars.MONGO_PORT }}
+          MONGO_GUI_PORT: ${{ vars.MONGO_GUI_PORT }}
+          HCAPTCHA_SITEKEY: ${{ vars.HCAPTCHA_SITEKEY }}
+          MAILER_TLS: ${{ vars.MAILER_TLS }}
+          MAILER_SECURE: ${{ vars.MAILER_SECURE }}
+          MAILER_DISABLED: ${{ vars.MAILER_DISABLED }}
+
+          # 🧩 Microserviços backend
+          USER_SERVICE_HOST: ${{ vars.USER_SERVICE_HOST }}
+          USER_SERVICE_PORT: ${{ vars.USER_SERVICE_PORT }}
+          EVENT_SERVICE_HOST: ${{ vars.EVENT_SERVICE_HOST }}
+          EVENT_SERVICE_PORT: ${{ vars.EVENT_SERVICE_PORT }}
+          TOKEN_SERVICE_HOST: ${{ vars.TOKEN_SERVICE_HOST }}
+          TOKEN_SERVICE_PORT: ${{ vars.TOKEN_SERVICE_PORT }}
+          MAILER_SERVICE_HOST: ${{ vars.MAILER_SERVICE_HOST }}
+          MAILER_SERVICE_PORT: ${{ vars.MAILER_SERVICE_PORT }}
+          PERMISSION_SERVICE_HOST: ${{ vars.PERMISSION_SERVICE_HOST }}
+          PERMISSION_SERVICE_PORT: ${{ vars.PERMISSION_SERVICE_PORT }}
+          GENERIC_SERVICE_HOST: ${{ vars.GENERIC_SERVICE_HOST }}
+          GENERIC_SERVICE_PORT: ${{ vars.GENERIC_SERVICE_PORT }}
+          ACTIVITY_SERVICE_HOST: ${{ vars.ACTIVITY_SERVICE_HOST }}
+          ACTIVITY_SERVICE_PORT: ${{ vars.ACTIVITY_SERVICE_PORT }}
+          CERTIFICATE_SERVICE_HOST: ${{ vars.CERTIFICATE_SERVICE_HOST }}
+          CERTIFICATE_SERVICE_PORT: ${{ vars.CERTIFICATE_SERVICE_PORT }}
+          STORAGE_SERVICE_HOST: ${{ vars.STORAGE_SERVICE_HOST }}
+          STORAGE_SERVICE_PORT: ${{ vars.STORAGE_SERVICE_PORT }}
+
+          # 🔐 Secrets sensíveis
           APP_SECRET: ${{ secrets.APP_SECRET }}
+          HCAPTCHA_SECRET: ${{ secrets.HCAPTCHA_SECRET }}
           MONGO_USER: ${{ secrets.MONGO_USER }}
-          MONGO_DATABASE: ${{ secrets.MONGO_DATABASE }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+          MONGO_DATABASE: ${{ secrets.MONGO_DATABASE }}
+          MONGODB_ROOT_PASSWORD: ${{ secrets.MONGODB_ROOT_PASSWORD }}
+          MONGO_HOST: ${{ secrets.MONGO_HOST }}
+          MONGO_GUI_USER: ${{ secrets.MONGO_GUI_USER }}
+          MONGO_GUI_PASSWORD: ${{ secrets.MONGO_GUI_PASSWORD }}
+          TOKEN_EXPIRES_IN: ${{ secrets.TOKEN_EXPIRES_IN }}
+          MAILER_HOST: ${{ secrets.MAILER_HOST }}
+          MAILER_PORT: ${{ secrets.MAILER_PORT }}
+          MAILER_USER: ${{ secrets.MAILER_USER }}
+          MAILER_PASS: ${{ secrets.MAILER_PASS }}
+          MAILER_FROM: ${{ secrets.MAILER_FROM }}
+
         run: |
+          echo "📄 Gerando .env.deploy..."
+
+          cat > .env.deploy <<EOF
+          # ========================================
+          # CONFIGURAÇÕES DE DOMÍNIO E HOSTS
+          # ========================================
+          DOMAIN=${DOMAIN}
+          API_URI=${API_URI}
+          WEB_URL=${WEB_URL}
+          WEB_PORT=${WEB_PORT}
+          API_GATEWAY_PORT=${API_GATEWAY_PORT}
+          API_GATEWAY_HOST=${API_GATEWAY_HOST}
+
+          # ========================================
+          # CONFIGURAÇÕES DO MONGODB
+          # ========================================
+          MONGO_USER=${MONGO_USER}
+          MONGO_PASSWORD=${MONGO_PASSWORD}
+          MONGO_DATABASE=${MONGO_DATABASE}
+          MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+          MONGO_PORT=${MONGO_PORT}
+          HOST_MONGO_PORT=${HOST_MONGO_PORT}
+          MONGO_HOST=${MONGO_HOST}
+          MONGO_GUI_PORT=${MONGO_GUI_PORT}
+          MONGO_GUI_USER=${MONGO_GUI_USER}
+          MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
+
+          # ========================================
+          # CONFIGURAÇÕES DE SEGURANÇA
+          # ========================================
+          APP_SECRET=${APP_SECRET}
+          HCAPTCHA_SITEKEY=${HCAPTCHA_SITEKEY}
+          HCAPTCHA_SECRET=${HCAPTCHA_SECRET}
+          TOKEN_EXPIRES_IN=${TOKEN_EXPIRES_IN}
+
+          # ========================================
+          # CONFIGURAÇÕES DO SERVIÇO DE EMAIL
+          # ========================================
+          MAILER_HOST=${MAILER_HOST}
+          MAILER_PORT=${MAILER_PORT}
+          MAILER_TLS=${MAILER_TLS}
+          MAILER_SECURE=${MAILER_SECURE}
+          MAILER_USER=${MAILER_USER}
+          MAILER_PASS=${MAILER_PASS}
+          MAILER_FROM=${MAILER_FROM}
+          MAILER_DISABLED=${MAILER_DISABLED}
+
+          # ========================================
+          # MICRO SERVIÇOS BACKEND
+          # ========================================
+          USER_SERVICE_HOST=${USER_SERVICE_HOST}
+          USER_SERVICE_PORT=${USER_SERVICE_PORT}
+          EVENT_SERVICE_HOST=${EVENT_SERVICE_HOST}
+          EVENT_SERVICE_PORT=${EVENT_SERVICE_PORT}
+          TOKEN_SERVICE_HOST=${TOKEN_SERVICE_HOST}
+          TOKEN_SERVICE_PORT=${TOKEN_SERVICE_PORT}
+          MAILER_SERVICE_HOST=${MAILER_SERVICE_HOST}
+          MAILER_SERVICE_PORT=${MAILER_SERVICE_PORT}
+          PERMISSION_SERVICE_HOST=${PERMISSION_SERVICE_HOST}
+          PERMISSION_SERVICE_PORT=${PERMISSION_SERVICE_PORT}
+          GENERIC_SERVICE_HOST=${GENERIC_SERVICE_HOST}
+          GENERIC_SERVICE_PORT=${GENERIC_SERVICE_PORT}
+          ACTIVITY_SERVICE_HOST=${ACTIVITY_SERVICE_HOST}
+          ACTIVITY_SERVICE_PORT=${ACTIVITY_SERVICE_PORT}
+          CERTIFICATE_SERVICE_HOST=${CERTIFICATE_SERVICE_HOST}
+          CERTIFICATE_SERVICE_PORT=${CERTIFICATE_SERVICE_PORT}
+          STORAGE_SERVICE_HOST=${STORAGE_SERVICE_HOST}
+          STORAGE_SERVICE_PORT=${STORAGE_SERVICE_PORT}
+          EOF
+
+          echo "📤 Enviando .env para o servidor..."
+          scp -P ${{ secrets.SERVER_SSH_PORT }} \
+              -i ~/.ssh/id_rsa \
+              .env.deploy \
+              ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
+
+      # 5️⃣ Atualiza o repositório e sobe containers
+      - name: 🚀 Atualizar repositório e subir containers
+        run: |
+          echo "🚀 Iniciando deploy remoto..."
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
               -i ~/.ssh/id_rsa \
               -o StrictHostKeyChecking=no \
-              ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-              "echo 'Deploy executado no domínio $DOMAIN usando banco $MONGO_DATABASE' > ~/deploy_log.txt"
+              ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} <<'ENDSSH'
+                set -euo pipefail
+                cd ~
+
+                # 📁 Clona ou atualiza o repositório
+                if [ ! -d "certificates/.git" ]; then
+                  echo "📥 Clonando repositório pela primeira vez..."
+                  git clone https://github.com/Certificados-Ifba/certificates.git
+                else
+                  echo "🔄 Atualizando repositório existente..."
+                  cd certificates
+                  git fetch --all --prune
+                  git reset --hard origin/main
+                  git pull origin main
+                fi
+
+                cd certificates
+
+                echo "🔻 Parando containers antigos..."
+                docker compose down || true
+
+                echo "⬆️ Subindo containers com nova versão..."
+                docker compose --env-file .env up -d --build
+
+                echo "🧹 Limpando imagens antigas..."
+                docker image prune -af --filter "until=24h" || true
+
+                echo "✅ Deploy concluído com sucesso em $(date)" > ~/deploy_log.txt
+              ENDSSH
+
+      # 6️⃣ Healthcheck final
+      - name: 🩺 Verificar status do serviço
+        run: |
+          echo "🩺 Checando se o gateway está online..."
+          curl -fsS http://200.128.9.4:4001/status || (
+            echo "❌ O serviço não respondeu corretamente ao healthcheck." && exit 1
+          )
+
+          echo "✅ Deploy validado com sucesso!"
