@@ -1,4 +1,4 @@
-name: Deploy Certificates IFBA (prod.up)
+name: Deploy Certificates IFBA (com Docker Registry)
 
 on:
   workflow_dispatch:
@@ -6,172 +6,111 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment:
       name: production
       url: http://200.128.9.4:4000
 
     steps:
+      # 1️⃣ Clona o repositório
       - name: 📦 Checkout código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: 🔑 Configurar acesso SSH
+      # 2️⃣ Faz login no Docker Hub (ou GHCR)
+      - name: 🔐 Login no Docker Registry
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: 🌐 Testar conexão SSH
+      # 3️⃣ Gera nome da imagem
+      - name: 🏷️ Definir tag da imagem
+        id: vars
         run: |
-          ssh -p ${{ secrets.SERVER_SSH_PORT }} \
-            -i ~/.ssh/id_rsa \
-            -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-            "echo '✅ Conexão SSH funcionando no servidor remoto!'"
+          IMAGE_NAME="certificados-ifba"
+          IMAGE_TAG=$(date +'%Y%m%d-%H%M%S')
+          echo "image=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: 🧩 Gerar e enviar .env (conteúdo existente)
+      # 4️⃣ Build e push da imagem
+      - name: 🏗️ Build e push da imagem para o registry
+        run: |
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.tag }} .
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.tag }}
+
+      # 5️⃣ Cria e envia o arquivo .env
+      - name: 🧩 Gerar e enviar .env
         env:
           DOMAIN: ${{ vars.DOMAIN }}
           API_URI: ${{ vars.API_URI }}
           WEB_URL: ${{ vars.WEB_URL }}
           WEB_PORT: ${{ vars.WEB_PORT }}
-          API_GATEWAY_PORT: ${{ vars.API_GATEWAY_PORT }}
-          API_GATEWAY_HOST: ${{ vars.API_GATEWAY_HOST }}
-          HOST_MONGO_PORT: ${{ vars.HOST_MONGO_PORT }}
-          MONGO_PORT: ${{ vars.MONGO_PORT }}
-          MONGO_GUI_PORT: ${{ vars.MONGO_GUI_PORT }}
-          HCAPTCHA_SITEKEY: ${{ vars.HCAPTCHA_SITEKEY }}
-          MAILER_TLS: ${{ vars.MAILER_TLS }}
-          MAILER_SECURE: ${{ vars.MAILER_SECURE }}
-          MAILER_DISABLED: ${{ vars.MAILER_DISABLED }}
-          USER_SERVICE_HOST: ${{ vars.USER_SERVICE_HOST }}
-          USER_SERVICE_PORT: ${{ vars.USER_SERVICE_PORT }}
-          EVENT_SERVICE_HOST: ${{ vars.EVENT_SERVICE_HOST }}
-          EVENT_SERVICE_PORT: ${{ vars.EVENT_SERVICE_PORT }}
-          TOKEN_SERVICE_HOST: ${{ vars.TOKEN_SERVICE_HOST }}
-          TOKEN_SERVICE_PORT: ${{ vars.TOKEN_SERVICE_PORT }}
-          MAILER_SERVICE_HOST: ${{ vars.MAILER_SERVICE_HOST }}
-          MAILER_SERVICE_PORT: ${{ vars.MAILER_SERVICE_PORT }}
-          PERMISSION_SERVICE_HOST: ${{ vars.PERMISSION_SERVICE_HOST }}
-          PERMISSION_SERVICE_PORT: ${{ vars.PERMISSION_SERVICE_PORT }}
-          GENERIC_SERVICE_HOST: ${{ vars.GENERIC_SERVICE_HOST }}
-          GENERIC_SERVICE_PORT: ${{ vars.GENERIC_SERVICE_PORT }}
-          ACTIVITY_SERVICE_HOST: ${{ vars.ACTIVITY_SERVICE_HOST }}
-          ACTIVITY_SERVICE_PORT: ${{ vars.ACTIVITY_SERVICE_PORT }}
-          CERTIFICATE_SERVICE_HOST: ${{ vars.CERTIFICATE_SERVICE_HOST }}
-          CERTIFICATE_SERVICE_PORT: ${{ vars.CERTIFICATE_SERVICE_PORT }}
-          STORAGE_SERVICE_HOST: ${{ vars.STORAGE_SERVICE_HOST }}
-          STORAGE_SERVICE_PORT: ${{ vars.STORAGE_SERVICE_PORT }}
-          APP_SECRET: ${{ secrets.APP_SECRET }}
-          HCAPTCHA_SECRET: ${{ secrets.HCAPTCHA_SECRET }}
+          MONGO_HOST: ${{ secrets.MONGO_HOST }}
           MONGO_USER: ${{ secrets.MONGO_USER }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
           MONGO_DATABASE: ${{ secrets.MONGO_DATABASE }}
-          MONGODB_ROOT_PASSWORD: ${{ secrets.MONGODB_ROOT_PASSWORD }}
-          MONGO_HOST: ${{ secrets.MONGO_HOST }}
-          MONGO_GUI_USER: ${{ secrets.MONGO_GUI_USER }}
-          MONGO_GUI_PASSWORD: ${{ secrets.MONGO_GUI_PASSWORD }}
-          TOKEN_EXPIRES_IN: ${{ secrets.TOKEN_EXPIRES_IN }}
-          MAILER_HOST: ${{ secrets.MAILER_HOST }}
-          MAILER_PORT: ${{ secrets.MAILER_PORT }}
-          MAILER_USER: ${{ secrets.MAILER_USER }}
-          MAILER_PASS: ${{ secrets.MAILER_PASS }}
-          MAILER_FROM: ${{ secrets.MAILER_FROM }}
+          APP_SECRET: ${{ secrets.APP_SECRET }}
         run: |
           cat > .env.deploy <<EOF
           DOMAIN=${DOMAIN}
           API_URI=${API_URI}
           WEB_URL=${WEB_URL}
           WEB_PORT=${WEB_PORT}
-          API_GATEWAY_PORT=${API_GATEWAY_PORT}
-          API_GATEWAY_HOST=${API_GATEWAY_HOST}
 
+          MONGO_HOST=${MONGO_HOST}
           MONGO_USER=${MONGO_USER}
           MONGO_PASSWORD=${MONGO_PASSWORD}
           MONGO_DATABASE=${MONGO_DATABASE}
-          MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
-          MONGO_PORT=${MONGO_PORT}
-          HOST_MONGO_PORT=${HOST_MONGO_PORT}
-          MONGO_HOST=${MONGO_HOST}
-          MONGO_GUI_PORT=${MONGO_GUI_PORT}
-          MONGO_GUI_USER=${MONGO_GUI_USER}
-          MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
 
           APP_SECRET=${APP_SECRET}
-          HCAPTCHA_SITEKEY=${HCAPTCHA_SITEKEY}
-          HCAPTCHA_SECRET=${HCAPTCHA_SECRET}
-          TOKEN_EXPIRES_IN=${TOKEN_EXPIRES_IN}
-
-          MAILER_HOST=${MAILER_HOST}
-          MAILER_PORT=${MAILER_PORT}
-          MAILER_TLS=${MAILER_TLS}
-          MAILER_SECURE=${MAILER_SECURE}
-          MAILER_USER=${MAILER_USER}
-          MAILER_PASS=${MAILER_PASS}
-          MAILER_FROM=${MAILER_FROM}
-          MAILER_DISABLED=${MAILER_DISABLED}
-
-          USER_SERVICE_HOST=${USER_SERVICE_HOST}
-          USER_SERVICE_PORT=${USER_SERVICE_PORT}
-          EVENT_SERVICE_HOST=${EVENT_SERVICE_HOST}
-          EVENT_SERVICE_PORT=${EVENT_SERVICE_PORT}
-          TOKEN_SERVICE_HOST=${TOKEN_SERVICE_HOST}
-          TOKEN_SERVICE_PORT=${TOKEN_SERVICE_PORT}
-          MAILER_SERVICE_HOST=${MAILER_SERVICE_HOST}
-          MAILER_SERVICE_PORT=${MAILER_SERVICE_PORT}
-          PERMISSION_SERVICE_HOST=${PERMISSION_SERVICE_HOST}
-          PERMISSION_SERVICE_PORT=${PERMISSION_SERVICE_PORT}
-          GENERIC_SERVICE_HOST=${GENERIC_SERVICE_HOST}
-          GENERIC_SERVICE_PORT=${GENERIC_SERVICE_PORT}
-          ACTIVITY_SERVICE_HOST=${ACTIVITY_SERVICE_HOST}
-          ACTIVITY_SERVICE_PORT=${ACTIVITY_SERVICE_PORT}
-          CERTIFICATE_SERVICE_HOST=${CERTIFICATE_SERVICE_HOST}
-          CERTIFICATE_SERVICE_PORT=${CERTIFICATE_SERVICE_PORT}
-          STORAGE_SERVICE_HOST=${STORAGE_SERVICE_HOST}
-          STORAGE_SERVICE_PORT=${STORAGE_SERVICE_PORT}
+          DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.tag }}
           EOF
 
           sed -e 's/^[[:space:]]*//' .env.deploy > .env.cleaned
-          ssh -p ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} "mkdir -p ~/certificates"
-          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
 
-      - name: 🚀 Build e Deploy (substitui make)
+          echo "📤 Enviando .env atualizado para o servidor remoto..."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa \
+            .env.cleaned ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
+
+      # 6️⃣ Atualiza e sobe containers no servidor
+      - name: 🚀 Atualizar containers no servidor remoto
         run: |
           ssh -T -p ${{ secrets.SERVER_SSH_PORT }} \
             -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=10 \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} <<'EOSSH'
           set -euo pipefail
-          cd ~
+          cd ~/certificates
 
-          # Clonar ou atualizar repositório
-          if [ ! -d "certificates/.git" ]; then
-            git clone https://github.com/Certificados-Ifba/certificates.git certificates
+          echo "📥 Atualizando código..."
+          if [ ! -d ".git" ]; then
+            git clone https://github.com/Certificados-Ifba/certificates.git .
           else
-            cd certificates
             git fetch --all --prune
             git reset --hard origin/main
-            git checkout main || true
-            git pull origin main || true
-            cd ..
           fi
 
-          cd certificates
+          echo "📦 Carregando imagem mais recente..."
+          source .env
+          docker pull $DOCKER_IMAGE
 
-          echo "🛠️  Executando build de produção..."
-          docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache --force-rm
-          docker system prune -a -f
+          echo "🧹 Parando containers antigos..."
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml down || true
 
-          echo "🚀 Subindo containers de produção..."
-          docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
+          echo "⬆️ Subindo containers atualizados..."
+          IMAGE=$DOCKER_IMAGE docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --force-recreate
 
-          echo "✅ Deploy finalizado em $(date)" > ~/deploy_log.txt
+          echo "✅ Deploy finalizado com sucesso em $(date)" > ~/deploy_log.txt
           EOSSH
 
-      - name: 🩺 Healthcheck gateway (produção)
+      # 7️⃣ Healthcheck final
+      - name: 🩺 Healthcheck do serviço
         run: |
+          echo "🩺 Verificando se o gateway está online..."
           curl -fsS http://200.128.9.4:4000/status || (
-            echo "❌ Healthcheck falhou" && exit 1
+            echo "❌ Healthcheck falhou — verifique o servidor!" && exit 1
           )
-          echo "✅ OK"
+          echo "✅ Deploy validado com sucesso!"
