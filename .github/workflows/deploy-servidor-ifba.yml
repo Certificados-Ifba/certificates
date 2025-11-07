@@ -160,59 +160,30 @@ jobs:
           echo "📤 Enviando .env para o servidor..."
           # remove possíveis espaços de indentação criados pelo heredoc e envia o arquivo limpo
           sed -e 's/^[[:space:]]*//' .env.deploy > .env.cleaned
+          # envia .env.cleaned para a home do servidor (o script remoto cuidará do local final)
           scp -P ${{ secrets.SERVER_SSH_PORT }} \
             -i ~/.ssh/id_rsa \
             .env.cleaned \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/.env.cleaned
 
       # 5️⃣ Atualiza o repositório e sobe containers
-      - name: 🚀 Atualizar repositório e subir containers
+      - name: 🚀 Atualizar repositório e subir containers (assíncrono)
         run: |
-          echo "🚀 Iniciando deploy remoto..."
+          echo "🚀 Iniciando deploy remoto (upload de script + .env)..."
+          # envia o script de deploy e o .env.cleaned para a home do servidor
+          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa deploy.sh ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/deploy.sh
+          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/.env.cleaned
+
+          # executa o script em background via nohup para não depender da sessão SSH
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
-              -i ~/.ssh/id_rsa \
-              -o StrictHostKeyChecking=no \
-              ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} <<'ENDSSH'
-                set -euo pipefail
-                cd ~
-
-                # 📁 Clona ou atualiza o repositório (mais robusto)
-                if [ ! -d "certificates" ]; then
-                  echo "📥 Clonando repositório pela primeira vez..."
-                  git clone https://github.com/Certificados-Ifba/certificates.git certificates
-                else
-                  # existe o diretório certificates
-                  if [ -d "certificates/.git" ]; then
-                    echo "🔄 Diretório já é um repositório git — atualizando (main)..."
-                    cd certificates
-                    git fetch --all --prune
-                    git reset --hard origin/main
-                    git checkout main || true
-                    git pull origin main || true
-                    cd ..
-                  else
-                    # diretório existe mas não é um repo git — faz backup e clona novamente
-                    ts=$(date +%s)
-                    echo "⚠️ Diretório ~/certificates existe e não é um repo git — movendo para ~/certificates.bak.$ts"
-                    mv certificates "certificates.bak.$ts"
-                    git clone https://github.com/Certificados-Ifba/certificates.git certificates
-                  fi
-                fi
-
-                cd certificates
-
-                echo "🔻 Parando containers antigos (make prod.down)..."
-                # usa Makefile para garantir a mesma lógica de build/compose definida no projeto
-                make prod.down || true
-
-                echo "⬆️ Subindo containers com make prod.up..."
-                make prod.up
-
-                echo "🧹 Limpando imagens antigas..."
-                docker image prune -af --filter "until=24h" || true
-
-                echo "✅ Deploy concluído com sucesso em $(date)" > ~/deploy_log.txt
-              ENDSSH
+            -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=60 \
+            -o ServerAliveCountMax=10 \
+            -o TCPKeepAlive=yes \
+            -o BatchMode=yes \
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
+            "chmod +x ~/deploy.sh && nohup ~/deploy.sh > ~/deploy_run.log 2>&1 & echo \$! > ~/deploy_pid && sleep 2 && tail -n 200 ~/deploy_run.log || true"
 
       # 6️⃣ Healthcheck final
       - name: 🩺 Verificar status do serviço
