@@ -1,4 +1,4 @@
-name: Deploy Certificates IFBA
+name: Deploy Certificates IFBA (dev.up)
 
 on:
   workflow_dispatch:
@@ -11,30 +11,25 @@ jobs:
       url: http://200.128.9.4:4000
 
     steps:
-      # 1️⃣ Clona o repositório (necessário pro Actions pegar estrutura)
       - name: 📦 Checkout código
         uses: actions/checkout@v3
 
-      # 2️⃣ Configura o SSH (chave privada vinda do secret)
       - name: 🔑 Configurar acesso SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      # 3️⃣ Testa se a conexão SSH com o servidor remoto funciona
       - name: 🌐 Testar conexão SSH
         run: |
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
-              -i ~/.ssh/id_rsa \
-              -o StrictHostKeyChecking=no \
-              ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-              "echo '✅ Conexão SSH funcionando no servidor remoto!'"
+            -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=no \
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
+            "echo '✅ Conexão SSH funcionando no servidor remoto!'"
 
-      # 4️⃣ Gera e envia o arquivo .env completo
-      - name: 🧩 Gerar e enviar arquivo .env
+      - name: 🧩 Gerar e enviar .env (mesmo conteúdo que você já usa)
         env:
-          # 🔧 Variáveis de ambiente (não secretas)
           DOMAIN: ${{ vars.DOMAIN }}
           API_URI: ${{ vars.API_URI }}
           WEB_URL: ${{ vars.WEB_URL }}
@@ -49,7 +44,6 @@ jobs:
           MAILER_SECURE: ${{ vars.MAILER_SECURE }}
           MAILER_DISABLED: ${{ vars.MAILER_DISABLED }}
 
-          # 🧩 Microserviços backend
           USER_SERVICE_HOST: ${{ vars.USER_SERVICE_HOST }}
           USER_SERVICE_PORT: ${{ vars.USER_SERVICE_PORT }}
           EVENT_SERVICE_HOST: ${{ vars.EVENT_SERVICE_HOST }}
@@ -69,7 +63,6 @@ jobs:
           STORAGE_SERVICE_HOST: ${{ vars.STORAGE_SERVICE_HOST }}
           STORAGE_SERVICE_PORT: ${{ vars.STORAGE_SERVICE_PORT }}
 
-          # 🔐 Secrets sensíveis
           APP_SECRET: ${{ secrets.APP_SECRET }}
           HCAPTCHA_SECRET: ${{ secrets.HCAPTCHA_SECRET }}
           MONGO_USER: ${{ secrets.MONGO_USER }}
@@ -85,14 +78,8 @@ jobs:
           MAILER_USER: ${{ secrets.MAILER_USER }}
           MAILER_PASS: ${{ secrets.MAILER_PASS }}
           MAILER_FROM: ${{ secrets.MAILER_FROM }}
-
         run: |
-          echo "📄 Gerando .env.deploy..."
-
           cat > .env.deploy <<EOF
-          # ========================================
-          # CONFIGURAÇÕES DE DOMÍNIO E HOSTS
-          # ========================================
           DOMAIN=${DOMAIN}
           API_URI=${API_URI}
           WEB_URL=${WEB_URL}
@@ -100,9 +87,6 @@ jobs:
           API_GATEWAY_PORT=${API_GATEWAY_PORT}
           API_GATEWAY_HOST=${API_GATEWAY_HOST}
 
-          # ========================================
-          # CONFIGURAÇÕES DO MONGODB
-          # ========================================
           MONGO_USER=${MONGO_USER}
           MONGO_PASSWORD=${MONGO_PASSWORD}
           MONGO_DATABASE=${MONGO_DATABASE}
@@ -114,17 +98,11 @@ jobs:
           MONGO_GUI_USER=${MONGO_GUI_USER}
           MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
 
-          # ========================================
-          # CONFIGURAÇÕES DE SEGURANÇA
-          # ========================================
           APP_SECRET=${APP_SECRET}
           HCAPTCHA_SITEKEY=${HCAPTCHA_SITEKEY}
           HCAPTCHA_SECRET=${HCAPTCHA_SECRET}
           TOKEN_EXPIRES_IN=${TOKEN_EXPIRES_IN}
 
-          # ========================================
-          # CONFIGURAÇÕES DO SERVIÇO DE EMAIL
-          # ========================================
           MAILER_HOST=${MAILER_HOST}
           MAILER_PORT=${MAILER_PORT}
           MAILER_TLS=${MAILER_TLS}
@@ -134,9 +112,6 @@ jobs:
           MAILER_FROM=${MAILER_FROM}
           MAILER_DISABLED=${MAILER_DISABLED}
 
-          # ========================================
-          # MICRO SERVIÇOS BACKEND
-          # ========================================
           USER_SERVICE_HOST=${USER_SERVICE_HOST}
           USER_SERVICE_PORT=${USER_SERVICE_PORT}
           EVENT_SERVICE_HOST=${EVENT_SERVICE_HOST}
@@ -157,40 +132,48 @@ jobs:
           STORAGE_SERVICE_PORT=${STORAGE_SERVICE_PORT}
           EOF
 
-          echo "📤 Enviando .env para o servidor..."
-          # remove possíveis espaços de indentação criados pelo heredoc e envia o arquivo limpo
           sed -e 's/^[[:space:]]*//' .env.deploy > .env.cleaned
-          # envia .env.cleaned para a home do servidor (o script remoto cuidará do local final)
-          scp -P ${{ secrets.SERVER_SSH_PORT }} \
-            -i ~/.ssh/id_rsa \
-            .env.cleaned \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/.env.cleaned
+          ssh -p ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} "mkdir -p ~/certificates"
+          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned \
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
 
-      # 5️⃣ Atualiza o repositório e sobe containers
-      - name: 🚀 Atualizar repositório e subir containers (assíncrono)
+      - name: 🚀 Atualizar repo e executar docker-compose (dev.up)
         run: |
-          echo "🚀 Iniciando deploy remoto (upload de script + .env)..."
-          # envia o script de deploy e o .env.cleaned para a home do servidor
-          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa deploy.sh ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/deploy.sh
-          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/.env.cleaned
-
-          # executa o script em background via nohup para não depender da sessão SSH
-          ssh -p ${{ secrets.SERVER_SSH_PORT }} \
+          ssh -T -p ${{ secrets.SERVER_SSH_PORT }} \
             -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
-            -o ServerAliveInterval=60 \
-            -o ServerAliveCountMax=10 \
-            -o TCPKeepAlive=yes \
-            -o BatchMode=yes \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-            "chmod +x ~/deploy.sh && nohup ~/deploy.sh > ~/deploy_run.log 2>&1 & echo \$! > ~/deploy_pid && sleep 2 && tail -n 200 ~/deploy_run.log || true"
+            -o ServerAliveInterval=30 -o ServerAliveCountMax=4 \
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} <<'EOSSH'
+          set -euo pipefail
+          cd ~
 
-      # 6️⃣ Healthcheck final
-      - name: 🩺 Verificar status do serviço
+          # clone/atualiza
+          if [ ! -d "certificates/.git" ]; then
+            git clone https://github.com/Certificados-Ifba/certificates.git certificates
+          else
+            cd certificates
+            git fetch --all --prune
+            git reset --hard origin/main
+            git checkout main || true
+            git pull origin main || true
+            cd ..
+          fi
+
+          cd certificates
+
+          # (opcional) parar os serviços desse compose antes
+          docker-compose -f docker-compose.yml -f docker-compose.dev.yml down || true
+
+          # ⚙️ EXATAMENTE O QUE O dev.up FAZ:
+          docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans
+
+          echo "✅ dev.up concluído em $(date)" > ~/deploy_log.txt
+          EOSSH
+
+      - name: 🩺 Healthcheck gateway (porta dev)
         run: |
-          echo "🩺 Checando se o gateway está online..."
           curl -fsS http://200.128.9.4:4001/status || (
-            echo "❌ O serviço não respondeu corretamente ao healthcheck." && exit 1
+            echo "❌ Healthcheck falhou" && exit 1
           )
-
-          echo "✅ Deploy validado com sucesso!"
+          echo "✅ OK"
