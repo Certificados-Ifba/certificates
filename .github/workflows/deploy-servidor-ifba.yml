@@ -201,11 +201,12 @@ jobs:
 
                 cd certificates
 
-                echo "🔻 Parando containers antigos..."
-                docker compose down || true
+                echo "🔻 Parando containers antigos (make prod.down)..."
+                # usa Makefile para garantir a mesma lógica de build/compose definida no projeto
+                make prod.down || true
 
-                echo "⬆️ Subindo containers com nova versão..."
-                docker compose --env-file .env up -d --build
+                echo "⬆️ Subindo containers com make prod.up..."
+                make prod.up
 
                 echo "🧹 Limpando imagens antigas..."
                 docker image prune -af --filter "until=24h" || true

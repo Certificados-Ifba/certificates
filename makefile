@@ -13,7 +13,7 @@ dev.logs:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f $(container)
 
 prod.build:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache --force-rm && docker system prune -a
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache --force-rm && docker system prune -a -f
 
 prod.up:
 	make prod.build && docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
