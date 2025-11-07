@@ -3,7 +3,7 @@ module.exports = withImages({
   esModule: true,
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],
   env: {
-    baseURL: process.env.API_URI || 'http://localhost:3001',
+    baseURL: process.env.API_URI || 'http://localhost:4001',
     siteKey: process.env.HCAPTCHA_SITEKEY
   }
 })

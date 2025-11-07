@@ -2,6 +2,9 @@ version: '3.9'
 
 services:
 
+  # =============================
+  # FRONTEND WEB
+  # =============================
   web:
     image: 127.0.0.1:5000/certificates-web
     environment:
@@ -10,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/Dockerfile.web
-    hostname: ${API_URI:-web}
+    hostname: ${DOMAIN:-web}
     command: yarn workspace @certificates/web prod
     deploy:
       labels:
@@ -19,7 +22,7 @@ services:
         - traefik.http.routers.certificates-web.service=certificates-web
         - traefik.http.routers.certificates-web.entrypoints=web
         - traefik.http.routers.certificates-web.rule=Host(`${DOMAIN:-localhost}`)
-        - traefik.http.services.certificates-web.loadbalancer.server.port=${WEB_PORT:-3000}
+        - traefik.http.services.certificates-web.loadbalancer.server.port=${WEB_PORT}
     logging:
       driver: json-file
       options:
@@ -28,14 +31,16 @@ services:
     networks:
       - public
 
+  # =============================
+  # API GATEWAY
+  # =============================
   gateway:
     image: 127.0.0.1:5000/certificates-gateway
     environment:
-      - USER_SERVICE_PORT=${USER_SERVICE_PORT:-3004}
+      - API_GATEWAY_PORT=${API_GATEWAY_PORT}
+      - USER_SERVICE_PORT=${USER_SERVICE_PORT}
       - MONGO_GUI_USER=${MONGO_GUI_USER}
       - MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
-      - MONGO_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-      - MONGO_GUI_PORT=${MONGO_GUI_PORT:-4000}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.gateway
@@ -48,12 +53,12 @@ services:
         - traefik.http.routers.certificates-gateway.service=certificates-gateway
         - traefik.http.routers.certificates-gateway.entrypoints=web
         - traefik.http.routers.certificates-gateway.rule=(Host(`${DOMAIN:-localhost}`) && PathPrefix(`/gateway`))
-        - traefik.http.routers.certificates-gateway.middlewares=certificates-gateway-redirectregex, certificates-gateway-replacepathregex
+        - traefik.http.routers.certificates-gateway.middlewares=certificates-gateway-redirectregex,certificates-gateway-replacepathregex
         - traefik.http.middlewares.certificates-gateway-replacepathregex.replacepathregex.regex=^/gateway/(.*)
         - traefik.http.middlewares.certificates-gateway-replacepathregex.replacepathregex.replacement=/$$1
         - traefik.http.middlewares.certificates-gateway-redirectregex.redirectregex.regex=^(.*)/gateway$$
         - traefik.http.middlewares.certificates-gateway-redirectregex.redirectregex.replacement=$$1/gateway/
-        - traefik.http.services.certificates-gateway.loadbalancer.server.port=${API_GATEWAY_PORT:-3001}
+        - traefik.http.services.certificates-gateway.loadbalancer.server.port=${API_GATEWAY_PORT}
     logging:
       driver: json-file
       options:
@@ -63,151 +68,160 @@ services:
       - public
       - backend
 
+  # =============================
+  # MICROSERVIÇOS BACKEND
+  # =============================
   user:
     image: 127.0.0.1:5000/certificates-user
     environment:
-      - USER_SERVICE_PORT=${USER_SERVICE_PORT:-3004}
-      - MONGO_GUI_USER=${MONGO_GUI_USER}
-      - MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
-      - MONGO_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-      - MONGO_GUI_PORT=${MONGO_GUI_PORT:-4000}
+      - USER_SERVICE_PORT=${USER_SERVICE_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.user
-    hostname: ${USER_GATEWAY_HOST:-user}
+    hostname: ${USER_SERVICE_HOST:-user}
     command: yarn workspace @certificates/user prod
+    depends_on:
+      - db
     logging:
       driver: json-file
       options:
         max-size: 10m
         max-file: 5
-    depends_on:
-      - db
     networks:
       - backend
 
   event:
     image: 127.0.0.1:5000/certificates-event
     environment:
-      - EVENT_SERVICE_PORT=${EVENT_SERVICE_PORT:-3002}
-      - MONGO_GUI_USER=${MONGO_GUI_USER}
-      - MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
-      - MONGO_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-      - MONGO_GUI_PORT=${MONGO_GUI_PORT:-4000}
+      - EVENT_SERVICE_PORT=${EVENT_SERVICE_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.event
     hostname: ${EVENT_SERVICE_HOST:-event}
     command: yarn workspace @certificates/event prod
+    depends_on:
+      - db
     logging:
       driver: json-file
       options:
         max-size: 10m
         max-file: 5
-    depends_on:
-      - db
     networks:
       - backend
 
   generic:
     image: 127.0.0.1:5000/certificates-generic
     environment:
-      - GENERIC_SERVICE_PORT=${GENERIC_SERVICE_PORT:-3007}
-      - MONGO_GUI_USER=${MONGO_GUI_USER}
-      - MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
-      - MONGO_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-      - MONGO_GUI_PORT=${MONGO_GUI_PORT:-4000}
+      - GENERIC_SERVICE_PORT=${GENERIC_SERVICE_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.generic
     hostname: ${GENERIC_SERVICE_HOST:-generic}
     command: yarn workspace @certificates/generic prod
+    depends_on:
+      - db
     logging:
       driver: json-file
       options:
         max-size: 10m
         max-file: 5
-    depends_on:
-      - db
     networks:
       - backend
 
   activity:
     image: 127.0.0.1:5000/certificates-activity
     environment:
-      - ACTIVITY_SERVICE_PORT=${ACTIVITY_SERVICE_PORT:-3008}
-      - MONGO_GUI_USER=${MONGO_GUI_USER}
-      - MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
-      - MONGO_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-      - MONGO_GUI_PORT=${MONGO_GUI_PORT:-4000}
+      - ACTIVITY_SERVICE_PORT=${ACTIVITY_SERVICE_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.activity
     hostname: ${ACTIVITY_SERVICE_HOST:-activity}
     command: yarn workspace @certificates/activity prod
+    depends_on:
+      - db
     logging:
       driver: json-file
       options:
         max-size: 10m
         max-file: 5
-    depends_on:
-      - db
     networks:
       - backend
 
   certificate:
     image: 127.0.0.1:5000/certificates-certificate
     environment:
-      - CERTIFICATE_SERVICE_PORT=${CERTIFICATE_SERVICE_PORT:-3009}
-      - MONGO_GUI_USER=${MONGO_GUI_USER}
-      - MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
-      - MONGO_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-      - MONGO_GUI_PORT=${MONGO_GUI_PORT:-4000}
+      - CERTIFICATE_SERVICE_PORT=${CERTIFICATE_SERVICE_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.certificate
     hostname: ${CERTIFICATE_SERVICE_HOST:-certificate}
     command: yarn workspace @certificates/certificate prod
+    depends_on:
+      - db
     logging:
       driver: json-file
       options:
         max-size: 10m
         max-file: 5
-    depends_on:
-      - db
     networks:
       - backend
 
   token:
     image: 127.0.0.1:5000/certificates-token
     environment:
-      - TOKEN_SERVICE_PORT=${TOKEN_SERVICE_PORT:-3003}
-      - TOKEN_EXPIRES_IN=${TOKEN_EXPIRES_IN:-1d}
+      - TOKEN_SERVICE_PORT=${TOKEN_SERVICE_PORT}
+      - TOKEN_EXPIRES_IN=${TOKEN_EXPIRES_IN}
       - APP_SECRET=${APP_SECRET}
-      - MONGO_GUI_USER=${MONGO_GUI_USER}
-      - MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
-      - MONGO_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-      - MONGO_GUI_PORT=${MONGO_GUI_PORT:-4000}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.token
     hostname: ${TOKEN_SERVICE_HOST:-token}
     command: yarn workspace @certificates/token prod
+    depends_on:
+      - db
     logging:
       driver: json-file
       options:
         max-size: 10m
         max-file: 5
-    depends_on:
-      - db
     networks:
       - backend
 
   mailer:
     image: 127.0.0.1:5000/certificates-mailer
     environment:
-      - MAILER_SERVICE_PORT=${MAILER_SERVICE_PORT:-3005}
-      - MAILER_DISABLED=${MAILER_DISABLED:-0}
+      - MAILER_SERVICE_PORT=${MAILER_SERVICE_PORT}
+      - MAILER_DISABLED=${MAILER_DISABLED}
       - MAILER_HOST=${MAILER_HOST}
       - MAILER_PORT=${MAILER_PORT}
       - MAILER_TLS=${MAILER_TLS}
@@ -231,7 +245,7 @@ services:
   permission:
     image: 127.0.0.1:5000/certificates-permission
     environment:
-      - PERMISSION_SERVICE_PORT=${PERMISSION_SERVICE_PORT:-3006}
+      - PERMISSION_SERVICE_PORT=${PERMISSION_SERVICE_PORT}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.permission
@@ -248,7 +262,7 @@ services:
   storage:
     image: 127.0.0.1:5000/certificates-storage
     environment:
-      - STORAGE_SERVICE_PORT=${STORAGE_SERVICE_PORT:-3010}
+      - STORAGE_SERVICE_PORT=${STORAGE_SERVICE_PORT}
     build:
       context: .
       dockerfile: ./docker/Dockerfile.storage
@@ -264,13 +278,18 @@ services:
     networks:
       - backend
 
+  # =============================
+  # BANCO DE DADOS MONGODB
+  # =============================
   db:
     image: bitnami/mongodb:5.0
     environment:
-      - MONGODB_DATABASE=${MONGO_DATABASE:-certificates}
-      - MONGODB_USERNAME=${MONGO_USER:-mongo}
-      - MONGODB_PASSWORD=${MONGO_PASSWORD:-pass}
-      - MONGODB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-mongo}
+      - MONGODB_DATABASE=${MONGO_DATABASE}
+      - MONGODB_USERNAME=${MONGO_USER}
+      - MONGODB_PASSWORD=${MONGO_PASSWORD}
+      - MONGODB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    ports:
+      - "${HOST_MONGO_PORT}:${MONGO_PORT}"
     volumes:
       - mongo_data:/bitnami/mongodb
     networks:
@@ -279,14 +298,13 @@ services:
   gui-db:
     image: mongo-express:1.0.0-alpha.4
     environment:
-      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_GUI_USER:-admin}
-      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_GUI_PASSWORD:-admin}
-      - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
-      - ME_CONFIG_MONGODB_SERVER=${MONGO_HOST:-db}
-      - ME_CONFIG_MONGODB_PORT=${MONGO_PORT:-27017}
-      - ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGO_DATABASE:-certificates}
-      - ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_USER:-mongo}
-      - ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_PASSWORD:-pass}
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_GUI_USER}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_GUI_PASSWORD}
+      - ME_CONFIG_MONGODB_SERVER=${MONGO_HOST}
+      - ME_CONFIG_MONGODB_PORT=${MONGO_PORT}
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGO_DATABASE}
+      - ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_USER}
+      - ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_PASSWORD}
     depends_on:
       - db
     deploy:
@@ -296,7 +314,7 @@ services:
         - traefik.http.routers.mongo-gui.service=mongo-gui
         - traefik.http.routers.mongo-gui.entrypoints=web
         - traefik.http.routers.mongo-gui.rule=Host(`mongo.${DOMAIN:-localhost}`)
-        - traefik.http.services.mongo-gui.loadbalancer.server.port=8081
+        - traefik.http.services.mongo-gui.loadbalancer.server.port=${MONGO_GUI_PORT}
     logging:
       driver: json-file
       options:
@@ -306,6 +324,9 @@ services:
       - backend
       - public
 
+# =============================
+# VOLUMES E REDES
+# =============================
 volumes:
   mongo_data: {}
   storage_data: {}
