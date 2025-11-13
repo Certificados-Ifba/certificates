@@ -1,10 +1,14 @@
-name: Deploy Certificates IFBA (prod.up)
+name: Deploy Certificates IFBA
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
+    name: 🚀 Deploy para Servidor IFBA (Produção)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
@@ -12,38 +16,53 @@ jobs:
       url: http://200.128.9.4:4000
 
     steps:
-      - name: 📦 Checkout código
+      # -------------------------------------------------------
+      # 1) Checkout
+      # -------------------------------------------------------
+      - name: 📦 Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: 🔑 Configurar acesso SSH
+      # -------------------------------------------------------
+      # 2) Configuração SSH
+      # -------------------------------------------------------
+      - name: 🔑 Configurar chave SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: 🌐 Testar conexão SSH
+      - name: 🌐 Testar conexão SSH com servidor
         run: |
+          echo "🔌 Testando conexão SSH..."
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
             -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-            "echo '✅ Conexão SSH funcionando no servidor remoto!'"
+            "echo '✅ SSH OK — conexão estabelecida.'"
 
-      - name: 🧩 Gerar e enviar .env
+      # -------------------------------------------------------
+      # 3) Gerar arquivo .env com variáveis de ambiente
+      # -------------------------------------------------------
+      - name: 🧩 Gerar arquivo .env e enviar ao servidor
         env:
           DOMAIN: ${{ vars.DOMAIN }}
           API_URI: ${{ vars.API_URI }}
           WEB_URL: ${{ vars.WEB_URL }}
           WEB_PORT: ${{ vars.WEB_PORT }}
+
           API_GATEWAY_PORT: ${{ vars.API_GATEWAY_PORT }}
           API_GATEWAY_HOST: ${{ vars.API_GATEWAY_HOST }}
+
           HOST_MONGO_PORT: ${{ vars.HOST_MONGO_PORT }}
           MONGO_PORT: ${{ vars.MONGO_PORT }}
           MONGO_GUI_PORT: ${{ vars.MONGO_GUI_PORT }}
+
           HCAPTCHA_SITEKEY: ${{ vars.HCAPTCHA_SITEKEY }}
+
           MAILER_TLS: ${{ vars.MAILER_TLS }}
           MAILER_SECURE: ${{ vars.MAILER_SECURE }}
           MAILER_DISABLED: ${{ vars.MAILER_DISABLED }}
+
           USER_SERVICE_HOST: ${{ vars.USER_SERVICE_HOST }}
           USER_SERVICE_PORT: ${{ vars.USER_SERVICE_PORT }}
           EVENT_SERVICE_HOST: ${{ vars.EVENT_SERVICE_HOST }}
@@ -62,28 +81,35 @@ jobs:
           CERTIFICATE_SERVICE_PORT: ${{ vars.CERTIFICATE_SERVICE_PORT }}
           STORAGE_SERVICE_HOST: ${{ vars.STORAGE_SERVICE_HOST }}
           STORAGE_SERVICE_PORT: ${{ vars.STORAGE_SERVICE_PORT }}
+
           APP_SECRET: ${{ secrets.APP_SECRET }}
           HCAPTCHA_SECRET: ${{ secrets.HCAPTCHA_SECRET }}
+
           MONGO_USER: ${{ secrets.MONGO_USER }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
           MONGO_DATABASE: ${{ secrets.MONGO_DATABASE }}
           MONGODB_ROOT_PASSWORD: ${{ secrets.MONGODB_ROOT_PASSWORD }}
           MONGO_HOST: ${{ secrets.MONGO_HOST }}
+
           MONGO_GUI_USER: ${{ secrets.MONGO_GUI_USER }}
           MONGO_GUI_PASSWORD: ${{ secrets.MONGO_GUI_PASSWORD }}
+
           TOKEN_EXPIRES_IN: ${{ secrets.TOKEN_EXPIRES_IN }}
+
           MAILER_HOST: ${{ secrets.MAILER_HOST }}
           MAILER_PORT: ${{ secrets.MAILER_PORT }}
           MAILER_USER: ${{ secrets.MAILER_USER }}
           MAILER_PASS: ${{ secrets.MAILER_PASS }}
           MAILER_FROM: ${{ secrets.MAILER_FROM }}
         run: |
-          # gerar .env.clean — CORRIGIDO PARA EXPANDIR VARIÁVEIS
+          echo "📝 Gerando .env.deploy..."
+
           cat > .env.deploy << EOF
           DOMAIN=${DOMAIN}
           API_URI=${API_URI}
           WEB_URL=${WEB_URL}
           WEB_PORT=${WEB_PORT}
+
           API_GATEWAY_PORT=${API_GATEWAY_PORT}
           API_GATEWAY_HOST=${API_GATEWAY_HOST}
 
@@ -94,6 +120,7 @@ jobs:
           MONGO_PORT=${MONGO_PORT}
           HOST_MONGO_PORT=${HOST_MONGO_PORT}
           MONGO_HOST=${MONGO_HOST}
+
           MONGO_GUI_PORT=${MONGO_GUI_PORT}
           MONGO_GUI_USER=${MONGO_GUI_USER}
           MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
@@ -132,26 +159,46 @@ jobs:
           STORAGE_SERVICE_PORT=${STORAGE_SERVICE_PORT}
           EOF
 
-          sed -e 's/^[[:space:]]*//' .env.deploy > .env.cleaned
+                  sed -e 's/^[[:space:]]*//' .env.deploy > .env.cleaned
 
-          ssh -p ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-            "mkdir -p ~/certificates"
+                  echo "📡 Enviando .env ao servidor..."
+                  ssh -p ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa \
+                    ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
+                    "mkdir -p ~/certificates"
 
-          scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
+                  scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned \
+                    ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
 
-      - name: 🚀 Rodar DEPLOY usando Makefile (make prod.up)
+      # -------------------------------------------------------
+      # 4) Deploy via Makefile
+      # -------------------------------------------------------
+      - name: 🚀 Executar Deploy (make prod.up)
         run: |
+          echo "🚀 Iniciando Deploy via Makefile..."
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
             -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-            "cd ~/certificates && git fetch --all && git reset --hard origin/main && make prod.up"
+            "
+            sudo chown -R \$(whoami):\$(whoami) ~/certificates;
+            cd ~/certificates;
+            git fetch --all --prune;
+            git reset --hard origin/main;
+            make prod.up;
+            "
 
-      - name: 🩺 Healthcheck gateway (produção)
+      # -------------------------------------------------------
+      # 5) Healthchecks
+      # -------------------------------------------------------
+      - name: 🩺 Healthchecks (frontend e gateway)
         run: |
-          sleep 10
-          echo "🩺 Checando http://200.128.9.4:4000/status ..."
-          curl -fsS http://200.128.9.4:4000/status || (echo '❌ Healthcheck falhou' && exit 1)
-          echo "✅ OK"
+          echo "⏳ Aguardando serviços subirem..."
+          sleep 60
+
+          echo "🌐 Verificando Frontend..."
+          curl -fsS http://200.128.9.4:4000 || (echo "❌ Frontend indisponível" && exit 1)
+          echo "✅ Frontend OK"
+
+          echo "🧩 Verificando API Gateway..."
+          curl -fsS http://200.128.9.4:4001/status || (echo "❌ Gateway indisponível" && exit 1)
+          echo "✅ Gateway OK"

@@ -21,6 +21,7 @@ import { ConfigService } from './services/config/config.service'
 import { ThrottlerConfigService } from './services/config/throttler.service'
 import { AuthGuard } from './services/guards/authorization.guard'
 import { PermissionGuard } from './services/guards/permission.guard'
+import { StatusAppController } from './controllers/status-app.controller'
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import { PermissionGuard } from './services/guards/permission.guard'
     PasswordController,
     SessionsController,
     UploadController,
-    UsersController
+    UsersController,
+    StatusAppController
   ],
   providers: [
     ConfigService,
