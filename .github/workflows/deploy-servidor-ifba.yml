@@ -180,7 +180,9 @@ jobs:
             -o StrictHostKeyChecking=no \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
             "
-            sudo chown -R \$(whoami):\$(whoami) ~/certificates;
+            find ~/certificates -type d -exec chmod u+rwx {} \;
+            find ~/certificates -type f -exec chmod u+rw {} \;
+
             cd ~/certificates;
             git fetch --all --prune;
             git reset --hard origin/main;
