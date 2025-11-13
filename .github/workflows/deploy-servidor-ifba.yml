@@ -8,15 +8,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     environment:
       name: production
       url: http://200.128.9.4:4000
 
     steps:
+      # --------------------------------------------------------------
+      # 1. CHECKOUT
+      # --------------------------------------------------------------
       - name: 📦 Checkout código
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      # --------------------------------------------------------------
+      # 2. CONFIGURA SSH
+      # --------------------------------------------------------------
       - name: 🔑 Configurar acesso SSH
         run: |
           mkdir -p ~/.ssh
@@ -31,6 +39,9 @@ jobs:
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
             "echo '✅ Conexão SSH funcionando no servidor remoto!'"
 
+      # --------------------------------------------------------------
+      # 3. GERA .ENV E ENVIA PARA O SERVIDOR
+      # --------------------------------------------------------------
       - name: 🧩 Gerar e enviar .env
         env:
           DOMAIN: ${{ vars.DOMAIN }}
@@ -80,6 +91,7 @@ jobs:
           MAILER_PASS: ${{ secrets.MAILER_PASS }}
           MAILER_FROM: ${{ secrets.MAILER_FROM }}
         run: |
+          echo "🔧 Gerando .env..."
           cat > .env.deploy << EOF
           DOMAIN=${DOMAIN}
           API_URI=${API_URI}
@@ -131,6 +143,7 @@ jobs:
 
           sed -e 's/^[[:space:]]*//' .env.deploy > .env.cleaned
 
+          echo "📤 Enviando .env..."
           ssh -p ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
             "mkdir -p ~/certificates"
@@ -138,32 +151,53 @@ jobs:
           scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
 
-      # ✨ CORREÇÃO PARA O ERRO DE PERMISSÃO DO GIT
+      # --------------------------------------------------------------
+      # 4. AJUSTA PERMISSÕES (SEM SUDO)
+      # --------------------------------------------------------------
       - name: 🔧 Corrigir permissões antes do deploy
         run: |
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
             -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-            "sudo chown -R $USER:$USER ~/certificates && sudo chmod -R u+rwX ~/certificates"
+            "chown -R \$(whoami):\$(whoami) ~/certificates 2>/dev/null || true && chmod -R u+rwX ~/certificates"
 
-      - name: 🚀 Rodar DEPLOY usando Makefile (make prod.up)
+      # --------------------------------------------------------------
+      # 5. DEPLOY
+      # --------------------------------------------------------------
+      - name: 🚀 Rodar DEPLOY usando Makefile (prod.up)
         run: |
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
             -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-            "cd ~/certificates && git fetch --all && git reset --hard origin/main && make prod.up"
+            "
+              cd ~/certificates &&
+              echo '📥 Fetching...' &&
+              git fetch --all &&
+              echo '🧹 Reset...' &&
+              git reset --hard origin/main &&
+              echo '🚀 Rodando make prod.up...' &&
+              make prod.up
+            "
 
+      # --------------------------------------------------------------
+      # 6. HEALTHCHECK COMPLETO
+      # --------------------------------------------------------------
       - name: 🩺 Healthchecks (frontend e gateway)
         run: |
           echo "⏳ Aguardando serviços subirem..."
           sleep 60
 
-          echo "🌐 Verificando Frontend..."
-          curl -fsS http://200.128.9.4:4000 || (echo "❌ Frontend indisponível" && exit 1)
-          echo "✅ Frontend OK"
+          SERVICES=(
+            "http://200.128.9.4:4000"
+            "http://200.128.9.4:4001/status"
+          )
 
-          echo "🧩 Verificando API Gateway..."
-          curl -fsS http://200.128.9.4:4001/status || (echo "❌ Gateway indisponível" && exit 1)
-          echo "✅ Gateway OK"
+          for url in "${SERVICES[@]}"; do
+            echo "🔍 Testando $url ..."
+            curl -fsS "$url" || (echo "❌ Falha no serviço: $url" && exit 1)
+            echo "✅ OK"
+          done
+
+          echo "🎉 Todos os serviços estão OK!"
