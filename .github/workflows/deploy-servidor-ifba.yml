@@ -22,6 +22,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+
       - name: 🌐 Testar conexão SSH
         run: |
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
@@ -29,6 +30,7 @@ jobs:
             -o StrictHostKeyChecking=no \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
             "echo '✅ Conexão SSH funcionando no servidor remoto!'"
+
       - name: 🧩 Gerar e enviar .env
         env:
           DOMAIN: ${{ vars.DOMAIN }}
@@ -78,7 +80,6 @@ jobs:
           MAILER_PASS: ${{ secrets.MAILER_PASS }}
           MAILER_FROM: ${{ secrets.MAILER_FROM }}
         run: |
-          # gerar .env.clean — CORRIGIDO PARA EXPANDIR VARIÁVEIS
           cat > .env.deploy << EOF
           DOMAIN=${DOMAIN}
           API_URI=${API_URI}
@@ -127,12 +128,25 @@ jobs:
           STORAGE_SERVICE_HOST=${STORAGE_SERVICE_HOST}
           STORAGE_SERVICE_PORT=${STORAGE_SERVICE_PORT}
           EOF
+
           sed -e 's/^[[:space:]]*//' .env.deploy > .env.cleaned
+
           ssh -p ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
             "mkdir -p ~/certificates"
+
           scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned \
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
+
+      # ✨ CORREÇÃO PARA O ERRO DE PERMISSÃO DO GIT
+      - name: 🔧 Corrigir permissões antes do deploy
+        run: |
+          ssh -p ${{ secrets.SERVER_SSH_PORT }} \
+            -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=no \
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
+            "sudo chown -R $USER:$USER ~/certificates && sudo chmod -R u+rwX ~/certificates"
+
       - name: 🚀 Rodar DEPLOY usando Makefile (make prod.up)
         run: |
           ssh -p ${{ secrets.SERVER_SSH_PORT }} \
