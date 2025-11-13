@@ -2,6 +2,8 @@ name: Deploy Certificates IFBA (prod.up)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   deploy:
