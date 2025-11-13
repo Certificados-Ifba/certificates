@@ -152,18 +152,7 @@ jobs:
             ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }}:~/certificates/.env
 
       # --------------------------------------------------------------
-      # 4. AJUSTA PERMISSÕES (SEM SUDO)
-      # --------------------------------------------------------------
-      - name: 🔧 Corrigir permissões antes do deploy
-        run: |
-          ssh -p ${{ secrets.SERVER_SSH_PORT }} \
-            -i ~/.ssh/id_rsa \
-            -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
-            "chown -R \$(whoami):\$(whoami) ~/certificates 2>/dev/null || true && chmod -R u+rwX ~/certificates"
-
-      # --------------------------------------------------------------
-      # 5. DEPLOY
+      # 4. DEPLOY
       # --------------------------------------------------------------
       - name: 🚀 Rodar DEPLOY usando Makefile (prod.up)
         run: |
@@ -182,7 +171,7 @@ jobs:
             "
 
       # --------------------------------------------------------------
-      # 6. HEALTHCHECK COMPLETO
+      # 5. HEALTHCHECK COMPLETO
       # --------------------------------------------------------------
       - name: 🩺 Healthchecks (frontend e gateway)
         run: |
