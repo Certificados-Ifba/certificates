@@ -78,14 +78,15 @@ jobs:
           MAILER_PASS: ${{ secrets.MAILER_PASS }}
           MAILER_FROM: ${{ secrets.MAILER_FROM }}
         run: |
-          # gerar .env.clean
-          cat > .env.deploy << 'EOF'
+          # gerar .env.clean — CORRIGIDO PARA EXPANDIR VARIÁVEIS
+          cat > .env.deploy << EOF
           DOMAIN=${DOMAIN}
           API_URI=${API_URI}
           WEB_URL=${WEB_URL}
           WEB_PORT=${WEB_PORT}
           API_GATEWAY_PORT=${API_GATEWAY_PORT}
           API_GATEWAY_HOST=${API_GATEWAY_HOST}
+
           MONGO_USER=${MONGO_USER}
           MONGO_PASSWORD=${MONGO_PASSWORD}
           MONGO_DATABASE=${MONGO_DATABASE}
@@ -96,10 +97,12 @@ jobs:
           MONGO_GUI_PORT=${MONGO_GUI_PORT}
           MONGO_GUI_USER=${MONGO_GUI_USER}
           MONGO_GUI_PASSWORD=${MONGO_GUI_PASSWORD}
+
           APP_SECRET=${APP_SECRET}
           HCAPTCHA_SITEKEY=${HCAPTCHA_SITEKEY}
           HCAPTCHA_SECRET=${HCAPTCHA_SECRET}
           TOKEN_EXPIRES_IN=${TOKEN_EXPIRES_IN}
+
           MAILER_HOST=${MAILER_HOST}
           MAILER_PORT=${MAILER_PORT}
           MAILER_TLS=${MAILER_TLS}
@@ -108,6 +111,7 @@ jobs:
           MAILER_PASS=${MAILER_PASS}
           MAILER_FROM=${MAILER_FROM}
           MAILER_DISABLED=${MAILER_DISABLED}
+
           USER_SERVICE_HOST=${USER_SERVICE_HOST}
           USER_SERVICE_PORT=${USER_SERVICE_PORT}
           EVENT_SERVICE_HOST=${EVENT_SERVICE_HOST}
@@ -130,7 +134,8 @@ jobs:
 
           sed -e 's/^[[:space:]]*//' .env.deploy > .env.cleaned
 
-          ssh -p ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
+          ssh -p ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa \
+            ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_SSH_HOST }} \
             "mkdir -p ~/certificates"
 
           scp -P ${{ secrets.SERVER_SSH_PORT }} -i ~/.ssh/id_rsa .env.cleaned \
