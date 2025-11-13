@@ -176,7 +176,7 @@ jobs:
               echo '📥 Fetching...' &&
               git fetch --all &&
               echo '🧹 Reset...' &&
-              git reset --hard origin/main &&
+              git reset --soft origin/main &&
               echo '🚀 Rodando make prod.up...' &&
               make prod.up
             "
