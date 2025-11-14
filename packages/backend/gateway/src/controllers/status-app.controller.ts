@@ -5,7 +5,7 @@ export class StatusAppController {
   @Get()
   status() {
     return {
-      status: 'ok',
+      status: 'ok teste',
       uptime: process.uptime(),
       timestamp: new Date().toISOString()
     }
