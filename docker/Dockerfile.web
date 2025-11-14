@@ -2,6 +2,10 @@ FROM node:14-alpine
 
 WORKDIR /usr/src/app
 
+RUN yarn config set enableIPv6 false \
+ && yarn config set networkFamily ipv4 \
+ && yarn config set enable-http2 false
+
 COPY package.json yarn.lock prettier.config.js tsconfig.json .eslintrc.js .eslintignore ./
 COPY packages/shared ./packages/shared
 COPY packages/frontend/web/package.json ./packages/frontend/web/
