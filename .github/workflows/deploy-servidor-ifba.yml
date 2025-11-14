@@ -167,6 +167,7 @@ jobs:
               echo '🧹 Reset...' &&
               git reset --hard origin/main &&
               echo '🚀 Rodando make prod.up...' &&
+              make prod.down &&
               make prod.up
             "
 
