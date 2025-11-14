@@ -179,8 +179,8 @@ jobs:
           sleep 60
 
           SERVICES=(
-            "http://200.128.9.4:4000"
-            "http://200.128.9.4:4001/status"
+            "http://200.128.9.8:4000"
+            "http://200.128.9.8:4001/status"
           )
 
           for url in "${SERVICES[@]}"; do
