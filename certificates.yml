@@ -289,7 +289,7 @@ services:
       - MONGODB_PASSWORD=${MONGO_PASSWORD}
       - MONGODB_ROOT_PASSWORD=${MONGO_PASSWORD}
     ports:
-      - "${HOST_MONGO_PORT}:${MONGO_PORT}"
+      - "${MONGO_PORT}:27017"
     volumes:
       - mongo_data:/bitnami/mongodb
     networks:
