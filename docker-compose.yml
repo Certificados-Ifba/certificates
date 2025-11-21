@@ -20,7 +20,7 @@ services:
     env_file:
       - .env
     ports:
-      - '${API_GATEWAY_PORT}:${API_GATEWAY_PORT}'
+      - '${API_GATEWAY_PORT}:3001'
     networks:
       - backend
       - frontend
