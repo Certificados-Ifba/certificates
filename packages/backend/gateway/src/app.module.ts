@@ -20,6 +20,7 @@ import { UsersController } from './controllers/users.controller'
 import { ConfigService } from './services/config/config.service'
 import { AuthGuard } from './services/guards/authorization.guard'
 import { PermissionGuard } from './services/guards/permission.guard'
+import { StatusAppController } from './controllers/status-app.controller'
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import { PermissionGuard } from './services/guards/permission.guard'
     ResumeController,
     SessionsController,
     UploadController,
-    UsersController
+    UsersController,
+    StatusAppController
   ],
   providers: [
     ConfigService,
