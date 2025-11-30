@@ -34,8 +34,8 @@ export const Sidebar: React.FC = () => {
       setItems([
         {
           name: 'Dashboard',
-          link: '/',
-          activeLinks: ['/dashboard/[id]', '/dashboard/[id]/participants'],
+          link: '/dashboard',
+          activeLinks: ['/dashboard/[id]/participants'],
           icon: FiHome
         },
         {

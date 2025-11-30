@@ -66,10 +66,10 @@ export const InfoStep: React.FC<Props> = ({
         </Section>
         <FileChooserContainer>
           <FileChooser
-            handleFileSelected={(file: FileSelected) => {
-              setFile(file)
-              setNextText('Avançar')
-            }}
+            // handleFileSelected={(file: FileSelected) => {
+            //   setFile(file)
+            //   setNextText('Avançar')
+            // }}
             handleFileRemoved={() => {
               setFile(null)
               setNextText('Selecione o arquivo antes')

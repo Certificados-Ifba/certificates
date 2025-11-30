@@ -44,7 +44,5 @@ export function minDate(value: string, min: string): boolean {
 }
 
 export function maxDate(value: string, max: string): boolean {
-  console.log(value <= max)
-
   return value <= max
 }

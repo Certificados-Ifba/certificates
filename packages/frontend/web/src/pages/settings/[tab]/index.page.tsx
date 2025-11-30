@@ -24,12 +24,6 @@ const Settings: React.FC = () => {
       <Tabs
         tabs={[
           {
-            name: 'Texto Padrão',
-            icon: FiAlignCenter,
-            children: <TextConfig />,
-            path: 'text'
-          },
-          {
             name: 'Funções',
             icon: FiBriefcase,
             children: (
@@ -54,6 +48,12 @@ const Settings: React.FC = () => {
               />
             ),
             path: 'activity-type'
+          },
+          {
+            name: 'Texto Padrão',
+            icon: FiAlignCenter,
+            children: <TextConfig />,
+            path: 'default-text'
           }
         ]}
       />

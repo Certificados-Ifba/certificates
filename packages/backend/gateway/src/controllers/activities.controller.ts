@@ -21,32 +21,33 @@ import {
   ApiBearerAuth
 } from '@nestjs/swagger'
 import { Response } from 'express'
-import { ActivityIdDto } from 'src/interfaces/activity/dto/activity-id.dto'
-import { DeleteActivityResponseDto } from 'src/interfaces/activity/dto/delete-activity-response.dto'
-import { EventIdDto } from 'src/interfaces/activity/dto/event-id.dto'
-import { UpdateActivityResponseDto } from 'src/interfaces/activity/dto/update-activity-response.dto'
-import { UpdateActivityDto } from 'src/interfaces/activity/dto/update-activity.dto'
-import { IServiceActivityDeleteResponse } from 'src/interfaces/activity/service-activity-delete-response.interface'
-import { IServiceActivityUpdateByIdResponse } from 'src/interfaces/activity/service-activity-update-by-id-response.interface'
-import { IAuthorizedRequest } from 'src/interfaces/common/authorized-request.interface'
-import { IServiceEventGetByIdResponse } from 'src/interfaces/event/service-event-get-by-id-response.interface'
-import capitalize from 'src/utils/capitalize'
 
 import { Authorization } from '../decorators/authorization.decorator'
 import { Permission } from '../decorators/permission.decorator'
-// import { ActivityIdDto } from '../interfaces/activity/dto/activity-id.dto'
+import { ActivityIdDto } from '../interfaces/activity/dto/activity-id.dto'
 import { CreateActivityResponseDto } from '../interfaces/activity/dto/create-activity-response.dto'
 import { CreateActivityDto } from '../interfaces/activity/dto/create-activity.dto'
-// import { DeleteActivityResponseDto } from '../interfaces/activity/dto/delete-activity-response.dto'
+import { DeleteActivityResponseDto } from '../interfaces/activity/dto/delete-activity-response.dto'
+import { EventIdDto } from '../interfaces/activity/dto/event-id.dto'
 import { ListActivityResponseDto } from '../interfaces/activity/dto/list-activity-response.dto'
-// import { GetActivityByIdResponseDto } from '../interfaces/activity/dto/get-activity-by-id-response.dto'
 import { ListActivityDto } from '../interfaces/activity/dto/list-activity.dto'
+import { UpdateActivityResponseDto } from '../interfaces/activity/dto/update-activity-response.dto'
+import { UpdateActivityDto } from '../interfaces/activity/dto/update-activity.dto'
+import { IServiceActivityCreateResponse } from '../interfaces/activity/service-activity-create-response.interface'
+import { IServiceActivityDeleteResponse } from '../interfaces/activity/service-activity-delete-response.interface'
+import { IServiceActivityListResponse } from '../interfaces/activity/service-activity-list-response.interface'
+import { IServiceActivityUpdateByIdResponse } from '../interfaces/activity/service-activity-update-by-id-response.interface'
+import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
+import { IServiceEventGetByIdResponse } from '../interfaces/event/service-event-get-by-id-response.interface'
+import capitalize from '../utils/capitalize'
+
+// import { ActivityIdDto } from '../interfaces/activity/dto/activity-id.dto'
+// import { DeleteActivityResponseDto } from '../interfaces/activity/dto/delete-activity-response.dto'
+// import { GetActivityByIdResponseDto } from '../interfaces/activity/dto/get-activity-by-id-response.dto'
 // import { UpdateActivityResponseDto } from '../interfaces/activity/dto/update-activity-response.dto'
 // import { UpdateActivityDto } from '../interfaces/activity/dto/update-activity.dto'
-import { IServiceActivityCreateResponse } from '../interfaces/activity/service-activity-create-response.interface'
 // import { IServiceActivityDeleteResponse } from '../interfaces/activity/service-activity-delete-response.interface'
 // import { IServiceActivityGetByIdResponse } from '../interfaces/activity/service-activity-get-by-id-response.interface'
-import { IServiceActivityListResponse } from '../interfaces/activity/service-activity-list-response.interface'
 // import { IServiceActivityUpdateByIdResponse } from '../interfaces/activity/service-activity-update-by-id-response.interface'
 // import { IAuthorizedRequest } from '../interfaces/common/authorized-request.interface'
 
@@ -169,7 +170,7 @@ export class ActivitiesController {
 
     const createActivityResponse: IServiceActivityCreateResponse = await this.activityServiceClient
       .send('activity_create', {
-        name: capitalize(name.trim()),
+        name: capitalize(name?.trim()),
         type,
         workload,
         start_date,

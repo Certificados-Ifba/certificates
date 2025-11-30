@@ -1,3 +1,4 @@
+import { shade, tint } from 'polished'
 import styled, { css } from 'styled-components'
 
 interface Props {
@@ -16,26 +17,35 @@ export const Container = styled.div<Props>`
       padding: 20px;
       ${props.type === 'warning' &&
       css`
-        color: #664d03;
-        background-color: #fff3cd;
-        border-color: #ffecb5;
+        color: ${({ theme }) => shade(0.4, theme.colors.warningShade)};
+        background-color: ${({ theme }) => tint(0.7, theme.colors.warningTint)};
       `}
       ${props.type === 'danger' &&
       css`
-        color: #842029;
-        background-color: #f8d7da;
-        border-color: #f5c2c7;
+        color: ${({ theme }) => shade(0.4, theme.colors.dangerShade)};
+        background-color: ${({ theme }) => tint(0.7, theme.colors.dangerTint)};
+      `}
+      ${props.type === 'success' &&
+      css`
+        color: ${({ theme }) => shade(0.4, theme.colors.successShade)};
+        background-color: ${({ theme }) => tint(0.7, theme.colors.successTint)};
+      `}
+      ${props.type === 'info' &&
+      css`
+        color: ${({ theme }) => shade(0.4, theme.colors.infoShade)};
+        background-color: ${({ theme }) => tint(0.7, theme.colors.infoTint)};
       `}
     `}
 
   display: flex;
-  margin-bottom: ${props => props.theme.margins[props.marginBottom] || 0};
+  margin-bottom: ${({ theme, marginBottom }) =>
+    theme.margins[marginBottom] || 0};
   .alert-icon {
     display: flex;
     svg {
       margin-top: auto;
       margin-bottom: auto;
-      margin-left: 10px;
+      margin-left: auto;
       margin-right: 10px;
       color: ${props => props.theme.colors[props.type]};
     }

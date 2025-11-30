@@ -21,7 +21,7 @@ interface BaseProps<Multiline = false>
   type?: any
   icon?: React.ComponentType<IconBaseProps>
   multiline?: Multiline
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
 }
 
 type InputProps = JSX.IntrinsicElements['input'] & BaseProps<false>
@@ -43,9 +43,9 @@ export const Input: React.FC<Props> = ({
 
   const secure = type === 'password'
 
-  const [inputState, setInputState] = useState<
-    'isFilled' | 'isFocused' | 'hasError' | 'isDefault' | 'isDisabled'
-  >('isDefault')
+  const [inputState, setInputState] = useState<'isFilled' | 'isFocused' | ''>(
+    ''
+  )
   const [isShowPass, setIsShowPass] = useState(false)
 
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
@@ -59,11 +59,11 @@ export const Input: React.FC<Props> = ({
       path: 'value',
       setValue(ref: any, value) {
         ref.value = value || ''
-        setInputState(value ? 'isFilled' : 'isDefault')
+        setInputState(value ? 'isFilled' : '')
       },
       clearValue: ref => {
         ref.value = ''
-        setInputState('isDefault')
+        setInputState('')
       }
     })
   }, [fieldName, registerField])
@@ -77,7 +77,7 @@ export const Input: React.FC<Props> = ({
   }, [isShowPass])
 
   const handleInputBlur = useCallback(() => {
-    setInputState(inputRef.current?.value ? 'isFilled' : 'isDefault')
+    setInputState(inputRef.current?.value ? 'isFilled' : '')
   }, [])
 
   const handleKeyup = useCallback(() => {
@@ -92,7 +92,7 @@ export const Input: React.FC<Props> = ({
 
   const handleOnChange = useCallback(() => {
     if (inputState !== 'isFocused') {
-      setInputState(inputRef.current?.value ? 'isFilled' : 'isDefault')
+      setInputState(inputRef.current?.value ? 'isFilled' : '')
     }
   }, [inputState])
 
@@ -116,7 +116,7 @@ export const Input: React.FC<Props> = ({
       <Container
         hidden={restAux.hidden}
         marginBottom={marginBottom}
-        isErrored={inputState === 'hasError'}
+        isErrored={!!error}
         isFilled={inputState === 'isFilled'}
         isFocused={inputState === 'isFocused'}
         isDisabled={!!props?.disabled}

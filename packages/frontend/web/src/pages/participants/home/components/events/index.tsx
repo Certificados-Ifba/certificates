@@ -9,7 +9,7 @@ import {
 } from '@components'
 import { usePaginatedRequest } from '@services'
 import { Form } from '@unform/web'
-import { formatData } from '@utils'
+import { formatDate } from '@utils'
 import { useCallback, useState } from 'react'
 import { FiCalendar, FiSearch } from 'react-icons/fi'
 
@@ -118,8 +118,8 @@ export const Events: React.FC<Props> = ({ token, loading }) => {
                     {event?.name} ({event?.initials})
                   </td>
                   <td>
-                    De {formatData(event?.start_date)} até{' '}
-                    {formatData(event?.end_date)}
+                    De {formatDate(event?.start_date)} até{' '}
+                    {formatDate(event?.end_date)}
                   </td>
                   <td>{event?.local}</td>
                   <td>{event?.edition}</td>

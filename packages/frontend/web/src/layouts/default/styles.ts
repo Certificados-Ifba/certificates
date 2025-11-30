@@ -1,6 +1,5 @@
 import SimpleBar from 'simplebar-react'
 import styled from 'styled-components'
-import 'simplebar/dist/simplebar.min.css'
 
 export const Container = styled.div`
   display: flex;

@@ -1,39 +1,38 @@
-import { Dispatch, SetStateAction, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { IconBaseProps } from 'react-icons'
 import { FiChevronDown } from 'react-icons/fi'
 
 import { Container, Header, Content } from './styles'
 
 interface Props {
-  children: React.ReactNode
-  isOpen?: boolean
   title?: string
   icon?: React.ComponentType<IconBaseProps>
-  setIsOpen?: Dispatch<SetStateAction<boolean>>
+  isOpen?: boolean
+  onToggle?: (state: boolean) => void
 }
 export type { Props as AccordionProps }
 
 export const InternalAccordion: React.FC<Props> = ({
   children,
-  isOpen = false,
+  isOpen: isOpenState,
   title,
   icon: Icon,
-  setIsOpen
+  onToggle
 }) => {
-  const [accordionOpen, setAccordionOpen] = useState(isOpen)
+  const [isOpen, setIsOpen] = useState(!!isOpenState)
+
+  const handleToggle = useCallback(() => {
+    if (onToggle) onToggle(!isOpen)
+    if (isOpenState === undefined) setIsOpen(isOpen => !isOpen)
+  }, [isOpen, isOpenState, onToggle])
+
+  useEffect(() => {
+    if (isOpenState !== undefined) setIsOpen(!!isOpenState)
+  }, [isOpen, isOpenState])
 
   return (
     <Container>
-      <Header
-        onClick={() => {
-          if (setIsOpen) {
-            setIsOpen(!isOpen)
-          } else {
-            setAccordionOpen(!accordionOpen)
-          }
-        }}
-        open={(setIsOpen && isOpen) || (!setIsOpen && accordionOpen)}
-      >
+      <Header open={isOpen} onClick={handleToggle}>
         {Icon && (
           <div>
             <Icon size={20} />
@@ -44,9 +43,7 @@ export const InternalAccordion: React.FC<Props> = ({
           <FiChevronDown size={20} />
         </div>
       </Header>
-      {((setIsOpen && isOpen) || (!setIsOpen && accordionOpen)) && (
-        <Content>{children}</Content>
-      )}
+      <Content open={isOpen}>{children}</Content>
     </Container>
   )
 }

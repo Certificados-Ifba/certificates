@@ -6,6 +6,7 @@ import { IEventCreateResponse } from './interfaces/event-create-response.interfa
 import { IEventDeleteResponse } from './interfaces/event-delete-response.interface'
 import { IEventListParams } from './interfaces/event-list-params.interface'
 import { IEventListResponse } from './interfaces/event-list-response.interface'
+import { IEventPublishedResponse } from './interfaces/event-published-response.interface'
 import { IEventSearchByUserResponse } from './interfaces/event-search-by-user-response.interface'
 import { IEventUpdateByIdResponse } from './interfaces/event-update-by-id-response.interface'
 import { IEventUpdateParams } from './interfaces/event-update-params.interface'
@@ -234,5 +235,16 @@ export class EventController {
     }
 
     return result
+  }
+
+  @MessagePattern('event_published')
+  public async getEventPublished(): Promise<IEventPublishedResponse> {
+    const quantity = await this.eventService.getEventPublished()
+
+    return {
+      status: HttpStatus.OK,
+      message: 'get_event_published_success',
+      data: quantity
+    }
   }
 }

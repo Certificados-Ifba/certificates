@@ -146,9 +146,7 @@ const Participants: React.FC = () => {
             inline
             color="info"
             size="small"
-            onClick={() => {
-              router.push(`/import/participants`)
-            }}
+            onClick={() => router.push('/participants/import')}
           >
             <FiFilePlus size={20} />
             <span>Importar via Planilha</span>

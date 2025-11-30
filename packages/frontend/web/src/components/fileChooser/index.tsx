@@ -1,111 +1,138 @@
 import { Button } from '@components'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Loading } from '@components/loading'
+import { useToast } from '@providers'
+import { useCallback, useEffect, useState } from 'react'
 import { IconBaseProps } from 'react-icons'
 import {
   FiSearch,
-  FiAlertCircle,
   FiFile,
+  FiAlertCircle,
   FiCheckCircle,
   FiTrash2
 } from 'react-icons/fi'
 
-import { Container, ImageContainer, TextContainer, Info } from './styles'
+import { Container, ImageContainer, Info, TextContainer } from './styles'
 
-export interface FileSelected {
-  name: string
-  file: any
+const types = {
+  image: '.jpg,.png',
+  spreadsheet: '.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xls,.xlt,.xml,.xlam,.xla,.ods'
 }
 
 interface Props {
-  setPreview?: Dispatch<SetStateAction<string>>
+  type: 'image' | 'spreadsheet'
+  onUpload: (formData: FormData) => Promise<void> | void
+  onRemove?: () => Promise<void> | void
   preview?: string
   height: string
-  info?: ReactNode
   title?: string
   icon?: React.ComponentType<IconBaseProps>
-  type: 'image' | 'spreadsheet'
-  handleFileSelected: (file: FileSelected) => void
-  handleFileRemoved?: () => void
+  loading?: boolean
+  info?: JSX.Element
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
 }
 
 export const FileChooser: React.FC<Props> = ({
-  setPreview,
-  preview,
-  height,
-  info,
-  title,
-  icon: Icon,
   type,
-  handleFileSelected,
-  handleFileRemoved
+  preview = '',
+  height,
+  title,
+  icon,
+  loading = false,
+  info,
+  marginBottom,
+  onUpload,
+  onRemove
 }) => {
+  const [file, setFile] = useState<File>()
   const [highlight, setHighlight] = useState(false)
-  const [fileInfo, setFileInfo] = useState<FileSelected>(null)
+  const { addToast } = useToast()
 
-  const handleEnter = e => {
-    e.preventDefault()
-    e.stopPropagation()
-    preview === '' && setHighlight(true)
-  }
+  const handleEnter = useCallback(
+    e => {
+      e.preventDefault()
+      e.stopPropagation()
+      preview === '' && setHighlight(true)
+    },
+    [preview]
+  )
 
-  const handleOver = e => {
-    e.preventDefault()
-    e.stopPropagation()
-    preview === '' && setHighlight(true)
-  }
+  const handleOver = useCallback(
+    e => {
+      e.preventDefault()
+      e.stopPropagation()
+      preview === '' && setHighlight(true)
+    },
+    [preview]
+  )
 
-  const handleLeave = e => {
+  const handleLeave = useCallback(e => {
     e.preventDefault()
     e.stopPropagation()
     setHighlight(false)
-  }
+  }, [])
 
-  const handleUpload = e => {
-    e.preventDefault()
-    e.stopPropagation()
-    setHighlight(false)
-    const [file] = e.target.files || e.dataTransfer.files
-    uploadFile(file)
-  }
-
-  function uploadFile(file: any) {
-    const reader = new FileReader()
-    if (reader) {
-      if (file instanceof Blob) {
-        reader.readAsBinaryString(file)
-
-        reader.onload = () => {
-          // this is the base64 data
-          const fileRes = btoa(reader.result.toString())
-          if (setPreview) setPreview(`data:image/jpg;base64,${fileRes}`)
-          const info: FileSelected = { name: (file as any).name, file: fileRes }
-          setFileInfo(info)
-          handleFileSelected(info)
-        }
-
-        reader.onerror = () => {
-          console.error('There is a problem while uploading...')
-        }
+  const uploadFile = useCallback(
+    (file: File) => {
+      if (!(file instanceof File)) {
+        addToast({
+          type: 'error',
+          title: 'Erro no arquivo',
+          description:
+            'Erro desconhecido, favor entrar em contato com o adminstrador.'
+        })
+        return
       }
-    }
-  }
+      const format = file.name.split('.').pop()
+      if (!types[type].includes(format)) {
+        addToast({
+          type: 'error',
+          title: 'Erro no arquivo',
+          description: `O formato ${format} não é permitido.`
+        })
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('file', file)
+      setFile(file)
+      onUpload(formData)
+    },
+    [addToast, onUpload, type]
+  )
+
+  const handleUpload = useCallback(
+    e => {
+      e.preventDefault()
+      e.stopPropagation()
+      setHighlight(false)
+      const [file] = e.target.files || e.dataTransfer.files
+      uploadFile(file)
+    },
+    [uploadFile]
+  )
+
+  const handleRemove = useCallback(
+    e => {
+      e.preventDefault()
+      e.stopPropagation()
+      setFile(undefined)
+      if (onRemove) onRemove()
+    },
+    [onRemove]
+  )
 
   useEffect(() => {
-    setHighlight(preview === '')
-  }, [preview])
+    if (!preview && file && type === 'image') setFile(undefined)
+  }, [file, preview, type])
 
-  let accept: string
-  if (type === 'image') {
-    accept = 'image/*'
-  } else if (type === 'spreadsheet') {
-    accept = '.XLSX,.XLSM,.XLSB,.XLTX,.XLTM,.XLS,.XLT,.XML,.XLAM,.XLA,.ods'
-  }
+  const Icon = icon || FiFile
 
   return (
     <Container
-      background={!fileInfo}
-      border={!preview || preview === ''}
+      background={!file}
+      border={!preview}
       height={height}
+      marginBottom={marginBottom}
     >
       <div
         onDragEnter={e => handleEnter(e)}
@@ -115,62 +142,30 @@ export const FileChooser: React.FC<Props> = ({
         className={`upload${
           highlight ? ' is-highlight' : preview ? ' is-drop' : ''
         }`}
-        style={{ backgroundImage: `url(${preview})` }}
+        style={{
+          backgroundImage:
+            preview && `url(${process.env.baseURL}/upload/${preview})`
+        }}
       >
-        {(!preview || preview === '') && (
+        {!preview && (
           <div>
-            {fileInfo && (
+            {!loading && (
               <>
                 <ImageContainer>
-                  <FiCheckCircle size={70} />
+                  {file ? <FiCheckCircle size={70} /> : <Icon size={70} />}
                 </ImageContainer>
                 <TextContainer>
-                  <h3>
-                    {!Icon && <FiFile size={20}></FiFile>}
-                    {Icon && <Icon size={20}></Icon>} {fileInfo.name}
-                  </h3>
+                  {file ? (
+                    <>
+                      <Icon size={20} /> {file.name}
+                    </>
+                  ) : (
+                    title || 'Arraste o arquivo aqui'
+                  )}
                 </TextContainer>
               </>
             )}
-            {!fileInfo && (
-              <>
-                <ImageContainer>
-                  {!Icon && <FiFile size={70}></FiFile>}
-                  {Icon && <Icon size={70}></Icon>}
-                </ImageContainer>
-                <TextContainer>
-                  <h3>
-                    {title}
-                    {!title && 'Arraste o arquivo aqui'}
-                  </h3>
-                </TextContainer>
-              </>
-            )}
-
-            {!fileInfo && (
-              <div className="upload-button">
-                <input
-                  type="file"
-                  className="upload-file"
-                  accept={accept}
-                  onChange={e => handleUpload(e)}
-                />
-                <Button
-                  square
-                  outline={!!fileInfo}
-                  color="primary"
-                  size="small"
-                  type="button"
-                  onClick={() => {
-                    console.log()
-                  }}
-                >
-                  <FiSearch size={20} />
-                  <span>Clique aqui para procurar um arquivo</span>
-                </Button>
-              </div>
-            )}
-            {fileInfo && (
+            {file ? (
               <div>
                 <Button
                   square
@@ -178,17 +173,35 @@ export const FileChooser: React.FC<Props> = ({
                   color="danger"
                   size="small"
                   type="button"
-                  onClick={() => {
-                    setFileInfo(null)
-                    if (handleFileRemoved) handleFileRemoved()
-                  }}
+                  onClick={handleRemove}
                 >
                   <FiTrash2 size={20} />
                   <span>Remover arquivo</span>
                 </Button>
               </div>
+            ) : (
+              <div className="upload-button">
+                <Loading active={!!loading} size={100} />
+                <input
+                  type="file"
+                  className="upload-file"
+                  accept={types[type]}
+                  onChange={e => handleUpload(e)}
+                  hidden={!!loading}
+                />
+                <Button
+                  square
+                  color="primary"
+                  size="small"
+                  type="button"
+                  hidden={!!loading}
+                >
+                  <FiSearch size={20} />
+                  <span>Clique aqui para procurar um arquivo</span>
+                </Button>
+              </div>
             )}
-            {info && (
+            {info && !loading && (
               <Info>
                 <FiAlertCircle size={30} />
                 <small>{info}</small>

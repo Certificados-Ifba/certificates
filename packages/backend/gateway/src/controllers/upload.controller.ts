@@ -5,18 +5,29 @@ import {
   UploadedFile,
   Inject,
   HttpStatus,
-  HttpException
+  HttpException,
+  Get,
+  Param,
+  Res,
+  Delete
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { FileInterceptor } from '@nestjs/platform-express'
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiTags
 } from '@nestjs/swagger'
-import { Express } from 'express'
-import { IServiceStorageUploadResponse } from 'src/interfaces/storage/service-storage-upload-response.interface'
+import { Express, Response } from 'express'
+
+import { Authorization } from '../decorators/authorization.decorator'
+import { Permission } from '../decorators/permission.decorator'
+import { DeleteFileResponseDto } from '../interfaces/storage/dto/delete-file-response.dto'
+import { FileDto } from '../interfaces/storage/dto/file.dto'
+import { IServiceStorageUploadResponse } from '../interfaces/storage/service-storage-upload-response.interface'
 
 @Controller('upload')
 @ApiTags('upload')
@@ -26,7 +37,73 @@ export class UploadController {
     private readonly storageServiceClient: ClientProxy
   ) {}
 
-  @Post('image')
+  @Get(':file')
+  // @Authorization(true)
+  // @Permission('storage_decode')
+  public async decodeFile(
+    @Param() params: FileDto,
+    @Res() res: Response
+  ): Promise<any> {
+    const {
+      status,
+      message,
+      data,
+      errors
+    } = await this.storageServiceClient
+      .send('storage_decode', params.file)
+      .toPromise()
+
+    if (status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message,
+          errors,
+          data: null
+        },
+        status
+      )
+    }
+    res.set({
+      'Content-Type': 'image/png'
+    })
+    return res.end(Buffer.from(data, 'binary'), 'binary')
+  }
+
+  @Delete(':file')
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
+  @Permission('storage_destroy')
+  @ApiOkResponse({
+    type: DeleteFileResponseDto,
+    description: 'List of user'
+  })
+  public async destroyFile(
+    @Param() params: FileDto
+  ): Promise<DeleteFileResponseDto> {
+    const { status, message, errors } = await this.storageServiceClient
+      .send('storage_destroy', params.file)
+      .toPromise()
+
+    if (status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message,
+          errors,
+          data: null
+        },
+        status
+      )
+    }
+
+    return {
+      message
+    }
+  }
+
+  @Post()
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
+  @Permission('storage_upload')
   @ApiCreatedResponse({})
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -42,117 +119,32 @@ export class UploadController {
   })
   @UseInterceptors(FileInterceptor('file'))
   public async uploadFile(
-    @UploadedFile() file // : Express.Multer.File
+    @UploadedFile() file: Express.Multer.File
   ): Promise<any> {
-    console.log(file)
-    const storageUploadResponse: IServiceStorageUploadResponse = await this.storageServiceClient
+    const {
+      status,
+      message,
+      data,
+      errors
+    }: IServiceStorageUploadResponse = await this.storageServiceClient
       .send('storage_upload', file)
       .toPromise()
 
-    if (storageUploadResponse.status !== HttpStatus.CREATED) {
+    if (status !== HttpStatus.CREATED) {
       throw new HttpException(
         {
-          message: storageUploadResponse.message,
-          errors: storageUploadResponse.errors,
+          message,
+          errors,
           data: null
         },
-        storageUploadResponse.status
+        status
       )
     }
 
     return {
-      message: storageUploadResponse.message,
+      message,
+      data,
       errors: null
     }
   }
-
-  // @Post()
-  // @ApiCreatedResponse({
-  //   type: LoginUserResponseDto,
-  //   description: 'Performs authentication on the platform'
-  // })
-  // public async loginUser(
-  //   @Req() req: Request,
-  //   @Body() loginRequest: LoginUserDto
-  // ): Promise<LoginUserResponseDto> {
-  //   const getUserResponse: IServiceUserSearchResponse = await this.userServiceClient
-  //     .send('user_search_by_credentials', loginRequest)
-  //     .toPromise()
-
-  //   if (getUserResponse.status !== HttpStatus.OK) {
-  //     throw new HttpException(
-  //       {
-  //         message: getUserResponse.message,
-  //         data: null,
-  //         errors: null
-  //       },
-  //       HttpStatus.UNAUTHORIZED
-  //     )
-  //   }
-  //   const agent = parser(req.headers['user-agent'])
-
-  //   const createTokenResponse: IServiceTokenCreateResponse = await this.tokenServiceClient
-  //     .send('token_create', {
-  //       user: getUserResponse.data.user,
-  //       ip: requestIp.getClientIp(req).split(':').pop(),
-  //       device: `${agent.device.model ? agent.device.model + ' - ' : ''}${
-  //         agent.os.name
-  //       } ${agent.os.version} - ${agent.browser.name}`,
-  //       where: req.headers.location
-  //     })
-  //     .toPromise()
-
-  //   if (createTokenResponse.status !== HttpStatus.CREATED) {
-  //     throw new HttpException(
-  //       {
-  //         message: createTokenResponse.message,
-  //         errors: createTokenResponse.errors,
-  //         data: null
-  //       },
-  //       createTokenResponse.status
-  //     )
-  //   }
-
-  //   return {
-  //     message: createTokenResponse.message,
-  //     data: {
-  //       token: createTokenResponse.token
-  //     },
-  //     errors: null
-  //   }
-  // }
-
-  // @Delete()
-  // @ApiBearerAuth('JWT')
-  // @Authorization(true)
-  // @ApiCreatedResponse({
-  //   type: LogoutUserResponseDto,
-  //   description: 'Performs the output on the platform'
-  // })
-  // public async logoutUser(
-  //   @Req() request: IAuthorizedRequest
-  // ): Promise<LogoutUserResponseDto> {
-  //   const userInfo = request.user
-
-  //   const destroyTokenResponse: IServiceTokenDestroyResponse = await this.tokenServiceClient
-  //     .send('token_destroy', userInfo.id)
-  //     .toPromise()
-
-  //   if (destroyTokenResponse.status !== HttpStatus.OK) {
-  //     throw new HttpException(
-  //       {
-  //         message: destroyTokenResponse.message,
-  //         data: null,
-  //         errors: destroyTokenResponse.errors
-  //       },
-  //       destroyTokenResponse.status
-  //     )
-  //   }
-
-  //   return {
-  //     message: destroyTokenResponse.message,
-  //     errors: null,
-  //     data: null
-  //   }
-  // }
 }

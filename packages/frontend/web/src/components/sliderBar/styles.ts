@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 interface Props {
   hidden?: boolean
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
 }
 
 export const Label = styled.label`
@@ -30,16 +30,8 @@ export const Error = styled.div`
 
 export const Container = styled.div<Props>`
   width: 100%;
-
-  ${props =>
-    props.marginBottom === 'sm' &&
-    'margin-bottom:' + props.theme.margins.sm + ';'}
-  ${props =>
-    props.marginBottom === 'md' &&
-    'margin-bottom:' + props.theme.margins.md + ';'}
-${props =>
-    props.marginBottom === 'lg' &&
-    'margin-bottom:' + props.theme.margins.lg + ';'}
+  margin-bottom: ${({ theme, marginBottom }) =>
+    theme.margins[marginBottom] || 0};
 
   input {
     -webkit-appearance: none;

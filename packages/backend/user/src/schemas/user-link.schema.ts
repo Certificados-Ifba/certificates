@@ -1,12 +1,9 @@
 import * as mongoose from 'mongoose'
-import { v4 as uuidv4 } from 'uuid'
+
+import { securePassword } from '../utils/generators'
 
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id
-}
-
-function generateLink() {
-  return Math.random().toString(16).replace('0.', '')
 }
 
 export const UserLinkSchema = new mongoose.Schema(
@@ -22,7 +19,7 @@ export const UserLinkSchema = new mongoose.Schema(
     },
     link: {
       type: String,
-      default: generateLink()
+      default: securePassword()
     },
     expired: {
       type: Number,

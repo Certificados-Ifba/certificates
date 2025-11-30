@@ -1,4 +1,4 @@
-import { FormHandles, useField } from '@unform/core'
+import { FormHandles, UnformField, useField } from '@unform/core'
 import {
   useRef,
   useEffect,
@@ -13,9 +13,9 @@ import { components, OptionTypeBase, Props as SelectProps } from 'react-select'
 import { Container, Error, IconArea, Label, ReactSelect } from './styles'
 
 interface Props extends SelectProps<OptionTypeBase, boolean> {
-  name: string
+  name?: string
   label?: string
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   formRef?: MutableRefObject<FormHandles>
   icon?: React.ComponentType<IconBaseProps>
 }
@@ -26,10 +26,10 @@ export const NewSelect: React.FC<Props> = ({
   label,
   formRef,
   icon: Icon,
+  hidden,
   ...rest
 }) => {
   const selectRef = useRef(null)
-  const { fieldName, defaultValue, registerField, error } = useField(name)
   const [isFilled, setIsFilled] = useState(false)
 
   const handleOnChangeSelect = useCallback(
@@ -45,66 +45,58 @@ export const NewSelect: React.FC<Props> = ({
     },
     [formRef, name]
   )
+  let fieldName: string,
+    defaultValue,
+    registerField: <T>(field: UnformField<T>) => void,
+    error: string
+
+  if (name) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const field = useField(name)
+    fieldName = field.fieldName
+    defaultValue = field.defaultValue
+    registerField = field.registerField
+    error = field.error
+  }
 
   useEffect(() => {
-    registerField({
-      name: fieldName,
-      ref: selectRef.current,
-      setValue: (ref, value) => {
-        // console.log(ref, value)
-        const selected = ref?.props?.options?.filter(
-          (option: any) => option?.value === value
-        )
-        setIsFilled(!!selected[0])
-        ref?.select?.setValue(selected[0] || null)
-
-        // ref?.select?.select?.setValue(value)
-      },
-      getValue: ref => {
-        // console.log(ref)
-        if (rest?.isMulti) {
+    if (name) {
+      registerField({
+        name: fieldName,
+        ref: selectRef.current,
+        setValue: (ref, value) => {
+          const selected = ref?.props?.options?.filter(
+            (option: any) => option?.value === value
+          )
+          setIsFilled(!!selected[0])
+          ref?.select?.setValue(selected[0] || null)
+        },
+        getValue: ref => {
+          if (rest?.isMulti) {
+            if (!ref?.state?.value) {
+              setIsFilled(false)
+              return []
+            }
+            return ref?.state?.value?.map(
+              (option: OptionTypeBase) => option.value
+            )
+          }
           if (!ref?.state?.value) {
             setIsFilled(false)
-            return []
+            return ''
           }
-          return ref?.state?.value?.map(
-            (option: OptionTypeBase) => option.value
-          )
-        }
-        if (!ref?.state?.value) {
+          setIsFilled(!!ref?.state?.value?.value)
+          return ref?.state?.value?.value
+        },
+        clearValue: ref => {
           setIsFilled(false)
-          return ''
+          ref?.select?.clearValue()
+          ref?.select?.focus()
+          ref?.select?.blur()
         }
-        setIsFilled(!!ref?.state?.value?.value)
-        return ref?.state?.value?.value
-
-        // if (rest.isMulti) {
-        //   if (!ref?.select?.state?.value) {
-        //     setIsFilled(false)
-        //     return []
-        //   }
-
-        //   return ref?.select?.state?.value?.map(
-        //     (option: OptionTypeBase) => option?.value
-        //   )
-        // }
-        // if (!ref?.select?.state?.value) {
-        //   setIsFilled(false)
-        //   return ''
-        // }
-
-        // setIsFilled(!!ref?.select?.state?.value?.value)
-        // return ref?.select?.state?.value?.value
-      },
-      clearValue: ref => {
-        // ref?.select?.select?.clearValue()
-        setIsFilled(false)
-        ref?.select?.clearValue()
-        ref?.select?.focus()
-        ref?.select?.blur()
-      }
-    })
-  }, [fieldName, registerField, rest])
+      })
+    }
+  }, [fieldName, name, registerField, rest])
 
   const props = {
     noOptionsMessage: () => 'Nenhuma opção',
@@ -138,7 +130,11 @@ export const NewSelect: React.FC<Props> = ({
   }
 
   return (
-    <Container className={props.className} marginBottom={marginBottom}>
+    <Container
+      className={props.className}
+      marginBottom={marginBottom}
+      hidden={hidden}
+    >
       {label && <Label htmlFor={fieldName}>{label}</Label>}
       <ReactSelect
         isFilled={isFilled}

@@ -1,4 +1,14 @@
-import { AsyncSelect, Button, Grid, Input, Modal } from '@components'
+import {
+  AsyncSelect,
+  Button,
+  Grid,
+  Input,
+  Modal,
+  FooterModal,
+  HeaderModal,
+  MainModal,
+  ScrollWrapper
+} from '@components'
 import { Badge, Group } from '@components/asyncSelect/styles'
 import { IEvent, IUser } from '@dtos'
 import { useToast } from '@providers'
@@ -63,15 +73,15 @@ export const EventModal: React.FC<Props> = ({
   useEffect(() => {
     if (event) {
       formRef.current.setData({
-        name: event.name,
-        initials: event.initials,
-        edition: event.initials,
-        start_date: event.start_date,
-        end_date: event.end_date,
-        local: event.local,
+        name: event?.name,
+        initials: event?.initials,
+        edition: event?.initials,
+        start_date: event?.start_date,
+        end_date: event?.end_date,
+        local: event?.local,
         user: {
-          label: capitalize(event.user.name),
-          value: event.user.id
+          label: capitalize(event?.user?.name),
+          value: event?.user?.id
         }
       })
     } else {
@@ -81,8 +91,6 @@ export const EventModal: React.FC<Props> = ({
 
   const handleSubmit = useCallback(
     async data => {
-      console.log(data)
-
       setLoading(true)
       const schema = Yup.object().shape({
         name: Yup.string().required('O evento precisa ter um nome'),
@@ -107,7 +115,7 @@ export const EventModal: React.FC<Props> = ({
 
         if (type === 'add') {
           const response = await api.post('events', data)
-          router.push(`events/${response.data?.data?.event.id}/info`)
+          router.push(`events/${response.data?.data?.event?.id}/info`)
         } else {
           const response = await api.put(`events/${event?.id}`, data)
           setEvent(response.data?.data?.event)
@@ -120,13 +128,16 @@ export const EventModal: React.FC<Props> = ({
             type === 'add' ? 'cadastrado' : 'atualizado'
           } com sucesso.`
         })
+        setLoading(false)
         handleCloseSaveModal()
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err)
           formRef.current?.setErrors(errors)
+          setLoading(false)
           return
         }
+        setLoading(false)
         addToast({
           type: 'error',
           title: `Erro ao ${
@@ -134,7 +145,6 @@ export const EventModal: React.FC<Props> = ({
           }`,
           description: err
         })
-        setLoading(false)
       }
     },
     [router, type, event?.id, addToast, handleCloseSaveModal, setEvent]
@@ -174,69 +184,71 @@ export const EventModal: React.FC<Props> = ({
 
   return (
     <Modal open={openModal} onClose={handleCloseSaveModal} size="xl">
-      <header>
+      <HeaderModal>
         <h2>
           <FiCalendar size={20} />
           <span>{event ? 'Editar' : 'Adicionar'} Evento</span>
         </h2>
-      </header>
+      </HeaderModal>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <main>
-          <Input
-            marginBottom="sm"
-            name="name"
-            label="Nome"
-            placeholder="Nome do Evento"
-            icon={FiBookmark}
-          />
-          <Grid cols={2}>
+        <ScrollWrapper>
+          <MainModal>
             <Input
               marginBottom="sm"
-              name="initials"
-              label="Sigla"
-              placeholder="Sigla"
-              icon={FiHash}
+              name="name"
+              label="Nome"
+              placeholder="Nome do Evento"
+              icon={FiBookmark}
             />
-            <Input
-              marginBottom="sm"
-              name="edition"
-              label="Edição"
-              placeholder="Edição"
-              icon={FiTag}
-            />
-            <Input
-              marginBottom="sm"
-              name="start_date"
-              label="Data Inicial"
-              placeholder="Data Inicial"
-              type="date"
-              icon={FiCalendar}
-            />
-            <Input
-              marginBottom="sm"
-              name="end_date"
-              label="Data Final"
-              placeholder="Data Final"
-              type="date"
-              icon={FiCalendar}
-            />
-            <Input
-              marginBottom="sm"
-              name="local"
-              label="Local"
-              placeholder="Local"
-              icon={FiMapPin}
-            />
-            <AsyncSelect
-              label="Coordenador"
-              name="user"
-              loadOptions={loadUsers}
-              formatGroupLabel={formatGroupLabel}
-              icon={FiUser}
-            />
-          </Grid>
-        </main>
-        <footer>
+            <Grid cols={2}>
+              <Input
+                marginBottom="sm"
+                name="initials"
+                label="Sigla"
+                placeholder="Sigla"
+                icon={FiHash}
+              />
+              <Input
+                marginBottom="sm"
+                name="edition"
+                label="Edição"
+                placeholder="Edição"
+                icon={FiTag}
+              />
+              <Input
+                marginBottom="sm"
+                name="start_date"
+                label="Data Inicial"
+                placeholder="Data Inicial"
+                type="date"
+                icon={FiCalendar}
+              />
+              <Input
+                marginBottom="sm"
+                name="end_date"
+                label="Data Final"
+                placeholder="Data Final"
+                type="date"
+                icon={FiCalendar}
+              />
+              <Input
+                marginBottom="sm"
+                name="local"
+                label="Local"
+                placeholder="Local"
+                icon={FiMapPin}
+              />
+              <AsyncSelect
+                label="Coordenador"
+                name="user"
+                loadOptions={loadUsers}
+                formatGroupLabel={formatGroupLabel}
+                icon={FiUser}
+              />
+            </Grid>
+          </MainModal>
+        </ScrollWrapper>
+        <FooterModal inline>
           <Button
             onClick={() => {
               handleCloseSaveModal()
@@ -265,7 +277,7 @@ export const EventModal: React.FC<Props> = ({
               </>
             )}
           </Button>
-        </footer>
+        </FooterModal>
       </Form>
     </Modal>
   )

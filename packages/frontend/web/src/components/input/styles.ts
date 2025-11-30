@@ -2,7 +2,7 @@ import styled, { css } from 'styled-components'
 
 interface Props {
   hidden?: boolean
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   isDisabled: boolean
   isFocused: boolean
   isFilled: boolean
@@ -10,17 +10,10 @@ interface Props {
 }
 
 export const Container = styled.div<Props>`
-  ${props =>
-    props.marginBottom === 'sm' &&
-    'margin-bottom:' + props.theme.margins.sm + ';'}
-  ${props =>
-    props.marginBottom === 'md' &&
-    'margin-bottom:' + props.theme.margins.md + ';'}
-${props =>
-    props.marginBottom === 'lg' &&
-    'margin-bottom:' + props.theme.margins.lg + ';'}
+  margin-bottom: ${({ theme, marginBottom }) =>
+    theme.margins[marginBottom] || 0};
 
-fieldset {
+  fieldset {
     padding: 8px 12px;
     display: flex;
     align-self: center;

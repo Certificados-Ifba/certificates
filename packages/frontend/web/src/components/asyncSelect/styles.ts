@@ -3,7 +3,7 @@ import AsyncSelect from 'react-select/async'
 import styled, { css } from 'styled-components'
 
 interface Props {
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   isFilled?: boolean
   isErrored?: boolean
   hidden?: boolean
@@ -11,15 +11,8 @@ interface Props {
 
 export const Container = styled.div<Props>`
   ${props => props.hidden && 'display: none;'}
-  ${props =>
-    props.marginBottom === 'sm' &&
-    'margin-bottom:' + props.theme.margins.sm + ';'}
-  ${props =>
-    props.marginBottom === 'md' &&
-    'margin-bottom:' + props.theme.margins.md + ';'}
-  ${props =>
-    props.marginBottom === 'lg' &&
-    'margin-bottom:' + props.theme.margins.lg + ';'}
+  margin-bottom: ${({ theme, marginBottom }) =>
+    theme.margins[marginBottom] || 0};
 `
 
 export const ReactSelect = styled(Select)`

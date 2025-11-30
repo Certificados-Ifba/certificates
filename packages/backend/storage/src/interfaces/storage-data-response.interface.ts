@@ -1,5 +1,6 @@
 export interface IStorageDataResponse {
   status: number
   message: string
-  data: File | null
+  data: Buffer | null
+  errors: { [key: string]: any } | null
 }

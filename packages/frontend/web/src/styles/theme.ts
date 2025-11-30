@@ -24,9 +24,9 @@ export const theme = {
     medium: '#C7C9D9',
     mediumShade: '#A6ACBE',
     mediumTint: '#E4E4EB',
-    light: '#FAFAFC',
+    light: '#F8F8F8',
     lightShade: '#EEF0F6',
-    lightTint: '#ffffff'
+    lightTint: '#FFFFFF'
   },
   margins: {
     xs: '0.5rem',

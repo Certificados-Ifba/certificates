@@ -77,4 +77,10 @@ export class EventService {
       totalCount: count
     }
   }
+
+  public async getEventPublished(): Promise<number> {
+    return this.EventModel.countDocuments({
+      status: 'PUBLISHED'
+    })
+  }
 }

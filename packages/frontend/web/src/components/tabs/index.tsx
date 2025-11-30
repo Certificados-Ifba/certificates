@@ -33,10 +33,11 @@ export const Tabs: React.FC<Props> = ({
 
   const handleTabChange = useCallback(
     index => {
-      if (!notPushRouter) router.push(tabs[index].path)
+      const path = router.asPath.replace(tab, tabs[index].path)
+      if (!notPushRouter) router.push(path)
       setSelectedTab(index)
     },
-    [notPushRouter, router, tabs]
+    [notPushRouter, router, tabs, tab]
   )
 
   useEffect(() => {
@@ -44,7 +45,8 @@ export const Tabs: React.FC<Props> = ({
       const index = tabs.findIndex(
         ({ path, disabled }) => path === tab && !disabled
       )
-      if (index === -1 && !notPushRouter) router.push(tabs[0].path)
+      const path = router.asPath.replace(tab, tabs[0].path)
+      if (index === -1 && !notPushRouter) router.push(path)
       setSelectedTab(index !== -1 && !notPushRouter ? index : 0)
     }
   }, [notPushRouter, router, tab, tabs])
@@ -52,7 +54,7 @@ export const Tabs: React.FC<Props> = ({
   return (
     <>
       <Container>
-        {tabs.map(({ name: tabName, icon: Icon }, index) => (
+        {tabs.map(({ name: tabName, icon: Icon, disabled }, index) => (
           <span key={index}>
             <input
               checked={selectedTab === index}
@@ -60,6 +62,7 @@ export const Tabs: React.FC<Props> = ({
               id={`tab-${index}-${tabName.replace(' ', '-')}`}
               name={name}
               onChange={() => handleTabChange(index)}
+              disabled={disabled}
             />
             <label htmlFor={`tab-${index}-${tabName.replace(' ', '-')}`}>
               <Icon size={18} />

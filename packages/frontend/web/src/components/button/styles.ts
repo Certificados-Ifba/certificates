@@ -3,6 +3,13 @@ import { transparentize } from 'polished'
 import styled, { css } from 'styled-components'
 
 const sizes = {
+  'extra-small': css`
+    padding: 0rem ${(props: any) => (props.square ? '0rem' : '0.5rem')};
+    font-size: 0.625rem;
+    * + span {
+      margin-left: 0.5rem;
+    }
+  `,
   small: css`
     padding: 0.4375rem
       ${(props: any) => (props.square ? '0.4375rem' : '0.75rem')};
@@ -245,19 +252,19 @@ const colors = {
         props.ghost ? 'transparent' : props.theme.colors.mediumTint};
     }
   `,
-  ligth: css`
+  light: css`
     background: ${(props: any) =>
-      props.outline || props.ghost ? 'transparent' : props.theme.colors.ligth};
+      props.outline || props.ghost ? 'transparent' : props.theme.colors.light};
     border-color: ${(props: any) =>
-      props.ghost ? 'transparent' : props.theme.colors.ligth};
+      props.ghost ? 'transparent' : props.theme.colors.light};
     color: ${(props: any) =>
       props.outline || props.ghost
-        ? props.theme.colors.ligth
+        ? props.theme.colors.light
         : props.theme.colors.dark};
     &:hover {
       background: ${(props: any) =>
         props.outline || props.ghost
-          ? transparentize(0.8, props.theme.colors.ligth)
+          ? transparentize(0.8, props.theme.colors.light)
           : props.theme.colors.ligthShade};
       border-color: ${(props: any) =>
         props.ghost ? 'transparent' : props.theme.colors.ligthShade};
@@ -265,7 +272,7 @@ const colors = {
     &:active {
       background: ${(props: any) =>
         props.outline || props.ghost
-          ? transparentize(0.9, props.theme.colors.ligth)
+          ? transparentize(0.9, props.theme.colors.light)
           : props.theme.colors.ligthTint};
       border-color: ${(props: any) =>
         props.ghost ? 'transparent' : props.theme.colors.ligthTint};
@@ -276,7 +283,8 @@ const colors = {
 export const Container = styled.button.attrs<ButtonProps>(props => ({
   disabled: props.disabled || props.loading === 'true'
 }))<ButtonProps>`
-  margin-bottom: ${props => props.theme.margins[props.marginBottom] || 0};
+  margin-bottom: ${({ theme, marginBottom }) =>
+    theme.margins[marginBottom] || 0};
   display: ${({ hidden }) => (hidden ? 'none' : 'flex')};
   justify-content: center;
   align-items: center;

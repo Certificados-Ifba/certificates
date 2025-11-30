@@ -22,7 +22,6 @@ import {
 } from '@nestjs/swagger'
 import { Request, Response } from 'express'
 import * as requestIp from 'request-ip'
-import { AuthParticipantDto } from 'src/interfaces/user/dto/auth-participant.dto'
 import * as parser from 'ua-parser-js'
 
 import { Authorization } from '../decorators/authorization.decorator'
@@ -40,6 +39,7 @@ import { IServiceParticipantGetByIdResponse } from '../interfaces/participant/se
 import { IServiceParticipantListResponse } from '../interfaces/participant/service-participant-list-response.interface'
 import { IServiceParticipantUpdateByIdResponse } from '../interfaces/participant/service-participant-update-by-id-response.interface'
 import { IServiceTokenCreateResponse } from '../interfaces/token/service-token-create-response.interface'
+import { AuthParticipantDto } from '../interfaces/user/dto/auth-participant.dto'
 import { DeleteUserResponseDto } from '../interfaces/user/dto/delete-user-response.dto'
 import { LoginUserResponseDto } from '../interfaces/user/dto/login-user-response.dto'
 import { UserIdDto } from '../interfaces/user/dto/user-id.dto'

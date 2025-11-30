@@ -5,7 +5,6 @@ import {
   getSelected,
   getStepList,
   Loading,
-  StepConfig,
   Stepper
 } from '@components'
 import Head from 'next/head'
@@ -19,12 +18,6 @@ import { DownloadStep, ImportStep, InfoStep } from './steps'
 export const infoName = 'Instruções'
 export const downloadName = 'Download'
 export const importName = 'Importando'
-
-export const stepConfig: StepConfig[] = [
-  { name: downloadName },
-  { name: infoName },
-  { name: importName }
-]
 
 export interface Props {
   title: string

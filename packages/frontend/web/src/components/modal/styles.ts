@@ -1,16 +1,20 @@
 import { transparentize } from 'polished'
+import SimpleBar from 'simplebar-react'
 import styled, { css } from 'styled-components'
 
-interface ModalProps {
-  size?: 'sm' | 'lg' | 'xl'
-  reverse?: boolean
-}
+import { ModalProps } from '.'
+
+type IContainer = Pick<ModalProps, 'size'>
 
 interface RowProps {
   cols: 2 | 3
 }
 
-export const Container = styled.div<ModalProps>`
+interface IFooterModal {
+  inline?: boolean
+}
+
+export const Container = styled.div<IContainer>`
   .modal-container-div {
     margin: 0 1rem;
     width: ${props => props.theme.modal.size[props.size]};
@@ -34,7 +38,7 @@ export const Container = styled.div<ModalProps>`
   }
 
   @media (max-width: ${props => props.theme.responsive.mdDown}) {
-    top: 110px;
+    top: 114px;
   }
 
   @media (max-width: 500px) {
@@ -50,66 +54,57 @@ export const Container = styled.div<ModalProps>`
       width: 100%;
     }
   }
+`
 
-  header {
-    h2 {
-      display: flex;
-      margin: 0 !important;
-      svg {
-        margin-top: auto;
-        margin-bottom: auto;
-        margin-right: 1rem;
-      }
-    }
-    @media (max-width: ${props => props.theme.responsive.smDown}) {
-      min-height: 60px;
-    }
-  }
-
-  main {
+export const HeaderModal = styled.header`
+  h2 {
     display: flex;
-    flex-direction: column;
-    padding: 25px 30px;
-    fieldset {
-      width: 100%;
-    }
-
-    max-height: 400px;
-    overflow-y: auto;
-  }
-
-  footer {
-    border-top: 2px solid ${props => props.theme.colors.lightShade};
-    padding: 20px 30px;
-    display: flex;
-
-    ${props => props.size === 'sm' && 'justify-content: space-between;'}
-    ${props =>
-      (props.size === 'lg' || props.size === 'xl') &&
-      'justify-content: flex-end;'}
-
-    > button {
-      ${props =>
-        (props.size === 'lg' || props.size === 'xl') && 'margin-left: 8px;'}
-    }
-
-    ${props =>
-      props.reverse &&
-      css`
-        flex-direction: row-reverse;
-      `}
-
-    > * {
-      ${props =>
-        props.size === 'sm' && 'flex: 1; margin-left: 8px; margin-right: 8px;'}
-      &:first-child {
-        ${props => (props.reverse ? 'margin-right' : 'margin-left:') + '0;'}
-      }
-      &:last-child {
-        ${props => (props.reverse ? 'margin-left' : 'margin-right:') + '0;'}
-      }
+    margin: 0 !important;
+    svg {
+      margin-top: auto;
+      margin-bottom: auto;
+      margin-right: 1rem;
     }
   }
+  @media (max-width: ${({ theme }) => theme.responsive.smDown}) {
+    min-height: 60px;
+  }
+`
+
+export const ScrollWrapper = styled(SimpleBar)`
+  width: 100%;
+  max-height: 50vh;
+  @media (max-width: ${props => props.theme.responsive.mdDown}) {
+    max-height: calc(100vh - 308px);
+  }
+`
+interface IMainModal {
+  noPadding?: boolean
+}
+
+export const MainModal = styled.main<IMainModal>`
+  display: flex;
+  flex-direction: column;
+  ${({ noPadding }) =>
+    !noPadding ? 'padding: 25px 30px;' : 'padding: 0px 0px 8px;'}
+  fieldset {
+    width: 100%;
+  }
+`
+
+export const FooterModal = styled.footer<IFooterModal>`
+  border-top: 2px solid ${props => props.theme.colors.lightShade};
+  padding: 20px 30px;
+  display: flex;
+  gap: 16px;
+  ${({ inline }) =>
+    inline &&
+    css`
+      justify-content: flex-end;
+      > button {
+        width: auto;
+      }
+    `}
 `
 
 export const Row = styled.div<RowProps>`
