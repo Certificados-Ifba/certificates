@@ -1,12 +1,13 @@
 import { Controller, HttpStatus } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
-import { ICertificateValidateResponse } from 'src/interfaces/certificate-validate-response.interface'
 
 import { ICertificateByIdResponse } from '../interfaces/certificate-by-id-response.interface'
 import { ICertificateCreateResponse } from '../interfaces/certificate-create-response.interface'
 import { ICertificateDeleteResponse } from '../interfaces/certificate-delete-response.interface'
+import { ICertificateIssuedResponse } from '../interfaces/certificate-issued-response.interface'
 import { ICertificateListParams } from '../interfaces/certificate-list-params.interface'
 import { ICertificateListResponse } from '../interfaces/certificate-list-response.interface'
+import { ICertificateValidateResponse } from '../interfaces/certificate-validate-response.interface'
 import { ICertificate } from '../interfaces/certificate.interface'
 import { CertificateService } from '../services/certificate.service'
 
@@ -198,5 +199,16 @@ export class CertificateController {
     }
 
     return result
+  }
+
+  @MessagePattern('certificate_issued')
+  public async getCertificateIssued(): Promise<ICertificateIssuedResponse> {
+    const quantity = await this.certificateService.getCertificateIssued()
+
+    return {
+      status: HttpStatus.OK,
+      message: 'get_certificate_issued_success',
+      data: quantity
+    }
   }
 }

@@ -1,8 +1,12 @@
+import { transparentize } from 'polished'
 import styled, { css } from 'styled-components'
 
-export const TextContainer = styled.div`
+export const TextContainer = styled.h3`
   text-align: center;
   margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `
 
 export const ImageContainer = styled.div`
@@ -26,43 +30,51 @@ export const Info = styled.div`
   }
   color: ${props => props.theme.colors.secondary};
 `
-
-export const Container = styled.div<{
+interface IContainer {
   height: string
   border: boolean
   background: boolean
-}>`
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
+}
+
+export const Container = styled.div<IContainer>`
+  margin-bottom: ${({ theme, marginBottom }) =>
+    theme.margins[marginBottom] || 0};
   .upload {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: ${props => props.height};
-    color: ${props => props.theme.colors.primary};
-    ${props =>
-      props.background &&
-      css`
-        background-color: ${props => props.theme.colors.mediumTint};
-      `}
-    ${props =>
-      !props.background &&
-      css`
-        border-style: dashed;
-      `}
     position: relative;
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
-    ${props => props.border && 'border-radius: 25px;'}
-
+    height: ${({ height }) => height};
+    color: ${({ theme }) => theme.colors.primary};
+    ${({ border }) =>
+      border &&
+      css`
+        border-radius: 25px;
+      `}
+    ${({ background }) =>
+      background
+        ? css`
+            background-color: ${({ theme }) => theme.colors.mediumTint};
+          `
+        : css`
+            border-style: dashed;
+          `}
     > div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       opacity: 1;
       transition: opacity 0.25s ease-in-out;
       > div {
-        width: 400px;
-        @media (max-width: ${props => props.theme.responsive.smDown}) {
+        @media (max-width: ${({ theme }) => theme.responsive.smDown}) {
           width: 90%;
           margin-left: auto;
           margin-right: auto;
@@ -71,8 +83,8 @@ export const Container = styled.div<{
     }
 
     &.is-highlight {
-      background-color: rgba(#4aa0ea, 0.5);
-
+      background-color: ${({ theme }) =>
+        transparentize(0.6, theme.colors.infoShade)};
       > div {
         opacity: 1;
       }

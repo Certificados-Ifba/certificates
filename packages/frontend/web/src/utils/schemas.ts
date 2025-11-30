@@ -1,8 +1,8 @@
-import { inDateRange, isValidCpf, minDate, formatData } from '@utils'
+import { inDateRange, isValidCpf, minDate, formatDate } from '@utils'
 import * as Yup from 'yup'
 
-export const getParticipantSchema: () => any = () => {
-  const schema = Yup.object().shape({
+export const getParticipantSchema = (): Yup.AnySchema =>
+  Yup.object().shape({
     name: Yup.string().required('O usuário precisa ter um nome'),
     email: Yup.string().email('Por favor, digite um e-mail válido'),
     cpf: Yup.string()
@@ -21,19 +21,12 @@ export const getParticipantSchema: () => any = () => {
       'Selecione se o participante é da instituição.'
     )
   })
-  return schema
-}
 
-export const getActivitySchema: (
-  activity_start_date: string,
+export const getActivitySchema = (
   event_start_date: string,
   event_end_date: string
-) => any = (
-  activity_start_date: string,
-  event_start_date: string,
-  event_end_date: string
-) => {
-  const schema = Yup.object().shape({
+): Yup.AnySchema =>
+  Yup.object().shape({
     name: Yup.string().required('A atividade precisa ter um nome'),
     type: Yup.string().required(`Selecione um tipo da atividade`),
     workload: Yup.number()
@@ -43,26 +36,24 @@ export const getActivitySchema: (
     start_date: Yup.string()
       .test(
         'in-date-range',
-        `A atividade precisa ser entre os dias ${formatData(
+        `A atividade precisa ser entre os dias ${formatDate(
           event_start_date
-        )} e ${formatData(event_end_date)}`,
+        )} e ${formatDate(event_end_date)}`,
         (value: string) => inDateRange(value, event_start_date, event_end_date)
       )
       .required('Selecione a data de início'),
     end_date: Yup.string()
       .test(
         'in-date-range',
-        `A atividade precisa ser entre os dias ${formatData(
+        `A atividade precisa ser entre os dias ${formatDate(
           event_start_date
-        )} e ${formatData(event_end_date)}`,
+        )} e ${formatDate(event_end_date)}`,
         (value: string) => inDateRange(value, event_start_date, event_end_date)
       )
       .test(
         'min-date',
         'A data final precisa ser maior que a data inicial',
-        (value: string) => minDate(value, activity_start_date)
+        (value, context) => minDate(value, context.parent.start_date)
       )
       .required('Selecione a data do fim')
   })
-  return schema
-}

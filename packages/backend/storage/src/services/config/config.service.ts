@@ -1,12 +1,12 @@
-import path from 'path'
+import { resolve } from 'path'
 
 export class ConfigService {
   private readonly envConfig: { [key: string]: any } = null
 
   constructor() {
     this.envConfig = {
-      port: process.env.STORAGE_SERVICE_PORT
-      // uploadDir: path.resolve(__dirname, '..', '..', '..', 'uploads')
+      port: process.env.STORAGE_SERVICE_PORT,
+      uploadDir: resolve(__dirname, '..', '..', '..', 'uploads')
     }
   }
 

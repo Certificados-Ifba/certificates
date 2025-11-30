@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
-import { IGeneric } from 'src/interfaces/generic.interface'
 
 import { ICertificateListParams } from '../interfaces/certificate-list-params.interface'
 import { DataResponse } from '../interfaces/certificate-list-response.interface'
 import { ICertificate } from '../interfaces/certificate.interface'
+import { IGeneric } from '../interfaces/generic.interface'
 
 @Injectable()
 export class CertificateService {
@@ -50,14 +50,14 @@ export class CertificateService {
     const query: any = {}
 
     if (event) query.event = new Types.ObjectId(event)
-    if (user) query.user = new Types.ObjectId(user)
+    if (user) query.participant = new Types.ObjectId(user)
 
     const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
 
     const certificates = await this.CertificateModel.find(query)
       .populate('function')
       .populate('activity')
-      .populate('participant')
+      .populate(user ? 'event' : 'participant')
       .skip(perPage * (page - 1))
       .limit(perPage)
       .sort(sort)
@@ -74,5 +74,17 @@ export class CertificateService {
 
   public async findGenericById(id: string): Promise<IGeneric> {
     return this.GenericModel.findById(id).exec()
+  }
+
+  public async getCertificateIssued(): Promise<number> {
+    const certificates = await this.CertificateModel.aggregate()
+      .lookup({
+        from: 'events',
+        localField: 'event',
+        foreignField: '_id',
+        as: 'event'
+      })
+      .match({ 'event.status': 'PUBLISHED' })
+    return certificates?.length
   }
 }

@@ -18,7 +18,7 @@ import { Container, AsyncReactSelect, IconArea, Label, Error } from './styles'
 interface Props extends AsyncProps<OptionTypeBase, boolean> {
   name: string
   label?: string
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   formRef?: MutableRefObject<FormHandles>
   icon?: React.ComponentType<IconBaseProps>
   handleOnSelect?: (value: { label: string; value: any }) => void

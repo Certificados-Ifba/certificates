@@ -5,7 +5,7 @@ export const Container = styled.div`
   align-items: center;
   width: 100%;
   max-width: 500px;
-  margin: 24px 20px;
+  margin: 48px 20px;
   @media (min-width: ${props => props.theme.responsive.lgDown}) {
     display: grid;
     grid-template-columns: 1fr 550px 480px 1fr;

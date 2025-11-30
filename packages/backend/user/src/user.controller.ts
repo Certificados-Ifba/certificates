@@ -1,6 +1,7 @@
 import { Controller, HttpStatus, Inject } from '@nestjs/common'
 import { MessagePattern, ClientProxy } from '@nestjs/microservices'
 
+import { IParticipantRegisteredResponse } from './interfaces/participant-registered-response.interface'
 import { IUserConfirmResponse } from './interfaces/user-confirm-response.interface'
 import { IUserCreateResponse } from './interfaces/user-create-response.interface'
 import { IUserDeleteResponse } from './interfaces/user-delete-response.interface'
@@ -15,6 +16,7 @@ import { IUserUpdateByIdResponse } from './interfaces/user-update-by-id-response
 import { IUserUpdateParams } from './interfaces/user-update-params.interface'
 import { IUser } from './interfaces/user.interface'
 import { UserService } from './services/user.service'
+import { securePassword } from './utils/generators'
 
 @Controller('user')
 export class UserController {
@@ -83,48 +85,58 @@ export class UserController {
   }
 
   @MessagePattern('user_search_by_credentials')
-  public async searchUserByCredentials(searchParams: {
+  public async searchUserByCredentials({
+    email,
+    password
+  }: {
     email: string
     password: string
   }): Promise<IUserSearchResponse> {
-    let result: IUserSearchResponse
+    if (!email || !password)
+      return {
+        status: HttpStatus.NOT_FOUND,
+        message: 'user_search_by_credentials_not_match',
+        data: null
+      }
 
-    if (searchParams.email && searchParams.password) {
-      const user = await this.userService.searchUserByEmail(searchParams.email)
+    const user = await this.userService.searchUserByEmail(email)
+    if (!user)
+      return {
+        status: HttpStatus.NOT_FOUND,
+        message: 'user_search_by_credentials_not_match',
+        data: null
+      }
 
-      if (user) {
-        if (await user.compareEncryptedPassword(searchParams.password)) {
-          const userUpdeted = await this.userService.updateUserById(user.id, {
-            last_login: new Date()
-          })
-          result = {
-            status: HttpStatus.OK,
-            message: 'user_search_by_credentials_success',
-            data: { user: userUpdeted }
-          }
-        } else {
-          result = {
-            status: HttpStatus.NOT_FOUND,
-            message: 'user_search_by_credentials_not_match',
-            data: null
-          }
-        }
-      } else {
-        result = {
+    const auth = user.compareEncryptedPassword(password)
+    if (!auth)
+      return {
+        status: HttpStatus.NOT_FOUND,
+        message: 'user_search_by_credentials_not_match',
+        data: null
+      }
+    try {
+      const userUpdeted = await this.userService.updateUserById(user.id, {
+        last_login: new Date()
+      })
+
+      if (!userUpdeted)
+        return {
           status: HttpStatus.NOT_FOUND,
-          message: 'user_search_by_credentials_not_found',
+          message: 'user_search_by_credentials_not_match',
           data: null
         }
+      return {
+        status: HttpStatus.OK,
+        message: 'user_search_by_credentials_success',
+        data: { user: userUpdeted }
       }
-    } else {
-      result = {
+    } catch (e) {
+      return {
         status: HttpStatus.NOT_FOUND,
-        message: 'user_search_by_credentials_not_found',
+        message: 'user_search_by_credentials_not_match',
         data: null
       }
     }
-
-    return result
   }
 
   @MessagePattern('user_list')
@@ -268,6 +280,13 @@ export class UserController {
         message: 'user_forgot_password_success',
         errors: null
       }
+      console.log({
+        name: user.name,
+        email: user.email,
+        link: this.userService.getConfirmationLink(userLink.link),
+        site: this.userService.getWebUrl()
+      })
+
       this.mailerServiceClient
         .send('mail_send', {
           to: user.email,
@@ -380,7 +399,7 @@ export class UserController {
         try {
           if (userParams.role !== 'PARTICIPANT') {
             userParams.is_confirmed = false
-            userParams.password = Math.random().toString(16).replace('0.', '')
+            userParams.password = securePassword()
           } else {
             const usersWithCPF = await this.userService.searchUserByCpf(
               userParams.personal_data.cpf
@@ -479,27 +498,25 @@ export class UserController {
                 }
               }
             }
-            updatedUser.is_confirmed = false
-            updatedUser.password = Math.random().toString(16).replace('0.', '')
           }
-          this.userService.updateUserById(updatedUser.id, updatedUser)
+          await this.userService.updateUserById(updatedUser.id, updatedUser)
           // await updatedUser.save()
-          if (params.user.role !== 'PARTICIPANT') {
-            const userLink = await this.userService.createUserLink(user.id)
-            this.mailerServiceClient
-              .send('mail_send', {
-                to: user.email,
-                subject: 'E-mail de Confirmação',
-                template: '/templates/confirm_email',
-                context: {
-                  name: user.name,
-                  email: user.email,
-                  link: this.userService.getConfirmationLink(userLink.link),
-                  site: this.userService.getWebUrl()
-                }
-              })
-              .toPromise()
-          }
+          // if (params.user.role !== 'PARTICIPANT') {
+          //   const userLink = await this.userService.createUserLink(user.id)
+          //   this.mailerServiceClient
+          //     .send('mail_send', {
+          //       to: user.email,
+          //       subject: 'E-mail de Confirmação',
+          //       template: '/templates/confirm_email',
+          //       context: {
+          //         name: user.name,
+          //         email: user.email,
+          //         link: this.userService.getConfirmationLink(userLink.link),
+          //         site: this.userService.getWebUrl()
+          //       }
+          //     })
+          //     .toPromise()
+          // }
           result = {
             status: HttpStatus.OK,
             message: 'user_update_by_id_success',
@@ -515,8 +532,6 @@ export class UserController {
           }
         }
       } catch (e) {
-        console.log(e)
-
         result = {
           status: HttpStatus.PRECONDITION_FAILED,
           message: 'user_update_by_id_precondition_failed',
@@ -580,5 +595,18 @@ export class UserController {
     }
 
     return result
+  }
+
+  @MessagePattern('participant_registered')
+  public async getParticipantRegistered(): Promise<
+    IParticipantRegisteredResponse
+  > {
+    const quantity = await this.userService.getParticipantRegistered()
+
+    return {
+      status: HttpStatus.OK,
+      message: 'get_participant_registered_success',
+      data: quantity
+    }
   }
 }

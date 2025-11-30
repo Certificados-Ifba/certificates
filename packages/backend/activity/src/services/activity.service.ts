@@ -15,24 +15,34 @@ export class ActivityService {
 
   public async createActivity(activityBody: IActivity): Promise<IActivity> {
     const ActivityModel = new this.ActivityModel(activityBody)
-    return await ActivityModel.save()
+    return ActivityModel.save()
   }
 
   public async findActivityById(id: string): Promise<IActivity> {
-    return await this.ActivityModel.findById(id).populate('type')
+    return this.ActivityModel.findById(id).populate('type')
+  }
+
+  public async searchActivity(
+    event: Types.ObjectId,
+    type: Types.ObjectId,
+    name: string
+  ): Promise<IActivity> {
+    return this.ActivityModel.findOne({
+      event,
+      type,
+      name
+    }).exec()
   }
 
   public async removeActivityById(id: string): Promise<IActivity> {
-    return await this.ActivityModel.findOneAndDelete({ _id: id })
+    return this.ActivityModel.findOneAndDelete({ _id: id })
   }
 
   public async updateActivityById(
     id: string,
     params: IActivityUpdateParams
   ): Promise<IActivity> {
-    return await this.ActivityModel.updateOne({ _id: id }, params).populate(
-      'type'
-    )
+    return this.ActivityModel.updateOne({ _id: id }, params).populate('type')
   }
 
   public async listActivities({

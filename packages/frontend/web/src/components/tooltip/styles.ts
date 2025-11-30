@@ -2,6 +2,7 @@ import styled from 'styled-components'
 
 export const Container = styled.div`
   position: relative;
+  display: inline;
   span {
     background: ${props => props.theme.colors.secondary};
     padding: 8px;

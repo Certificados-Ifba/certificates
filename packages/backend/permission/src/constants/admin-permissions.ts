@@ -33,5 +33,8 @@ export const adminPermissions = [
   'certificate_delete_by_id',
   'model_list',
   'model_create',
-  'model_delete_by_id'
+  'model_delete_by_id',
+  'storage_decode',
+  'storage_destroy',
+  'storage_upload'
 ]

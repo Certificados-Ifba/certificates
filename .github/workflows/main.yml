@@ -18,6 +18,7 @@ jobs:
     - name: Docker deploy
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
+        SHEET_PASSWORD: ${{ secrets.SHEET_PASSWORD}}
         APP_SECRET: ${{ secrets.APP_SECRET}}
         HCAPTCHA_SITEKEY: ${{ secrets.HCAPTCHA_SITEKEY}}
         HCAPTCHA_SECRET: ${{ secrets.HCAPTCHA_SECRET}}
@@ -63,7 +64,7 @@ jobs:
         MONGO_GUI_USER: ${{ secrets.MONGO_GUI_USER}}
         MONGO_GUI_PASSWORD: ${{ secrets.MONGO_GUI_PASSWORD}}
         MONGO_GUI_PORT: ${{ secrets.MONGO_GUI_PORT}}
-        MONGODB_ROOT_PASSWORD: ${{ secrets.MONGODB_ROOT_PASSWORD}}
+        MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD}}
       run: |
         bash ./deploy.sh
       id: docker_deploy

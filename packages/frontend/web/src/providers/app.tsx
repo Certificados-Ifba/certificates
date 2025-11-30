@@ -5,11 +5,11 @@ import NProgress from 'nprogress'
 import { ThemeProvider } from 'styled-components'
 
 import 'nprogress/nprogress.css'
+import { ResumeProvider } from './resume'
 
-Router.events.on('routeChangeStart', url => {
-  console.log(`Loading: ${url}`)
-  NProgress.start()
-})
+NProgress.configure({ showSpinner: false })
+
+Router.events.on('routeChangeStart', () => NProgress.start())
 Router.events.on('routeChangeComplete', () => NProgress.done())
 Router.events.on('routeChangeError', () => NProgress.done())
 
@@ -18,7 +18,9 @@ export const AppProvider: React.FC = ({ children }) => {
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <ToastProvider>
-          <SidebarProvider>{children}</SidebarProvider>
+          <SidebarProvider>
+            <ResumeProvider>{children}</ResumeProvider>
+          </SidebarProvider>
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>

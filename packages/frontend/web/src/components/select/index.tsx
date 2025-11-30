@@ -23,7 +23,7 @@ import { Container, Label, Error } from './styles'
 interface Props extends SelectProps<OptionTypeBase> {
   name?: string
   label?: string
-  marginBottom?: string
+  marginBottom?: 'sm' | 'md' | 'lg' | 'xs'
   formRef?: MutableRefObject<FormHandles>
   hidden?: boolean
   async?: boolean
@@ -129,6 +129,7 @@ export const Select: React.FC<Props> = ({
     inputId: name,
     selectOption: selectOpt,
     onChange: handleOnChangeSelect,
+    noOptionsMessage: () => 'Sem opções',
     ...rest
   }
 
@@ -171,6 +172,8 @@ export const Select: React.FC<Props> = ({
         name: fieldName,
         ref: selectRef.current,
         setValue: (ref, value) => {
+          console.log(ref, value)
+
           let selected
           let options: any = []
           let setValue
@@ -188,9 +191,13 @@ export const Select: React.FC<Props> = ({
               setFocusLoaded(false)
               selected = [opt]
             } else {
-              selected = options.filter((option: any) => option.value === value)
+              selected = options?.filter(
+                (option: any) => option.value === value
+              )
             }
           }
+          console.log(selected)
+
           if (selected) {
             setValue(selected[0] || null)
             setIsFilled(!!selected[0])

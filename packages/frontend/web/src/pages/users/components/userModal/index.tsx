@@ -1,4 +1,14 @@
-import { Alert, Button, Grid, Input, Modal, NewSelect } from '@components'
+import {
+  Alert,
+  Button,
+  FooterModal,
+  HeaderModal,
+  Input,
+  MainModal,
+  Modal,
+  NewSelect,
+  ScrollWrapper
+} from '@components'
 import { IUser } from '@dtos'
 import { useToast } from '@providers'
 import { api, PaginatedRequest } from '@services'
@@ -84,6 +94,9 @@ export const UserModal: React.FC<Props> = ({
         if (type === 'add') {
           await api.post('users', data)
         } else {
+          if (!data.name) delete data.name
+          if (!data.role) delete data.role
+          if (!data.email) delete data.email
           await api.put(`users/${user.id}`, data)
         }
 
@@ -136,7 +149,7 @@ export const UserModal: React.FC<Props> = ({
 
   return (
     <Modal open={openModal} onClose={handleCloseModal}>
-      <header>
+      <HeaderModal>
         <h2>
           {type === 'update' ? (
             <>
@@ -155,101 +168,99 @@ export const UserModal: React.FC<Props> = ({
             </>
           )}
         </h2>
-      </header>
+      </HeaderModal>
       <Form ref={formRef} onSubmit={handleSubmit}>
-        <main>
-          {type === 'update-email' && (
-            <>
-              <Alert size="sm" marginBottom="xs">
-                Usuário:
-              </Alert>
-              <Alert size="sm" icon={FiUser} marginBottom="sm">
-                <b>{user?.name}</b>
-              </Alert>
-              <Alert size="sm" marginBottom="xs">
-                E-mail atual:
-              </Alert>
-              <Alert size="sm" icon={FiMail} marginBottom="xs">
-                <b>{user?.email}</b>
-              </Alert>
-              <Alert
-                type={user?.is_confirmed ? 'success' : 'danger'}
-                icon={user?.is_confirmed ? FiUnlock : FiLock}
-                size="sm"
-                marginBottom="md"
-              >
-                Este e-mail {user?.is_confirmed ? 'já foi' : 'não foi'}{' '}
-                confirmado
-              </Alert>
-            </>
-          )}
-          {type === 'update' && (
-            <>
-              <Alert size="sm" marginBottom="sm">
-                O e-mail de {user?.name} é:
-              </Alert>
-              <Alert size="sm" icon={FiMail} marginBottom="md">
-                <b>{user?.email}</b>
-              </Alert>
-            </>
-          )}
-          {type !== 'update-email' && (
-            <>
-              <Input
-                marginBottom="sm"
-                name="name"
-                label="Nome"
-                placeholder="Nome"
-                icon={FiUser}
-                disabled={loading}
-              />
-              <NewSelect
-                label="Privilégio"
-                name="role"
-                isSearchable={false}
-                marginBottom={type === 'add' ? 'sm' : ''}
-                icon={FiKey}
-                isDisabled={loading}
-                options={[
-                  {
-                    value: 'ADMIN',
-                    label: 'Administrador'
-                  },
-                  {
-                    value: 'COORDINATOR',
-                    label: 'Coordenador de Eventos'
-                  }
-                ]}
-              />
-            </>
-          )}
-          {type !== 'update' && (
-            <>
-              <Input
-                marginBottom={'sm'}
-                name="email"
-                label={type === 'update-email' ? 'Novo e-mail' : 'E-mail'}
-                placeholder="email@exemplo.com"
-                type="text"
-                icon={FiMail}
-                disabled={loading}
-              />
-              <Input
-                name="repeatEmail"
-                label={
-                  type === 'update-email'
-                    ? 'Confirme o novo e-mail'
-                    : 'Confirme o e-mail'
+        <ScrollWrapper>
+          <MainModal>
+            {type === 'update-email' && (
+              <>
+                <Alert size="sm" marginBottom="xs">
+                  Usuário:
+                </Alert>
+                <Alert size="sm" icon={FiUser} marginBottom="sm">
+                  <b>{user?.name}</b>
+                </Alert>
+                <Alert size="sm" marginBottom="xs">
+                  E-mail atual:
+                </Alert>
+                <Alert size="sm" icon={FiMail} marginBottom="xs">
+                  <b>{user?.email}</b>
+                </Alert>
+                <Alert
+                  type={user?.is_confirmed ? 'success' : 'danger'}
+                  icon={user?.is_confirmed ? FiUnlock : FiLock}
+                  size="sm"
+                  marginBottom="md"
+                >
+                  Este e-mail {user?.is_confirmed ? 'já foi' : 'não foi'}{' '}
+                  confirmado
+                </Alert>
+              </>
+            )}
+            {type === 'update' && (
+              <>
+                <Alert size="sm" marginBottom="sm">
+                  O e-mail de {user?.name} é:
+                </Alert>
+                <Alert size="sm" icon={FiMail} marginBottom="md">
+                  <b>{user?.email}</b>
+                </Alert>
+              </>
+            )}
+            <Input
+              hidden={!(type !== 'update-email')}
+              marginBottom="sm"
+              name="name"
+              label="Nome"
+              placeholder="Nome"
+              icon={FiUser}
+              disabled={loading}
+            />
+            <NewSelect
+              hidden={!(type !== 'update-email')}
+              label="Privilégio"
+              name="role"
+              isSearchable={false}
+              marginBottom={type === 'add' ? 'sm' : undefined}
+              icon={FiKey}
+              isDisabled={loading}
+              options={[
+                {
+                  value: 'ADMIN',
+                  label: 'Administrador'
+                },
+                {
+                  value: 'COORDINATOR',
+                  label: 'Coordenador de Eventos'
                 }
-                placeholder="email@exemplo.com"
-                type="text"
-                icon={FiMail}
-                disabled={loading}
-              />
-            </>
-          )}
-        </main>
-        <footer>
+              ]}
+            />
+            <Input
+              marginBottom={'sm'}
+              name="email"
+              label={type === 'update-email' ? 'Novo e-mail' : 'E-mail'}
+              placeholder="email@exemplo.com"
+              type="text"
+              icon={FiMail}
+              disabled={loading}
+              hidden={!(type !== 'update')}
+            />
+            <Input
+              name="repeatEmail"
+              label={
+                type === 'update-email'
+                  ? 'Confirme o novo e-mail'
+                  : 'Confirme o e-mail'
+              }
+              placeholder="email@exemplo.com"
+              type="text"
+              icon={FiMail}
+              disabled={loading}
+              hidden={!(type !== 'update')}
+            />
+          </MainModal>
+        </ScrollWrapper>
+        <FooterModal>
           <Button
             onClick={() => {
               handleCloseModal()
@@ -279,7 +290,7 @@ export const UserModal: React.FC<Props> = ({
               </>
             )}
           </Button>
-        </footer>
+        </FooterModal>
       </Form>
     </Modal>
   )

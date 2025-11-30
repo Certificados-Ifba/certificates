@@ -9,7 +9,6 @@ import {
   Row
 } from '@components'
 import { withoutAuth } from '@hocs'
-import { ParticipantLoginLayout } from '@layouts'
 import { useAuth, useToast } from '@providers'
 import { FormHandles } from '@unform/core'
 import { getValidationErrors, isValidCpf, removeMask } from '@utils'
@@ -169,4 +168,4 @@ const Login: React.FC = () => {
   )
 }
 
-export default withoutAuth(Login, ParticipantLoginLayout)
+export default withoutAuth(Login)

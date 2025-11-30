@@ -11,7 +11,7 @@ import {
 
 import { Pagination, NoDataContainer, PaginateList, Select } from './styles'
 
-import 'simplebar/dist/simplebar.min.css'
+export { NoDataContainer }
 
 interface Props {
   request: PaginatedRequest<any, any>
@@ -101,6 +101,10 @@ export const PaginatedTable: React.FC<Props> = ({ request, children }) => {
             defaultValue={perPage}
             value={perPage}
             options={[
+              {
+                value: 5,
+                label: '5'
+              },
               {
                 value: 10,
                 label: '10'

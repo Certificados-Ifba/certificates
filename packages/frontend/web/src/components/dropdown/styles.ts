@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components'
 
 interface Props {
   active: boolean
+  align: 'left' | 'right'
 }
 
 export const Container = styled.div<Props>`
@@ -9,7 +10,7 @@ export const Container = styled.div<Props>`
   display: inline-block;
 
   > div {
-    min-width: 300px;
+    /* min-width: 200px; */
     display: none;
     position: absolute;
     border-radius: 10px;
@@ -17,6 +18,11 @@ export const Container = styled.div<Props>`
     background: ${props => props.theme.colors.lightTint};
     padding: ${props => props.theme.margins.sm};
     z-index: 15;
+    top: calc(100% + 4px);
+    ${({ align }) => align === 'right' && 'right: 0;'}
+    span {
+      width: max-content;
+    }
   }
 
   ${props =>

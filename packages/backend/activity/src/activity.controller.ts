@@ -61,86 +61,102 @@ export class ActivityController {
   }
 
   @MessagePattern('activity_update_by_id')
-  public async activityUpdateById(params: {
+  public async activityUpdateById({
+    activity,
+    id
+  }: {
     activity: IActivityUpdateParams
     id: string
   }): Promise<IActivityUpdateByIdResponse> {
-    let result: IActivityUpdateByIdResponse
-    if (params.id) {
-      try {
-        const activity = await this.activityService.findActivityById(params.id)
-        if (activity) {
-          const updatedActivity = await this.activityService.updateActivityById(
-            params.id,
-            params.activity
-          )
-          result = {
-            status: HttpStatus.OK,
-            message: 'activity_update_by_id_success',
-            activity: updatedActivity,
-            errors: null
-          }
-        } else {
-          result = {
-            status: HttpStatus.NOT_FOUND,
-            message: 'activity_update_by_id_not_found',
-            activity: null,
-            errors: null
-          }
-        }
-      } catch (e) {
-        result = {
-          status: HttpStatus.PRECONDITION_FAILED,
-          message: 'activity_update_by_id_precondition_failed',
-          activity: null,
-          errors: e.errors
-        }
-      }
-    } else {
-      result = {
+    if (!activity || id)
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'activity_update_by_id_bad_request',
         activity: null,
         errors: null
       }
-    }
+    try {
+      const activityOld = await this.activityService.findActivityById(id)
+      if (!activityOld)
+        return {
+          status: HttpStatus.NOT_FOUND,
+          message: 'activity_update_by_id_not_found',
+          activity: null,
+          errors: null
+        }
 
-    return result
+      const existActivity = await this.activityService.searchActivity(
+        activityOld?.event,
+        activity?.type,
+        activity?.name
+      )
+      if (existActivity)
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'activity_update_by_id_conflict',
+          activity: null,
+          errors: null
+        }
+      const updatedActivity = await this.activityService.updateActivityById(
+        id,
+        activity
+      )
+      return {
+        status: HttpStatus.OK,
+        message: 'activity_update_by_id_success',
+        activity: updatedActivity,
+        errors: null
+      }
+    } catch (e) {
+      return {
+        status: HttpStatus.PRECONDITION_FAILED,
+        message: 'activity_update_by_id_precondition_failed',
+        activity: null,
+        errors: e.errors
+      }
+    }
   }
 
   @MessagePattern('activity_create')
   public async activityCreate(
     activityBody: IActivity
   ): Promise<IActivityCreateResponse> {
-    let result: IActivityCreateResponse
-
-    if (activityBody) {
-      try {
-        const activity = await this.activityService.createActivity(activityBody)
-        result = {
-          status: HttpStatus.CREATED,
-          message: 'activity_create_success',
-          activity,
-          errors: null
-        }
-      } catch (e) {
-        result = {
-          status: HttpStatus.PRECONDITION_FAILED,
-          message: 'activity_create_precondition_failed',
-          activity: null,
-          errors: e.errors
-        }
-      }
-    } else {
-      result = {
+    if (!activityBody)
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'activity_create_bad_request',
         activity: null,
         errors: null
       }
-    }
+    try {
+      const existActivity = await this.activityService.searchActivity(
+        activityBody?.event,
+        activityBody?.type,
+        activityBody?.name
+      )
+      if (existActivity)
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'activity_create_conflict',
+          activity: null,
+          errors: null
+        }
 
-    return result
+      const activity = await this.activityService.createActivity(activityBody)
+      return {
+        status: HttpStatus.CREATED,
+        message: 'activity_create_success',
+        activity,
+        errors: null
+      }
+    } catch (e) {
+      return {
+        status: HttpStatus.PRECONDITION_FAILED,
+        message: 'activity_create_precondition_failed',
+        activity: null,
+        errors: e.errors
+      }
+    }
   }
 
   @MessagePattern('activity_delete_by_id')

@@ -1,12 +1,23 @@
 import { Card } from '@components'
 
-import { Container, CloseArea } from './styles'
+import {
+  Container,
+  CloseArea,
+  FooterModal,
+  HeaderModal,
+  MainModal,
+  ScrollWrapper
+} from './styles'
+
+export { FooterModal, HeaderModal, MainModal, ScrollWrapper }
 
 interface Props {
   open: boolean
   onClose: () => void
   size?: 'sm' | 'lg' | 'xl'
 }
+
+export type { Props as ModalProps }
 
 export const Modal: React.FC<Props> = ({
   open,

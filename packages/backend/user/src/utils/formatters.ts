@@ -6,7 +6,7 @@ export const formatCpf = (cpf: string): string =>
     .replace(/(\d{3})(\d{1,2})/, '$1-$2')
     .replace(/(-\d{2})\d+?$/, '$1')
 
-export const formatData = (value: string): string => {
+export const formatDate = (value: string): string => {
   if (!value) return ''
   const data = new Date(value)
   const diaF = data.toISOString().substr(8, 2)

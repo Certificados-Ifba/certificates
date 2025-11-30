@@ -1,4 +1,4 @@
-import { Button, Modal } from '@components'
+import { Button, HeaderModal, Modal, FooterModal, MainModal } from '@components'
 import { Form } from '@unform/web'
 import { FiTrash2, FiX } from 'react-icons/fi'
 
@@ -18,15 +18,15 @@ export const DeleteModal: React.FC<Props> = ({
 }) => {
   return (
     <Modal open={openModal} onClose={onClose}>
-      <header>
+      <HeaderModal>
         <h2>
           <FiTrash2 size={20} />
           <span>Excluir {name}</span>
         </h2>
-      </header>
+      </HeaderModal>
       <Form onSubmit={handleSubmit}>
-        <main>{children}</main>
-        <footer>
+        <MainModal>{children}</MainModal>
+        <FooterModal>
           <Button onClick={onClose} color="secondary" type="button">
             <FiX size={20} />
             <span>Cancelar</span>
@@ -34,7 +34,7 @@ export const DeleteModal: React.FC<Props> = ({
           <Button color="danger" type="submit" outline>
             <FiTrash2 size={20} /> <span>Excluir</span>
           </Button>
-        </footer>
+        </FooterModal>
       </Form>
     </Modal>
   )

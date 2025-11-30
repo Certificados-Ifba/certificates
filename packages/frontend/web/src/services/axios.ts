@@ -8,10 +8,9 @@ const api = axios.create({
 })
 
 api.interceptors.request.use(config => {
-  if (!config.headers.authorization)
-    config.headers.authorization = `Bearer ${Cookie.get(
-      'certificates.session'
-    )}`
+  const token = Cookie.get('certificates.session')
+  if (!config.headers.authorization && token)
+    config.headers.authorization = `Bearer ${token}`
 
   return config
 })
@@ -19,7 +18,7 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   config => config,
   error => {
-    const { data } = error.response
+    const data = error.response?.data
 
     if (data?.message === 'token_decode_unauthorized') {
       Cookie.remove('certificates.session')
