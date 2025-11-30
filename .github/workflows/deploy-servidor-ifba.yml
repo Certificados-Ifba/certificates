@@ -1,4 +1,4 @@
-name: Deploy Certificates IFBA (prod.up)
+name: Deploy Certificates IFBA
 
 on:
   workflow_dispatch:
@@ -171,23 +171,50 @@ jobs:
               make prod.up
             "
 
-      # --------------------------------------------------------------
+            # --------------------------------------------------------------
       # 5. HEALTHCHECK COMPLETO
       # --------------------------------------------------------------
       - name: 🩺 Healthchecks (frontend e gateway)
         run: |
           echo "⏳ Aguardando serviços subirem..."
-          sleep 60
+
+          # tempo máximo de espera (segundos) e intervalo entre tentativas
+          TIMEOUT=300   # 5 minutos
+          INTERVAL=5    # checa a cada 5 segundos
+          ELAPSED=0
+          OK=0
 
           SERVICES=(
             "http://200.128.9.8:4000"
             "http://200.128.9.8:4001/status"
           )
 
-          for url in "${SERVICES[@]}"; do
-            echo "🔍 Testando $url ..."
-            curl -fsS "$url" || (echo "❌ Falha no serviço: $url" && exit 1)
-            echo "✅ OK"
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            ALL_OK=1
+            for url in "${SERVICES[@]}"; do
+              echo "🔍 Testando $url ..."
+              if ! curl -fsS "$url" >/dev/null 2>&1; then
+                echo "⏳ $url não respondeu ainda."
+                ALL_OK=0
+                break
+              else
+                echo "✅ $url OK"
+              fi
+            done
+
+            if [ $ALL_OK -eq 1 ]; then
+              OK=1
+              break
+            fi
+
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+            echo "⏱ Aguardando... (${ELAPSED}s/${TIMEOUT}s)"
           done
+
+          if [ $OK -ne 1 ]; then
+            echo "❌ Serviços não responderam após ${TIMEOUT} segundos"
+            exit 1
+          fi
 
           echo "🎉 Todos os serviços estão OK!"
