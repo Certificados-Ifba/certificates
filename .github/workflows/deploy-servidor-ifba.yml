@@ -1,4 +1,4 @@
-name: Deploy Certificates IFBA
+name: Deploy Certificates Server IFBA
 
 on:
   workflow_dispatch:
