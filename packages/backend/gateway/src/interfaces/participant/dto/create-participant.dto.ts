@@ -21,7 +21,7 @@ export class CreateParticipantDto {
   @ApiProperty({
     example: '1999-01-01'
   })
-  dob: Date
+  dob?: Date
 
   @ApiProperty({
     example: '(77) 77777-7777'

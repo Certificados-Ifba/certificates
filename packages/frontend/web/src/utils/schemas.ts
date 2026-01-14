@@ -1,4 +1,4 @@
-import { inDateRange, isValidCpf, minDate, formatDate } from '@utils'
+import { formatDate, inDateRange, isValidCpf, minDate } from '@utils'
 import * as Yup from 'yup'
 
 export const getParticipantSchema = (): Yup.AnySchema =>
@@ -12,7 +12,7 @@ export const getParticipantSchema = (): Yup.AnySchema =>
       )
       .test('cpf-is-valid', 'CPF precisa ser válido', isValidCpf)
       .required('Digite o CPF do participante'),
-    dob: Yup.string().required('Selecione a data de nascimento'),
+    dob: Yup.string().optional(),
     phone: Yup.string().matches(
       /(^$|\((\d{2})\) (\d{4}|\d{5})-(\d{4}))/,
       'Por favor, digite um telefone válido.'

@@ -1,5 +1,5 @@
 import { Controller, HttpStatus, Inject } from '@nestjs/common'
-import { MessagePattern, ClientProxy } from '@nestjs/microservices'
+import { ClientProxy, MessagePattern } from '@nestjs/microservices'
 
 import { IParticipantRegisteredResponse } from './interfaces/participant-registered-response.interface'
 import { IUserConfirmResponse } from './interfaces/user-confirm-response.interface'
@@ -23,7 +23,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     @Inject('MAILER_SERVICE') private readonly mailerServiceClient: ClientProxy
-  ) {}
+  ) { }
 
   @MessagePattern('user_auth_participant')
   public async userAuthParticipant(searchParams: {
@@ -377,8 +377,7 @@ export class UserController {
       userParams &&
       (userParams.role !== 'PARTICIPANT' ||
         (userParams.role === 'PARTICIPANT' &&
-          userParams.personal_data.cpf &&
-          userParams.personal_data.dob))
+          userParams.personal_data.cpf))
     ) {
       const usersWithEmail = await this.userService.searchUserByEmail(
         userParams.email
