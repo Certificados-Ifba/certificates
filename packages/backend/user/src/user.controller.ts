@@ -37,16 +37,40 @@ export class UserController {
       const user = await this.userService.searchUserByCpf(searchParams.cpf)
 
       if (user && user.role === 'PARTICIPANT') {
-        if (
-          new Date(user.personal_data.dob).getTime() ===
-          new Date(searchParams.dob).getTime()
-        ) {
-          const userUpdeted = await this.userService.updateUserById(user.id, {
-            last_login: new Date()
-          })
+        const isValid = await this.userService.validToken(searchParams.token)
 
-          const isValid = await this.userService.validToken(searchParams.token)
-          if (isValid) {
+        if (!isValid) {
+          result = {
+            status: HttpStatus.UNAUTHORIZED,
+            message: 'user_search_by_credentials_invalid',
+            data: null
+          }
+        } else {
+          // Se o usuário não tem data de nascimento cadastrada, atualiza com a fornecida
+          if (!user.personal_data.dob) {
+            const userUpdated = await this.userService.updateUserById(user.id, {
+              last_login: new Date(),
+              personal_data: {
+                cpf: user.personal_data.cpf,
+                dob: new Date(searchParams.dob),
+                institution: user.personal_data.institution,
+                phone: user.personal_data.phone
+              }
+            })
+
+            result = {
+              status: HttpStatus.OK,
+              message: 'user_search_by_credentials_success',
+              data: { user: userUpdated }
+            }
+          } else if (
+            new Date(user.personal_data.dob).getTime() ===
+            new Date(searchParams.dob).getTime()
+          ) {
+            const userUpdeted = await this.userService.updateUserById(user.id, {
+              last_login: new Date()
+            })
+
             result = {
               status: HttpStatus.OK,
               message: 'user_search_by_credentials_success',
@@ -54,16 +78,10 @@ export class UserController {
             }
           } else {
             result = {
-              status: HttpStatus.UNAUTHORIZED,
-              message: 'user_search_by_credentials_invalid',
+              status: HttpStatus.NOT_FOUND,
+              message: 'user_search_by_credentials_not_match',
               data: null
             }
-          }
-        } else {
-          result = {
-            status: HttpStatus.NOT_FOUND,
-            message: 'user_search_by_credentials_not_match',
-            data: null
           }
         }
       } else {

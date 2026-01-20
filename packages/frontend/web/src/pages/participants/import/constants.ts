@@ -45,7 +45,8 @@ export const data: IDataSheet[] = [
       formulae: [new Date()],
       operator: 'lessThanOrEqual',
       error: 'Valor precisa ser uma data válida no formato "DD/MM/YYYY"',
-      prompt: 'Insira a Data de Nascimento do participante'
+      prompt: 'Insira a Data de Nascimento do participante',
+      allowBlank: true
     }
   },
   {
