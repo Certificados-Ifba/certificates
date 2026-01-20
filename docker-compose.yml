@@ -123,10 +123,11 @@ services:
     volumes:
       - './docker/db:/bitnami/mongodb'
   db:
-    image: 'bitnami/mongodb:latest'
+    image: 'bitnami/mongodb:5.0.5'
     environment:
       - 'MONGODB_USERNAME=${MONGO_USER}'
       - 'MONGODB_PASSWORD=${MONGO_PASSWORD}'
+      - 'MONGODB_ROOT_PASSWORD=${MONGO_PASSWORD}'
       - 'MONGODB_DATABASE=${MONGO_DATABASE}'
     volumes:
       - './docker/db:/bitnami/mongodb'

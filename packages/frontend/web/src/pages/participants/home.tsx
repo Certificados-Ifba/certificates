@@ -270,9 +270,9 @@ const Certificates: React.FC<{ token: string; loading: boolean }> = ({
             <tbody>
               {requestCertificate.data?.data?.map(certificate => (
                 <tr key={certificate.id}>
-                  <td>{certificate?.activitieType}</td>
-                  <td>{certificate?.name}</td>
-                  <td>{certificate?.function}</td>
+                  <td>{certificate?.activity.type}</td>
+                  <td>{certificate?.activity.name}</td>
+                  <td>{certificate?.function.name}</td>
                   <td>{certificate?.workload}</td>
                   <td>
                     <TableRow>
