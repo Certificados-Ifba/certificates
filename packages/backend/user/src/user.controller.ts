@@ -46,8 +46,12 @@ export class UserController {
             data: null
           }
         } else {
-          // Se o usuário não tem data de nascimento cadastrada, atualiza com a fornecida
-          if (!user.personal_data.dob) {
+          const defaultDate = new Date('2017-12-23T00:00:00.000Z')
+          const userDobTime = user.personal_data.dob ? new Date(user.personal_data.dob).getTime() : null
+          const isDefaultDate = userDobTime === defaultDate.getTime()
+          
+          // Se o usuário não tem data de nascimento cadastrada ou tem a data padrão, atualiza com a fornecida
+          if (!user.personal_data.dob || isDefaultDate) {
             const userUpdated = await this.userService.updateUserById(user.id, {
               last_login: new Date(),
               personal_data: {

@@ -172,6 +172,12 @@ const getRow = (
       if (col === 'phone') value = formatPhone(String(value))
       Object.assign(data, { [col]: getValue(value) })
     })
+    
+    // Se não tiver data de nascimento, adiciona data padrão
+    if (!data.dob) {
+      data.dob = '2017-12-23'
+    }
+    
     sleep(row.number).then(() => {
       schema
         .validate(data, {
