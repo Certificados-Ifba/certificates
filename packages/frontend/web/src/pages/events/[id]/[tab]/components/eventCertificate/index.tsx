@@ -73,7 +73,7 @@ export const EventCertificate: React.FC<Props> = ({ event }) => {
   return (
     <Container>
       {event?.status !== 'PUBLISHED' && <AddCertificate eventId={event?.id} />}
-      
+
       {/* Lista de modelos cadastrados */}
       <ModelList eventId={event?.id} />
 

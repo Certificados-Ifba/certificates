@@ -1,23 +1,23 @@
 import {
-  Controller,
-  Inject,
-  Get,
-  Post,
-  Delete,
-  Param,
   Body,
-  Req,
-  Res,
-  Query,
+  Controller,
+  Delete,
+  Get,
   HttpException,
-  HttpStatus
+  HttpStatus,
+  Inject,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import {
-  ApiTags,
-  ApiOkResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
-  ApiBearerAuth
+  ApiOkResponse,
+  ApiTags
 } from '@nestjs/swagger'
 import { Response } from 'express'
 
@@ -28,8 +28,8 @@ import { IServiceEventGetByIdResponse } from '../interfaces/event/service-event-
 import { CreateModelResponseDto } from '../interfaces/model/dto/create-model-response.dto'
 import { CreateModelDto } from '../interfaces/model/dto/create-model.dto'
 import { DeleteModelResponseDto } from '../interfaces/model/dto/delete-model-response.dto'
-import { ListModelDto } from '../interfaces/model/dto/list-model.dto'
 import { ListModelResponseDto } from '../interfaces/model/dto/list-model-response.dto'
+import { ListModelDto } from '../interfaces/model/dto/list-model.dto'
 import { ModelIdDto } from '../interfaces/model/dto/model-id.dto'
 import { IServiceModelCreateResponse } from '../interfaces/model/service-model-create-response.interface'
 import { IServiceModelDeleteResponse } from '../interfaces/model/service-model-delete-response.interface'
@@ -44,7 +44,7 @@ export class ModelsController {
     private readonly certificateServiceClient: ClientProxy,
     @Inject('EVENT_SERVICE')
     private readonly eventServiceClient: ClientProxy
-  ) {}
+  ) { }
 
   @Get()
   @Authorization(true)

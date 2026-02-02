@@ -11,7 +11,7 @@ import { ModelService } from '../services/model.service'
 
 @Controller()
 export class ModelController {
-  constructor(private readonly modelService: ModelService) {}
+  constructor(private readonly modelService: ModelService) { }
 
   @MessagePattern('model_list')
   public async modelList(

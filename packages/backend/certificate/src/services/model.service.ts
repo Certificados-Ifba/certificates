@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 
-import { IModel } from '../interfaces/model.interface'
 import { IModelListParams } from '../interfaces/model-list-params.interface'
 import { ModelDataResponse } from '../interfaces/model-list-response.interface'
+import { IModel } from '../interfaces/model.interface'
 
 @Injectable()
 export class ModelService {
   constructor(
     @InjectModel('Model')
     private readonly ModelModel: Model<IModel>
-  ) {}
+  ) { }
 
   public async createModel(modelBody: IModel): Promise<IModel> {
     const ModelModel = new this.ModelModel(modelBody)
