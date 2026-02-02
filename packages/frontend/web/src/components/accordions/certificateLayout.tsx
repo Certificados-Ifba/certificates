@@ -142,7 +142,7 @@ const CertificateLayout: React.FC<Props> = ({
               color="secondary"
               inline
               dropdownChildren={
-                <div>
+                <div className="dropdown" onClick={(e) => e.stopPropagation()}>
                   <Select
                     formRef={formRef}
                     handleOnSelect={data => {
@@ -166,6 +166,7 @@ const CertificateLayout: React.FC<Props> = ({
                       }
                     ]}
                     marginBottom="sm"
+                    menuPortalTarget={null}
                   />
                   {textConfig?.position === 'center' && (
                     <SliderBar
@@ -259,7 +260,7 @@ const CertificateLayout: React.FC<Props> = ({
             color="secondary"
             onChangeState={handleDropdownValidate}
             dropdownChildren={
-              <div>
+              <div className="dropdown" onClick={(e) => e.stopPropagation()}>
                 <Select
                   formRef={formRef}
                   handleOnSelect={data => {
@@ -281,6 +282,7 @@ const CertificateLayout: React.FC<Props> = ({
                     }
                   ]}
                   marginBottom="sm"
+                  menuPortalTarget={null}
                 />
                 <SliderBar
                   formRef={formRef}
@@ -327,6 +329,7 @@ const CertificateLayout: React.FC<Props> = ({
                     }
                   ]}
                   marginBottom="sm"
+                  menuPortalTarget={null}
                 />
                 {(textConfig.validateHorizontalPosition === 'left' ||
                   textConfig.validateHorizontalPosition === 'right') && (

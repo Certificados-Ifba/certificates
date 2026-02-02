@@ -15,15 +15,15 @@ interface Props extends ButtonProps {
   dropdownChildren: ReactNode
   icon?: React.ComponentType<IconBaseProps>
   dropdownColor?:
-    | 'primary'
-    | 'secondary'
-    | 'danger'
-    | 'info'
-    | 'success'
-    | 'warning'
-    | 'dark'
-    | 'medium'
-    | 'light'
+  | 'primary'
+  | 'secondary'
+  | 'danger'
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'dark'
+  | 'medium'
+  | 'light'
   onChangeState?: ({ active: boolean }) => void
   active: boolean
   setActive: Dispatch<SetStateAction<boolean>>
@@ -48,20 +48,31 @@ export const Dropdown: React.FC<Props> = ({ ...rest }) => {
   const handleEvt = useCallback(
     event => {
       let dropClick = false
-      if (event?.path instanceof Array) {
-        for (const path of event.path) {
+
+      // Usar composedPath() que é o padrão moderno (event.path é deprecated)
+      const path = event.composedPath ? event.composedPath() : (event.path || [])
+
+      if (path && path.length > 0) {
+        for (const element of path) {
           try {
-            for (const evtClass of path.classList) {
-              if (evtClass === 'dropdown') {
-                dropClick = true
-                break
+            if (element.classList) {
+              for (const evtClass of element.classList) {
+                // Verificar se é dropdown ou elemento do react-select
+                if (evtClass === 'dropdown' ||
+                  evtClass.includes('select__') ||
+                  evtClass.includes('css-') ||
+                  element.id?.includes('react-select')) {
+                  dropClick = true
+                  break
+                }
               }
             }
-          } catch (e) {}
+          } catch (e) { }
 
           if (dropClick) break
         }
       }
+
       if (!dropClick) {
         if (active) {
           setActive(false)
