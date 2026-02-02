@@ -1,6 +1,8 @@
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { FiImage } from 'react-icons/fi'
 
+import { useToast } from '../../providers/toast'
+import api from '../../services/axios'
 import {
   Container,
   Image,
@@ -47,6 +49,30 @@ const Certificate: React.FC<Props> = ({
   setPreview,
   image
 }) => {
+  const [loading, setLoading] = useState(false)
+  const { addToast } = useToast()
+
+  const handleUpload = useCallback(
+    async (formData: FormData) => {
+      setLoading(true)
+      try {
+        const { data } = await api.post('upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        setPreview(data.data)
+        setLoading(false)
+      } catch (err) {
+        addToast({
+          type: 'error',
+          title: 'Erro ao tentar enviar o arquivo',
+          description: err
+        })
+        setLoading(false)
+      }
+    },
+    [addToast, setPreview]
+  )
+
   return (
     <>
       <Container>
@@ -54,9 +80,7 @@ const Certificate: React.FC<Props> = ({
           {image && <Image img={image}></Image>}
           {!image && (
             <FileChooser
-              onUpload={async () => {
-                console.log()
-              }}
+              onUpload={handleUpload}
               type="image"
               info={
                 <>

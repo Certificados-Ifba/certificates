@@ -1,5 +1,4 @@
 export { ActivityModal } from './activityModal'
-export { AddCertificate } from './addCertificate'
 export { Certificate } from './certificate'
 export { CertificateForm } from './certificateForm'
 export { CertificateInfo } from './certificateInfo'
@@ -9,3 +8,4 @@ export { CertificatePreview } from './certificatePreview'
 export { EventCertificate } from './eventCertificate'
 export { EventParticipant } from './eventParticipant'
 export { Roles } from './roles'
+

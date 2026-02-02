@@ -1,8 +1,7 @@
-import { Grid } from '@components'
+import AddCertificate from '@components/accordions/addCertificate'
 import { IEvent, IModelCertificate } from '@dtos'
 import { useCallback, useState } from 'react'
 
-import { AddCertificate, CertificatePreview } from '../'
 import { Container } from './styles'
 
 interface Props {
