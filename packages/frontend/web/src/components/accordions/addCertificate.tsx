@@ -1,6 +1,6 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import {
   FiCheckSquare,
   FiEdit,
@@ -13,8 +13,6 @@ import {
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import ICertificate, { IModelCertificate } from '../../dtos/ICertificate'
-import { IEvent } from '../../dtos/IEvent'
 import { useToast } from '../../providers/toast'
 import api from '../../services/axios'
 import { Footer, Section } from '../../styles/components/accordion'
@@ -25,90 +23,145 @@ import { Accordion } from '../accordion'
 import { Button } from '../button'
 import { Input } from '../input'
 import CertificateLayout from './certificateLayout'
-import Roles from './roles'
 
 interface Props {
-  event: IEvent
+  eventId: string
   edit?: boolean
-  certificate: ICertificate
-  handleOnClose?: () => void
-  handleOnOpen?: (data: { isOpen: boolean; edit: boolean }) => void
 }
 
 const AddCertificate: React.FC<Props> = ({
-  event,
-  edit,
-  certificate,
-  handleOnClose,
-  handleOnOpen
+  eventId,
+  edit
 }) => {
-  const [layoutFrontFormRef, setLayoutFrontFormRef] = useState(null)
-  const [layoutVerseFormRef, setLayoutVerseFormRef] = useState(null)
-  const [rolesFormRef, setRolesFormRef] = useState(null)
-  const [loading, setLoading] = useState(false)
   const formRef = useRef<FormHandles>(null)
+  const layoutFrontFormRef = useRef<FormHandles>(null)
+  const layoutVerseFormRef = useRef<FormHandles>(null)
+  const [loading, setLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(!!edit)
+  const [isVerse, setIsVerse] = useState(false)
+  const [previewFront, setPreviewFront] = useState('')
+  const [previewVerse, setPreviewVerse] = useState('')
   const { addToast } = useToast()
-  const [cert, setCert] = useState(JSON.parse(JSON.stringify(certificate)))
-  const [isOpen, setIsOpen] = useState(edit)
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false)
+  }, [])
 
   const handleSubmit = useCallback(
-    data => {
-      const schema = Yup.object().shape({})
-      schema
-        .validate(data, {
+    async data => {
+      try {
+        console.log('📝 [DEBUG] Form data:', data)
+
+        setLoading(true)
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Nome do modelo é obrigatório')
+        })
+        formRef.current?.setErrors({})
+
+        await schema.validate(data, {
           abortEarly: false
         })
-        .then(async data => {
-          const response = await api.post(`event/${event?.id}/activity`, data)
 
-          if (response.data) {
-            addToast({
-              type: 'success',
-              title: `Modelo adicionado`,
-              description: `O modelo de certificado foi adicionado com sucesso.`
-            })
-          }
-        })
-        .catch(err => {
-          if (err instanceof Yup.ValidationError) {
-            const errors = getValidationErrors(err)
-            setLoading(false)
-            return
-          }
-          setLoading(false)
+        // Coletar dados dos layouts
+        const frontLayoutData = layoutFrontFormRef.current?.getData() || {}
+        const verseLayoutData = isVerse ? layoutVerseFormRef.current?.getData() || {} : null
 
-          addToast({
-            type: 'error',
-            title: `Erro ao adicionar as participações`,
-            description: err
+        console.log('🎨 [DEBUG] Front layout data:', frontLayoutData)
+        console.log('🔄 [DEBUG] Verse layout data:', verseLayoutData)
+        console.log('🖼️ [DEBUG] Preview front:', previewFront)
+        console.log('🖼️ [DEBUG] Preview verse:', previewVerse)
+
+        // Montar objeto pages conforme esperado pelo backend
+        const pages = [
+          {
+            type: 'frente',
+            text: frontLayoutData.html || '<p>Texto padrão</p>',
+            image: previewFront || '',
+            layout: {
+              padding: {
+                top: String(frontLayoutData.paddingTop || 15),
+                right: frontLayoutData.paddingRight || 15,
+                bottom: frontLayoutData.paddingBottom || 15,
+                left: String(frontLayoutData.paddingLeft || 15)
+              },
+              vertical: {
+                name: frontLayoutData.validateVerticalPosition || 'bottom',
+                value: Number(frontLayoutData.validateVerticalPadding || 0)
+              },
+              horizontal: {
+                name: frontLayoutData.validateHorizontalPosition || 'right',
+                value: Number(frontLayoutData.validateHorizontalPadding || 0)
+              }
+            }
+          }
+        ]
+
+        // Adicionar verso se existir
+        if (isVerse && verseLayoutData) {
+          pages.push({
+            type: 'verso',
+            text: verseLayoutData.html || '<p>Texto padrão</p>',
+            image: previewVerse || '',
+            layout: {
+              padding: {
+                top: String(verseLayoutData.paddingTop || 15),
+                right: verseLayoutData.paddingRight || 15,
+                bottom: verseLayoutData.paddingBottom || 15,
+                left: String(verseLayoutData.paddingLeft || 15)
+              },
+              vertical: {
+                name: verseLayoutData.validateVerticalPosition || 'bottom',
+                value: Number(verseLayoutData.validateVerticalPadding || 0)
+              },
+              horizontal: {
+                name: verseLayoutData.validateHorizontalPosition || 'right',
+                value: Number(verseLayoutData.validateHorizontalPadding || 0)
+              }
+            }
           })
+        }
+
+        const payload = {
+          name: data.name,
+          pages,
+          criterions: [] // Por enquanto vazio, pode ser implementado depois
+        }
+
+        console.log('🚀 [DEBUG] Payload to send:', JSON.stringify(payload, null, 2))
+
+        await api.post(`events/${eventId}/models`, payload)
+        addToast({
+          type: 'success',
+          title: 'Modelo adicionado',
+          description: 'O modelo de certificado foi adicionado com sucesso.'
         })
+        handleClose()
+        formRef.current?.reset()
+        setPreviewFront('')
+        setPreviewVerse('')
+        setLoading(false)
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err)
+          formRef.current?.setErrors(errors)
+          setLoading(false)
+          return
+        }
+        setLoading(false)
+        addToast({
+          type: 'error',
+          title: 'Erro ao adicionar o modelo',
+          description: err
+        })
+      }
     },
-    [event, addToast]
+    [addToast, eventId, handleClose, isVerse, previewFront, previewVerse]
   )
-
-  useEffect(() => {
-    if (handleOnOpen) handleOnOpen({ isOpen, edit })
-  }, [edit, handleOnOpen, isOpen])
-
-  const submit = useCallback(() => {
-    const data: IModelCertificate = {
-      name: formRef?.current?.getData().name,
-      pages: [],
-      criterions: []
-    }
-    console.log(data)
-
-    console.log(layoutFrontFormRef?.current?.getData())
-    console.log(layoutVerseFormRef?.current?.getData())
-    console.log(rolesFormRef?.current?.getData())
-    console.log(formRef?.current?.getData())
-  }, [formRef, layoutFrontFormRef, layoutVerseFormRef, rolesFormRef])
 
   return (
     <Accordion
       isOpen={isOpen}
-      onToggle={(state) => setIsOpen(state)}
+      onToggle={state => setIsOpen(state)}
       icon={edit ? FiEdit : FiPlusCircle}
       title={
         edit
@@ -116,14 +169,10 @@ const AddCertificate: React.FC<Props> = ({
           : 'Adicionar Modelo de Certificado'
       }
     >
-      <Section paddingTop="sm" paddingBottom="md">
-        <Row cols={2}>
-          <div>
-            <Form
-              initialData={{ name: cert?.name }}
-              ref={formRef}
-              onSubmit={handleSubmit}
-            >
+      <Form ref={formRef} onSubmit={handleSubmit}>
+        <Section paddingTop="sm" paddingBottom="md">
+          <Row cols={2}>
+            <div>
               <Input
                 type="text"
                 name="name"
@@ -131,95 +180,82 @@ const AddCertificate: React.FC<Props> = ({
                 placeholder="Ex.: Modelo Padrão"
                 icon={FiFileText}
               />
-            </Form>
-          </div>
-        </Row>
-      </Section>
-      <Divider />
-      <Section paddingTop="md" paddingBottom="sm">
-        <Accordion icon={FiImage} title="Layout Frente">
-          <CertificateLayout
-            onFormChange={form => {
-              setLayoutFrontFormRef(form)
-            }}
-            text={cert.front.text}
-          />
-        </Accordion>
-      </Section>
-
-      <Section paddingBottom="sm">
-        <Accordion icon={FiImage} title="Layout Verso">
-          <Section paddingTop="sm" paddingBottom="md">
-            <Button
-              size="small"
-              onClick={() => {
-                setCert({
-                  ...cert,
-                  verse: cert.verse ? null : { img: '', text: cert.front.text }
-                })
-              }}
-              outline={!cert.verse}
-              inline
-              type="button"
-            >
-              {cert.verse ? (
-                <FiCheckSquare size={20} />
-              ) : (
-                <FiSquare size={20} />
-              )}
-              <span>Possui verso?</span>
-            </Button>
-          </Section>
-
-          {cert.verse && (
+            </div>
+          </Row>
+        </Section>
+        <Divider />
+        <Section paddingTop="md" paddingBottom="sm">
+          <Accordion title="Layout Frente" icon={FiImage}>
             <CertificateLayout
-              onFormChange={form => {
-                setLayoutVerseFormRef(form)
-              }}
-              verse={true}
-              text={cert.verse.text}
+              type="frente"
+              text={
+                '<p>Certificamos que <strong>[participante_nome]</strong> participou da <strong>[evento_edicao] [evento_nome] ([evento_sigla])</strong> do Instituto Federal de Educação, Ciência e Tecnologia da Bahia (IFBA) Campus Vitória da Conquista, realizada no período de <strong>[participacao_periodo]</strong>, com carga horária de <strong>[participacao_carga_horaria]</strong></p>'
+              }
+              formRef={layoutFrontFormRef}
+              preview={previewFront}
+              setPreview={setPreviewFront}
             />
-          )}
-        </Accordion>
-      </Section>
-      <Section paddingBottom="md">
-        <Roles
-          id="add"
-          onFormChange={form => {
-            setRolesFormRef(form)
-          }}
-        />
-      </Section>
-      <Footer>
-        <div>
-          <Button
-            outline
-            color="secondary"
-            size="default"
-            type="button"
-            onClick={() => {
-              setIsOpen(false)
-              if (handleOnClose) handleOnClose()
-            }}
-          >
-            <FiX size={20} />
-            <span>{edit ? 'Fechar' : 'Cancelar'}</span>
-          </Button>
-        </div>
-        {!edit && (
-          <div className="first">
+          </Accordion>
+        </Section>
+
+        <Section paddingBottom="sm">
+          <Accordion icon={FiImage} title="Layout Verso">
+            <Section paddingTop="sm" paddingBottom="md">
+              <Button
+                size="small"
+                onClick={() => setIsVerse(state => !state)}
+                outline={!isVerse}
+                inline
+                type="button"
+              >
+                {isVerse ? <FiCheckSquare size={20} /> : <FiSquare size={20} />}
+                <span>Possui verso?</span>
+              </Button>
+            </Section>
+
+            {isVerse && (
+              <CertificateLayout
+                type="verso"
+                text={''}
+                formRef={layoutVerseFormRef}
+                preview={previewVerse}
+                setPreview={setPreviewVerse}
+              />
+            )}
+          </Accordion>
+        </Section>
+        <Section paddingBottom="md">
+          {/* Roles commented out for now */}
+        </Section>
+        <Footer>
+          <div>
             <Button
-              color={edit ? 'secondary' : 'primary'}
+              outline
+              color="secondary"
               size="default"
-              type="button"
-              onClick={submit}
+              type="reset"
+              disabled={loading}
+              onClick={handleClose}
             >
-              <FiPlus size={20} />
-              <span>Adicionar Modelo</span>
+              <FiX size={20} />
+              <span>{edit ? 'Fechar' : 'Cancelar'}</span>
             </Button>
           </div>
-        )}
-      </Footer>
+          {!edit && (
+            <div>
+              <Button
+                color={edit ? 'secondary' : 'primary'}
+                size="default"
+                type="submit"
+                loading={loading}
+              >
+                <FiPlus size={20} />
+                <span>Adicionar Modelo</span>
+              </Button>
+            </div>
+          )}
+        </Footer>
+      </Form>
     </Accordion>
   )
 }

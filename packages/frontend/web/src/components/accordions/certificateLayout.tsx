@@ -1,9 +1,7 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import {
-  MutableRefObject,
   useCallback,
-  useEffect,
   useRef,
   useState
 } from 'react'
@@ -18,6 +16,7 @@ import { Divider } from '../../styles/components/divider'
 import { useDebounce } from '../../utils/debounce'
 import { Button } from '../button'
 import { Dropdown } from '../dropdown'
+import { Input } from '../input'
 import { VariableModal } from '../modals/variableModal'
 import { RichTextEditor } from '../richTextEditor'
 import { Select } from '../select'
@@ -50,24 +49,35 @@ export const initialTextConfig = {
 }
 
 interface Props {
+  type: 'frente' | 'verso'
   text: string
-  verse?: boolean
-  onFormChange: (formRef: MutableRefObject<FormHandles>) => void
+  formRef?: MutableRefObject<FormHandles>
+  preview?: string
+  setPreview?: (value: string) => void
 }
 
-const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
+const CertificateLayout: React.FC<Props> = ({
+  type,
+  text,
+  formRef: externalFormRef,
+  preview: externalPreview,
+  setPreview: externalSetPreview
+}) => {
+  const internalFormRef = useRef<FormHandles>(null)
+  const formRef = externalFormRef || internalFormRef
+
+  const [internalPreview, setInternalPreview] = useState('')
+  const preview = externalPreview !== undefined ? externalPreview : internalPreview
+  const setPreview = externalSetPreview || setInternalPreview
   const [textConfig, setTextConfig] = useState<any>({
     html: text,
     ...initialTextConfig
   })
-  const formRef = useRef<FormHandles>(null)
-
-  useEffect(() => {
-    onFormChange(formRef)
-  }, [formRef, onFormChange])
 
   const [displayTextGuide, setDisplayTextGuide] = useState(false)
   const [displayValidateGuide, setDisplayValidateGuide] = useState(false)
+  const [dropdownTextActive, setDropdownTextActive] = useState(false)
+  const [dropdownValidateActive, setDropdownValidateActive] = useState(false)
   const [stateRichText, setStateRichText] = useState(null)
 
   const { run } = useDebounce<any>(config => {
@@ -76,7 +86,11 @@ const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
 
   const onConfigChange = useCallback(config => {
     setTextConfig({ ...config })
-  }, [])
+    // Atualizar o formulário com o novo HTML
+    if (formRef.current) {
+      formRef.current.setFieldValue('html', config.html)
+    }
+  }, [formRef])
 
   const [openModal, setOpenModal] = useState(false)
 
@@ -89,16 +103,12 @@ const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
     setStateRichText(value)
   }, [])
 
-  const [dropdownTextActive, setdropdownTextActive] = useState(false)
-  const [dropdownValidateActive, setDropdownValidateActive] = useState(false)
   const handleDropdownText = useCallback(({ active }) => {
     setDisplayTextGuide(active)
   }, [])
   const handleDropdownValidate = useCallback(({ active }) => {
     setDisplayValidateGuide(active)
   }, [])
-
-  const [preview, setPreview] = useState('')
 
   return (
     <Form
@@ -110,6 +120,8 @@ const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
     >
       <Section paddingTop="sm" paddingBottom="sm">
         <div>
+          {/* Campo hidden para manter o HTML no formulário */}
+          <Input type="hidden" name="html" value={textConfig.html} />
           <RichTextEditor
             onChange={({ html }) =>
               onConfigChange({ ...textConfig, html: html })
@@ -125,7 +137,7 @@ const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
           <div className="first-button">
             <Dropdown
               active={dropdownTextActive}
-              setActive={setdropdownTextActive}
+              setActive={setDropdownTextActive}
               onChangeState={handleDropdownText}
               color="secondary"
               inline
@@ -318,27 +330,27 @@ const CertificateLayout: React.FC<Props> = ({ text, verse, onFormChange }) => {
                 />
                 {(textConfig.validateHorizontalPosition === 'left' ||
                   textConfig.validateHorizontalPosition === 'right') && (
-                  <SliderBar
-                    step="0.5"
-                    formRef={formRef}
-                    name="validateHorizontalPadding"
-                    label={
-                      'Margem ' +
-                      (textConfig.validateHorizontalPosition === 'left'
-                        ? 'esquerda'
-                        : 'direita')
-                    }
-                    marginBottom="sm"
-                    min="0"
-                    max="10"
-                    onChange={data => {
-                      run({
-                        ...textConfig,
-                        validateHorizontalPadding: data.target.value
-                      })
-                    }}
-                  />
-                )}
+                    <SliderBar
+                      step="0.5"
+                      formRef={formRef}
+                      name="validateHorizontalPadding"
+                      label={
+                        'Margem ' +
+                        (textConfig.validateHorizontalPosition === 'left'
+                          ? 'esquerda'
+                          : 'direita')
+                      }
+                      marginBottom="sm"
+                      min="0"
+                      max="10"
+                      onChange={data => {
+                        run({
+                          ...textConfig,
+                          validateHorizontalPadding: data.target.value
+                        })
+                      }}
+                    />
+                  )}
               </div>
             }
           >
