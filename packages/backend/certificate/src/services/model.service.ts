@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 
 import { IModel } from '../interfaces/model.interface'
+import { IModelListParams } from '../interfaces/model-list-params.interface'
+import { ModelDataResponse } from '../interfaces/model-list-response.interface'
 
 @Injectable()
 export class ModelService {
@@ -24,34 +26,31 @@ export class ModelService {
     return await this.ModelModel.findOneAndDelete({ _id: id })
   }
 
-  // public async listModels({
-  //   event,
-  //   page,
-  //   perPage,
-  //   sortBy = 'created_at',
-  //   orderBy = 'ASC'
-  // }: IModelListParams): Promise<DataResponse> {
-  //   const query = {
-  //     event: new Types.ObjectId(event)
-  //   }
+  public async listModels({
+    event,
+    page = 1,
+    perPage = 10,
+    sortBy = 'created_at',
+    orderBy = 'ASC'
+  }: IModelListParams): Promise<ModelDataResponse> {
+    const query = {
+      event: new Types.ObjectId(event)
+    }
 
-  //   const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
+    const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
 
-  //   const certificates = await this.ModelModel.find(query)
-  //     .populate('function')
-  //     .populate('activity')
-  //     .populate('participant')
-  //     .skip(perPage * (page - 1))
-  //     .limit(perPage)
-  //     .sort(sort)
-  //     .exec()
+    const models = await this.ModelModel.find(query)
+      .skip(perPage * (page - 1))
+      .limit(perPage)
+      .sort(sort)
+      .exec()
 
-  //   const count = await this.ModelModel.countDocuments(query)
+    const count = await this.ModelModel.countDocuments(query)
 
-  //   return {
-  //     certificates,
-  //     totalPages: Math.ceil(count / perPage),
-  //     totalCount: count
-  //   }
-  // }
+    return {
+      models,
+      totalPages: Math.ceil(count / perPage),
+      totalCount: count
+    }
+  }
 }
