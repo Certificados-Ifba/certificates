@@ -1,6 +1,14 @@
-# compiled output
-dist
+# OS
+.DS_Store
+
+# Node
 node_modules
+dist
+build
+
+# Coverage
+coverage
+.nyc_output
 
 # Logs
 logs
@@ -10,15 +18,14 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# OS
-.DS_Store
-
-coverage
-.nyc_output
-
+# Env
 .env
 
+# Docker/Mongo
 docker/db/*
 !*.gitkeep
+docker/db/data
+docker/db_backup
 
+# VS Code
 .vscode

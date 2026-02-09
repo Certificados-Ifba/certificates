@@ -11,7 +11,7 @@ dev.build:
 		down --rmi local --volumes --remove-orphans
 
 dev.up:
-	COMPOSE_PROJECT_NAME=$(PROJECT) docker-compose \
+	COMPOSE_PROJECT_NAME=$(PROJECT) docker compose \
 		-f docker-compose.yml -f docker-compose.dev.yml \
 		up -d --remove-orphans
 
