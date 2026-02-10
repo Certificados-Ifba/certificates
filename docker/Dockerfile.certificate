@@ -6,10 +6,22 @@ RUN yarn config set enableIPv6 false \
  && yarn config set networkFamily ipv4 \
  && yarn config set enable-http2 false
 
+# arquivos base
 COPY package.json yarn.lock prettier.config.js tsconfig.json .eslintrc.js .eslintignore ./
 COPY packages/shared ./packages/shared
 COPY packages/backend/certificate/package.json ./packages/backend/certificate/
 
-RUN yarn && yarn cache clean
+# instala dependências
+RUN yarn install --frozen-lockfile
 
-COPY packages/backend/certificate/ ./packages/backend/certificate/
+# copia código
+COPY packages/backend/certificate ./packages/backend/certificate
+
+# build do certificate (NestJS)
+RUN yarn workspace @certificates/certificate build
+
+WORKDIR /usr/src/app/packages/backend/certificate
+
+EXPOSE 4009
+
+CMD ["node", "dist/main.js"]
