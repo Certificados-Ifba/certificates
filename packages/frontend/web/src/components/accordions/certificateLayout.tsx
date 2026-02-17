@@ -16,7 +16,6 @@ import { Divider } from '../../styles/components/divider'
 import { useDebounce } from '../../utils/debounce'
 import { Button } from '../button'
 import { Dropdown } from '../dropdown'
-import { Input } from '../input'
 import { VariableModal } from '../modals/variableModal'
 import { RichTextEditor } from '../richTextEditor'
 import { Select } from '../select'
@@ -120,8 +119,6 @@ const CertificateLayout: React.FC<Props> = ({
     >
       <Section paddingTop="sm" paddingBottom="sm">
         <div>
-          {/* Campo hidden para manter o HTML no formulário */}
-          <Input type="hidden" name="html" value={textConfig.html} />
           <RichTextEditor
             onChange={({ html }) =>
               onConfigChange({ ...textConfig, html: html })
