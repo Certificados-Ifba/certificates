@@ -1,0 +1,35 @@
+name: Deploy Activity Service
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      activity: ${{ steps.filter.outputs.activity }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            activity:
+              - 'packages/backend/activity/**'
+
+  deploy:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.activity == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Coolify Deploy
+        run: |
+          curl -X POST "${{ secrets.COOLIFY_ACTIVITY_WEBHOOK }}"
