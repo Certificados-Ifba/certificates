@@ -5,6 +5,13 @@ on:
     branches:
       - develop
 
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: "Forçar deploy mesmo sem mudanças"
+        required: false
+        default: "false"
+
 jobs:
 
   detect-changes:
@@ -26,8 +33,10 @@ jobs:
 
   deploy:
     needs: detect-changes
-    if: needs.detect-changes.outputs.activity == 'true'
     runs-on: ubuntu-latest
+    if: |
+      needs.detect-changes.outputs.activity == 'true' ||
+      github.event.inputs.force_deploy == 'true'
 
     steps:
       - name: Trigger Coolify Deploy
