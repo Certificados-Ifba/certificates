@@ -16,30 +16,8 @@ on:
 
 jobs:
 
-  detect-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      token: ${{ steps.filter.outputs.token }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Detect changes
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            token:
-              - 'packages/backend/token/**'
-
   deploy:
-    needs: detect-changes
     runs-on: ubuntu-latest
-
-    if: |
-      needs.detect-changes.outputs.token == 'true' ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
 
     steps:
       - name: Trigger Coolify Deploy

@@ -16,30 +16,8 @@ on:
 
 jobs:
 
-  detect-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      generic: ${{ steps.filter.outputs.generic }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Detect changes
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            generic:
-              - 'packages/backend/generic/**'
-
   deploy:
-    needs: detect-changes
     runs-on: ubuntu-latest
-
-    if: |
-      needs.detect-changes.outputs.generic == 'true' ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
 
     steps:
       - name: Trigger Coolify Deploy
