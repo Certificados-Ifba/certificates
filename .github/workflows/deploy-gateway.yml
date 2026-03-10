@@ -18,6 +18,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
 
     steps:
       - name: Trigger Coolify Deploy
