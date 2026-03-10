@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - develop
+    paths:
+      - 'packages/backend/mailer/**'
 
   workflow_dispatch:
     inputs:
@@ -43,5 +45,6 @@ jobs:
       - name: Trigger Coolify Deploy
         run: |
           curl -X POST \
+            --fail --fail-with-body --show-error \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_DEPLOY_TOKEN }}" \
             "${{ secrets.COOLIFY_MAILER_WEBHOOK }}"
