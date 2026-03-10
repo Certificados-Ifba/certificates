@@ -1,5 +1,6 @@
 import {
   Alert,
+  AsyncSelect,
   Button,
   Card,
   CardIcon,
@@ -10,10 +11,8 @@ import {
   Header,
   Input,
   PaginatedTable,
-  NewSelect,
   TableRow,
-  Tag,
-  AsyncSelect
+  Tag
 } from '@components'
 import { IEvent, IUser, statusEvent } from '@dtos'
 import { withAuth } from '@hocs'
@@ -75,8 +74,8 @@ const Home: React.FC = () => {
       filters && order !== ''
         ? Object.assign(filters, { sort_by: column, order_by: order })
         : order !== ''
-        ? { sort_by: column, order_by: order }
-        : filters
+          ? { sort_by: column, order_by: order }
+          : filters
   })
 
   const handleFilter = useCallback(
@@ -120,10 +119,10 @@ const Home: React.FC = () => {
   return (
     <Container>
       <Head>
-        <title>Página Inicial | Certificados</title>
+        <title>Página quase Inicial | Certificados</title>
       </Head>
       <Header
-        title="Página Inicial"
+        title="Página quase Inicial"
         subtitle={
           <>
             Seja bem vindo, <b>{firstName}</b>

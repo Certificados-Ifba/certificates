@@ -1,6 +1,6 @@
 export const formatCpf = (cpf: string): string => {
   if (!cpf) return ''
-  if (cpf.length < 11) cpf = cpf.padStart(11, '0')
+  // if (cpf.length < 11) cpf = cpf.padStart(11, '0')
   return cpf
     .replace(/\D/g, '')
     .replace(/(\d{3})(\d)/, '$1.$2')
