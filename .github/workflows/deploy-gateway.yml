@@ -12,18 +12,20 @@ on:
       force_deploy:
         description: "Forçar deploy mesmo sem mudanças"
         required: false
-        default: "false"
+        type: boolean
+        default: false
 
 jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    permissions: {}
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
 
     steps:
       - name: Trigger Coolify Deploy
         run: |
-          curl -X POST \
+          curl --connect-timeout 5 --max-time 30 --retry 3 -X POST \
             --fail --fail-with-body --show-error \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_DEPLOY_TOKEN }}" \
             "${{ secrets.COOLIFY_GATEWAY_WEBHOOK }}"
