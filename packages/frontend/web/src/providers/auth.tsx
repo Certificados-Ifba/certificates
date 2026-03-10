@@ -94,16 +94,23 @@ export const AuthProvider: React.FC = ({ children }) => {
   const signIn = useCallback(
     async (data: SignInCredentials) => {
       let token
+
       if (data.login && data.password) {
-        const response = await api.post('/sessions', {
-          email: data.login,
-          password: data.password
-        })
-        token = response.data?.data.token
+        try {
+          const response = await api.post('/sessions', {
+            email: data.login,
+            password: data.password
+          })
+          token = response.data?.data.token
+        } catch (error) {
+          throw error
+        }
       } else {
         token = data.token
       }
+
       const payload: any = decode(token || '')
+
       setToken(token)
       setData({ token, user: payload?.user })
     },

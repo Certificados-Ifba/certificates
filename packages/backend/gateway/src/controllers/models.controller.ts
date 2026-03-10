@@ -1,21 +1,25 @@
 import {
-  Controller,
-  Inject,
-  Post,
-  Delete,
-  Param,
   Body,
-  Req,
+  Controller,
+  Delete,
+  Get,
   HttpException,
-  HttpStatus
+  HttpStatus,
+  Inject,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import {
-  ApiTags,
-  ApiOkResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
-  ApiBearerAuth
+  ApiOkResponse,
+  ApiTags
 } from '@nestjs/swagger'
+import { Response } from 'express'
 
 import { Authorization } from '../decorators/authorization.decorator'
 import { Permission } from '../decorators/permission.decorator'
@@ -24,9 +28,12 @@ import { IServiceEventGetByIdResponse } from '../interfaces/event/service-event-
 import { CreateModelResponseDto } from '../interfaces/model/dto/create-model-response.dto'
 import { CreateModelDto } from '../interfaces/model/dto/create-model.dto'
 import { DeleteModelResponseDto } from '../interfaces/model/dto/delete-model-response.dto'
+import { ListModelResponseDto } from '../interfaces/model/dto/list-model-response.dto'
+import { ListModelDto } from '../interfaces/model/dto/list-model.dto'
 import { ModelIdDto } from '../interfaces/model/dto/model-id.dto'
 import { IServiceModelCreateResponse } from '../interfaces/model/service-model-create-response.interface'
 import { IServiceModelDeleteResponse } from '../interfaces/model/service-model-delete-response.interface'
+import { IServiceModelListResponse } from '../interfaces/model/service-model-list-response.interface'
 
 @Controller('events/:event_id/models')
 @ApiBearerAuth('JWT')
@@ -37,7 +44,59 @@ export class ModelsController {
     private readonly certificateServiceClient: ClientProxy,
     @Inject('EVENT_SERVICE')
     private readonly eventServiceClient: ClientProxy
-  ) {}
+  ) { }
+
+  @Get()
+  @Authorization(true)
+  @Permission('model_list')
+  @ApiOkResponse({
+    type: ListModelResponseDto,
+    description: 'List of models'
+  })
+  public async getModels(
+    @Req() request: IAuthorizedRequest,
+    @Param() params: ModelIdDto,
+    @Res({ passthrough: true }) res: Response,
+    @Query() query: ListModelDto
+  ): Promise<ListModelResponseDto> {
+    const { page = 1, per_page = 10, sort_by, order_by } = query
+
+    const eventResponse: IServiceEventGetByIdResponse = await this.eventServiceClient
+      .send('event_get_by_id', {
+        id: params.event_id,
+        user: request.user
+      })
+      .toPromise()
+
+    if (eventResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: eventResponse.message,
+          data: null,
+          errors: null
+        },
+        eventResponse.status
+      )
+    }
+
+    const modelsResponse: IServiceModelListResponse = await this.certificateServiceClient
+      .send('model_list', {
+        event: eventResponse.data.event.id,
+        page: Number(page),
+        perPage: Number(per_page),
+        sortBy: sort_by,
+        orderBy: order_by
+      })
+      .toPromise()
+
+    res.header('x-total-count', String(modelsResponse?.data.totalCount))
+    res.header('x-total-page', String(modelsResponse?.data.totalPages))
+
+    return {
+      message: modelsResponse.message,
+      data: modelsResponse?.data?.models
+    }
+  }
 
   @Post()
   @Authorization(true)

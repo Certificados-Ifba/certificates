@@ -30,6 +30,9 @@ export const FormLogin: React.FC<Props> = ({ setForgotPassword }) => {
       try {
         setLoading(true)
         formRef.current?.setErrors({})
+
+        console.log('🔐 [LOGIN DEBUG] Iniciando login com:', { login: data.login, password: '***' })
+
         const schema = Yup.object().shape({
           login: Yup.string()
             .required('Por favor, digite o seu login')
@@ -47,7 +50,7 @@ export const FormLogin: React.FC<Props> = ({ setForgotPassword }) => {
         })
 
         setLoading(false)
-        router.replace('/')
+        router.push('/dashboard')
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err)

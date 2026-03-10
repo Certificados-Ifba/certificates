@@ -19,14 +19,18 @@ interface ValidateContainerProps {
   orientation?: 'horizontal' | 'vertical'
 }
 
-export const Container = styled.div`
-  width: 1280px;
+export const ImageContainer = styled.div`
   position: relative;
+  width: 1280px;
   height: 878px;
   overflow: hidden;
   > div {
     width: 1280px;
   }
+`
+
+export const Container = styled.div`
+  position: relative;
 `
 
 export const ValidateContainer = styled.div<ValidateContainerProps>`
