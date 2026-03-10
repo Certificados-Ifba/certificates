@@ -185,8 +185,7 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles, id }) => {
                           size="small"
                           type="button"
                           onClick={() => {
-                            roleList.splice(roleList.indexOf(role), 1)
-                            setRoleList([...roleList])
+                            setRoleList(current => current.filter(r => r !== role))
                           }}
                         >
                           <FiMinus size={20} /> <span>Remover</span>

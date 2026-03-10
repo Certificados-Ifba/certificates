@@ -66,11 +66,6 @@ const AddCertificate: React.FC<Props> = ({
         const frontLayoutData = layoutFrontFormRef.current?.getData() || {}
         const verseLayoutData = isVerse ? layoutVerseFormRef.current?.getData() || {} : null
 
-        console.log('🎨 [DEBUG] Front layout data:', frontLayoutData)
-        console.log('🔄 [DEBUG] Verse layout data:', verseLayoutData)
-        console.log('🖼️ [DEBUG] Preview front:', previewFront)
-        console.log('🖼️ [DEBUG] Preview verse:', previewVerse)
-
         // Montar objeto pages conforme esperado pelo backend
         const pages = [
           {

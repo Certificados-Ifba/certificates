@@ -60,7 +60,6 @@ const CertificateInfo: React.FC<Props> = ({ eventId, certificate }) => {
           authorship_order: certificate.authorship_order,
           additional_field: certificate.additional_field
         })
-        console.log(data?.data?.certificate?.id)
 
         handleUpdate(certificate, { id: data?.data?.certificate?.id })
         setLoading(false)

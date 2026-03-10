@@ -37,7 +37,6 @@ export interface IRole {
 }
 
 export type { ICertificate }
-export default ICertificate
 
 export interface ILayout {
   padding: string

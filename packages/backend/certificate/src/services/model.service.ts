@@ -37,7 +37,7 @@ export class ModelService {
       event: new Types.ObjectId(event)
     }
 
-    const sort = JSON.parse(`{"${sortBy}":"${orderBy}"}`)
+    const sort = { [sortBy]: orderBy }
 
     const models = await this.ModelModel.find(query)
       .skip(perPage * (page - 1))
