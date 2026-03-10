@@ -8,19 +8,13 @@ on:
       - 'packages/backend/generic/**'
 
   workflow_dispatch:
-    inputs:
-      force_deploy:
-        description: "Forçar deploy mesmo sem mudanças"
-        required: false
-        type: boolean
-        default: false
 
 jobs:
 
   deploy:
     runs-on: ubuntu-latest
     permissions: {}
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Trigger Coolify Deploy
