@@ -1,0 +1,47 @@
+name: Deploy Mailer Service
+
+on:
+  push:
+    branches:
+      - develop
+
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: "Forçar deploy mesmo sem mudanças"
+        required: false
+        default: "false"
+
+jobs:
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      mailer: ${{ steps.filter.outputs.mailer }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            mailer:
+              - 'packages/backend/mailer/**'
+
+  deploy:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+
+    if: |
+      needs.detect-changes.outputs.mailer == 'true' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
+
+    steps:
+      - name: Trigger Coolify Deploy
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_DEPLOY_TOKEN }}" \
+            "${{ secrets.COOLIFY_MAILER_WEBHOOK }}"

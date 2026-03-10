@@ -1,0 +1,47 @@
+name: Deploy Storage Service
+
+on:
+  push:
+    branches:
+      - develop
+
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: "Forçar deploy mesmo sem mudanças"
+        required: false
+        default: "false"
+
+jobs:
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      storage: ${{ steps.filter.outputs.storage }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            storage:
+              - 'packages/backend/storage/**'
+
+  deploy:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+
+    if: |
+      needs.detect-changes.outputs.storage == 'true' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
+
+    steps:
+      - name: Trigger Coolify Deploy
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_DEPLOY_TOKEN }}" \
+            "${{ secrets.COOLIFY_STORAGE_WEBHOOK }}"
