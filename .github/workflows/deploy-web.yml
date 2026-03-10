@@ -1,11 +1,11 @@
-name: Deploy Activity Service
+name: Deploy Web Service
 
 on:
   push:
     branches:
       - develop
     paths:
-      - 'packages/backend/activity/**'
+      - 'packages/frontend/web/**'
 
   workflow_dispatch:
 
@@ -14,7 +14,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions: {}
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Trigger Coolify Deploy
@@ -22,4 +21,4 @@ jobs:
           curl --connect-timeout 5 --max-time 30 --retry 3 -X POST \
             --fail --fail-with-body --show-error \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_DEPLOY_TOKEN }}" \
-            "${{ secrets.COOLIFY_ACTIVITY_WEBHOOK }}"
+            "${{ secrets.COOLIFY_WEB_WEBHOOK }}"

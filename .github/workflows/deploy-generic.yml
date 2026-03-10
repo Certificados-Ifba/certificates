@@ -1,11 +1,11 @@
-name: Deploy Activity Service
+name: Deploy Generic Service
 
 on:
   push:
     branches:
       - develop
     paths:
-      - 'packages/backend/activity/**'
+      - 'packages/backend/generic/**'
 
   workflow_dispatch:
 
@@ -22,4 +22,4 @@ jobs:
           curl --connect-timeout 5 --max-time 30 --retry 3 -X POST \
             --fail --fail-with-body --show-error \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_DEPLOY_TOKEN }}" \
-            "${{ secrets.COOLIFY_ACTIVITY_WEBHOOK }}"
+            "${{ secrets.COOLIFY_GENERIC_WEBHOOK }}"
