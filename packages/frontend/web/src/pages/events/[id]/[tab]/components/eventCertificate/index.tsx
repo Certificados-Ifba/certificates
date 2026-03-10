@@ -1,8 +1,8 @@
-import { Grid } from '@components'
+import AddCertificate from '@components/accordions/addCertificate'
+import { ModelList } from '@components/accordions/modelList'
 import { IEvent, IModelCertificate } from '@dtos'
 import { useCallback, useState } from 'react'
 
-import { AddCertificate, CertificatePreview } from '../'
 import { Container } from './styles'
 
 interface Props {
@@ -73,6 +73,10 @@ export const EventCertificate: React.FC<Props> = ({ event }) => {
   return (
     <Container>
       {event?.status !== 'PUBLISHED' && <AddCertificate eventId={event?.id} />}
+
+      {/* Lista de modelos cadastrados */}
+      <ModelList eventId={event?.id} />
+
       {/* {showAdd && (
         <AddCertificate
           certificate={{

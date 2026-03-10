@@ -4,7 +4,7 @@ export * from './ICertificateValid'
 export * from './IEvent'
 export * from './IGeneric'
 export * from './IGroupVariable'
-export * from './IModelCertificate'
 export * from './IParticipant'
 export * from './IUser'
 export * from './IVariable'
+

@@ -4,27 +4,27 @@ import { MessagePattern } from '@nestjs/microservices'
 import { IModelByIdResponse } from '../interfaces/model-by-id-response.interface'
 import { IModelCreateResponse } from '../interfaces/model-create-response.interface'
 import { IModelDeleteResponse } from '../interfaces/model-delete-response.interface'
-// import { IModelListParams } from '../interfaces/model-list-params.interface'
-// import { IModelListResponse } from '../interfaces/model-list-response.interface'
+import { IModelListParams } from '../interfaces/model-list-params.interface'
+import { IModelListResponse } from '../interfaces/model-list-response.interface'
 import { IModel } from '../interfaces/model.interface'
 import { ModelService } from '../services/model.service'
 
 @Controller()
 export class ModelController {
-  constructor(private readonly modelService: ModelService) {}
+  constructor(private readonly modelService: ModelService) { }
 
-  // @MessagePattern('model_list')
-  // public async modelList(
-  //   params: IModelListParams
-  // ): Promise<IModelListResponse> {
-  //   const models = await this.modelService.listModels(params)
+  @MessagePattern('model_list')
+  public async modelList(
+    params: IModelListParams
+  ): Promise<IModelListResponse> {
+    const models = await this.modelService.listModels(params)
 
-  //   return {
-  //     status: HttpStatus.OK,
-  //     message: 'model_list_success',
-  //     data: models
-  //   }
-  // }
+    return {
+      status: HttpStatus.OK,
+      message: 'model_list_success',
+      data: models
+    }
+  }
 
   @MessagePattern('model_get_by_id')
   public async getModelById(params: {

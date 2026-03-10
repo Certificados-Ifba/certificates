@@ -1,9 +1,10 @@
 version: '3'
 services:
-  web:
-    command: yarn workspace @certificates/web dev
-    volumes:
-      - ./packages/frontend/web:/usr/src/app/packages/frontend/web
+  # web:
+  #   command: yarn workspace @certificates/web dev
+  #   volumes:
+  #     - ./packages/frontend/web:/usr/src/app/packages/frontend/web
+  #     - /usr/src/app/packages/frontend/web/node_modules
   gateway:
     command: yarn workspace @certificates/gateway dev
     volumes:

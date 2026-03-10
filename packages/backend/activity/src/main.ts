@@ -7,6 +7,7 @@ import { ConfigService } from './services/config/config.service'
 async function bootstrap() {
   const app = await NestFactory.createMicroservice(ActivityModule, {
     transport: Transport.TCP,
+
     options: {
       host: '0.0.0.0',
       port: new ConfigService().get('port')
