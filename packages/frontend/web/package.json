@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^0.3.7",
-    "@types/lodash": "4.14.168",
+    "@types/lodash": "^4.14.179",
     "@unform/core": "^2.1.6",
     "@unform/web": "^2.1.6",
     "axios": "^0.21.1",
@@ -52,16 +52,15 @@
     "@types/draftjs-to-html": "^0.8.0",
     "@types/html-to-draftjs": "^1.4.0",
     "@types/js-cookie": "^2.2.6",
-    "@types/node": "14.14.31",
+    "@types/node": "14.0.27",
     "@types/nprogress": "^0.2.0",
     "@types/page": "^1.11.2",
-    "@types/react": "17.0.3",
+    "@types/react": "^17.0.3",
     "@types/react-dom": "17.0.3",
     "@types/react-draft-wysiwyg": "^1.13.2",
     "@types/react-select": "^4.0.13",
     "@types/styled-components": "^5.1.9",
     "@types/uuid": "^8.3.0",
-    "babel-plugin-inline-react-svg": "^2.0.1",
-    "typescript": "4.2.3"
+    "babel-plugin-inline-react-svg": "^2.0.1"
   }
 }
