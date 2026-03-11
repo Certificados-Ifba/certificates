@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^0.3.7",
-    "@types/lodash": "^4.14.179",
+    "@types/lodash": "4.14.168",
     "@unform/core": "^2.1.6",
     "@unform/web": "^2.1.6",
     "axios": "^0.21.1",
