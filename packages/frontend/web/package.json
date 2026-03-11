@@ -15,7 +15,7 @@
     "@types/lodash": "^4.14.179",
     "@unform/core": "^2.1.6",
     "@unform/web": "^2.1.6",
-    "axios": "^0.21.1",
+    "axios": "^1.13.5",
     "babel-plugin-styled-components": "^2.0.6",
     "caniuse-lite": "^1.0.30001255",
     "cookie": "^0.4.1",
