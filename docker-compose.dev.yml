@@ -2,6 +2,7 @@ version: '3'
 services:
   web:
     command: yarn workspace @certificates/web dev
+    user: '${UID:-1000}:${GID:-1000}'
     volumes:
       - ./packages/frontend/web:/usr/src/app/packages/frontend/web
   gateway:
