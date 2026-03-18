@@ -14,6 +14,7 @@ import { withAuth } from '@hocs'
 import { useAuth, useToast } from '@providers'
 import { api, usePaginatedRequest } from '@services'
 import { Form } from '@unform/web'
+import { maskEmail } from '@utils'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
@@ -27,6 +28,27 @@ import {
 } from 'react-icons/fi'
 
 import { ParticipantModal } from './components'
+
+const maskCpf = (cpf: string): string => {
+  if (!cpf) return ''
+  const clean = cpf.replace(/\D/g, '')
+  if (clean.length !== 11) return cpf
+  return `***.${clean.slice(3, 6)}.${clean.slice(6, 9)}-**`
+}
+
+const maskDob = (dob: string): string => {
+  if (!dob) return ''
+  const str = String(dob)
+  // Formato ISO: YYYY-MM-DD ou YYYY-MM-DDTHH:...
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    return `${str.slice(8, 10)}/${str.slice(5, 7)}/****`
+  }
+  // Formato DD/MM/YYYY ou DD-MM-YYYY
+  if (str.length >= 6) {
+    return str.substring(0, 6) + '****'
+  }
+  return '****'
+}
 
 const Participants: React.FC = () => {
   const [show, setShow] = useState(false)
@@ -46,8 +68,8 @@ const Participants: React.FC = () => {
       filters && order !== ''
         ? Object.assign(filters, { sort_by: column, order_by: order })
         : order !== ''
-        ? { sort_by: column, order_by: order }
-        : filters
+          ? { sort_by: column, order_by: order }
+          : filters
   })
 
   const handleSubmitDelete = useCallback(async () => {
@@ -151,6 +173,7 @@ const Participants: React.FC = () => {
             <FiFilePlus size={20} />
             <span>Importar via Planilha</span>
           </Button>
+
         </header>
         <PaginatedTable request={request}>
           <thead>
@@ -203,9 +226,9 @@ const Participants: React.FC = () => {
             {request.data?.data?.map(participant => (
               <tr key={participant.id}>
                 <td>{participant.name}</td>
-                <td>{participant.personal_data.cpf}</td>
-                <td>{participant.personal_data.dob}</td>
-                <td>{participant.email}</td>
+                <td>{maskCpf(participant.personal_data.cpf)}</td>
+                <td>{maskDob(participant.personal_data.dob)}</td>
+                <td>{maskEmail(participant.email)}</td>
                 <td>{participant.personal_data.phone}</td>
                 <td>{participant.personal_data.institution ? 'Sim' : 'Não'}</td>
                 <td>{new Date(participant.updated_at).toLocaleString()}</td>
