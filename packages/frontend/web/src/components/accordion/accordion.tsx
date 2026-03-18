@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { ComponentType, useCallback, useEffect, useState } from 'react'
 import { IconBaseProps } from 'react-icons'
 import { FiChevronDown } from 'react-icons/fi'
 
@@ -6,7 +6,7 @@ import { Container, Header, Content } from './styles'
 
 interface Props {
   title?: string
-  icon?: React.ComponentType<IconBaseProps>
+  icon?: ComponentType<IconBaseProps>
   isOpen?: boolean
   onToggle?: (state: boolean) => void
 }
@@ -20,6 +20,9 @@ export const InternalAccordion: React.FC<Props> = ({
   onToggle
 }) => {
   const [isOpen, setIsOpen] = useState(!!isOpenState)
+  const StyledContainer = Container as ComponentType<any>
+  const StyledHeader = Header as ComponentType<any>
+  const StyledContent = Content as ComponentType<any>
 
   const handleToggle = useCallback(() => {
     if (onToggle) onToggle(!isOpen)
@@ -31,8 +34,8 @@ export const InternalAccordion: React.FC<Props> = ({
   }, [isOpen, isOpenState])
 
   return (
-    <Container>
-      <Header open={isOpen} onClick={handleToggle}>
+    <StyledContainer>
+      <StyledHeader open={isOpen} onClick={handleToggle}>
         {Icon && (
           <div>
             <Icon size={20} />
@@ -42,8 +45,8 @@ export const InternalAccordion: React.FC<Props> = ({
         <div>
           <FiChevronDown size={20} />
         </div>
-      </Header>
-      <Content open={isOpen}>{children}</Content>
-    </Container>
+      </StyledHeader>
+      <StyledContent open={isOpen}>{children}</StyledContent>
+    </StyledContainer>
   )
 }
