@@ -1,4 +1,3 @@
-version: '3'
 services:
   web:
     command: yarn workspace @certificates/web prod

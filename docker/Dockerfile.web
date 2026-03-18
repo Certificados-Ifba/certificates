@@ -9,10 +9,13 @@ RUN yarn config set enableIPv6 false \
 # arquivos base
 COPY package.json yarn.lock prettier.config.js tsconfig.json .eslintrc.js .eslintignore ./
 COPY packages/shared ./packages/shared
-COPY packages/frontend/web ./packages/frontend/web
+COPY packages/frontend/web/package.json ./packages/frontend/web/
 
-# instala dependências (inclui devDependencies necessárias para next build)
-RUN yarn install --frozen-lockfile --production=false
+# instala dependências
+RUN yarn install --frozen-lockfile
+
+# copia código
+COPY packages/frontend/web ./packages/frontend/web
 
 # build do frontend
 RUN yarn workspace @certificates/web build
