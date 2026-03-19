@@ -40,6 +40,7 @@ export const Input: React.FC<Props> = ({
   ...rest
 }) => {
   const { type, ...restAux } = rest
+  const shouldHide = restAux.hidden || type === 'hidden'
 
   const secure = type === 'password'
 
@@ -112,9 +113,9 @@ export const Input: React.FC<Props> = ({
 
   return (
     <div>
-      {label && !restAux.hidden && <Label htmlFor={fieldName}>{label}</Label>}
+      {label && !shouldHide && <Label htmlFor={fieldName}>{label}</Label>}
       <Container
-        hidden={restAux.hidden}
+        hidden={shouldHide}
         marginBottom={marginBottom}
         isErrored={!!error}
         isFilled={inputState === 'isFilled'}
@@ -134,7 +135,7 @@ export const Input: React.FC<Props> = ({
             </SecureToggle>
           )}
         </fieldset>
-        {error && !restAux.hidden && (
+        {error && !shouldHide && (
           <Error>
             <FiAlertCircle size={16} />
             <span>{error}</span>

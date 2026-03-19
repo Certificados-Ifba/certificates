@@ -123,7 +123,7 @@ const CertificateLayout: React.FC<Props> = ({
       <Section paddingTop="sm" paddingBottom="sm">
         <div>
           {/* Campo hidden para manter o HTML no formulário */}
-          <Input type="hidden" name="html" value={textConfig.html} />
+          <Input hidden type="hidden" name="html" value={textConfig.html} />
           <RichTextEditor
             onChange={({ html }) =>
               onConfigChange({ ...textConfig, html: html })
