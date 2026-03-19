@@ -36,7 +36,7 @@ interface ICertificate {
   activity: IActivity
   function: IGeneric
   participant: IParticipant
-  event: Event
+  event: IEvent
   key: string
   workload: number
   start_date: Date
@@ -68,8 +68,8 @@ const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
       filters && order !== ''
         ? Object.assign(filters, { sort_by: column, order_by: order })
         : order !== ''
-        ? { sort_by: column, order_by: order }
-        : filters
+          ? { sort_by: column, order_by: order }
+          : filters
   })
 
   const handleFilter = useCallback(
@@ -104,7 +104,7 @@ const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
     try {
       await api.delete(`events/${event?.id}/certificates/${id}`)
       addToast({
-        title: 'Certificado excluida',
+        title: 'Certificado excluído',
         type: 'success',
         description: 'Certificado excluído com sucesso.'
       })

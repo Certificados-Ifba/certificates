@@ -6,10 +6,22 @@ RUN yarn config set enableIPv6 false \
  && yarn config set networkFamily ipv4 \
  && yarn config set enable-http2 false
 
+# arquivos base
 COPY package.json yarn.lock prettier.config.js tsconfig.json .eslintrc.js .eslintignore ./
 COPY packages/shared ./packages/shared
 COPY packages/backend/storage/package.json ./packages/backend/storage/
 
-RUN yarn && yarn cache clean
+# instala dependências
+RUN yarn install --frozen-lockfile
 
-COPY packages/backend/storage/ ./packages/backend/storage/
+# copia código
+COPY packages/backend/storage ./packages/backend/storage
+
+# build do storage (NestJS)
+RUN yarn workspace @certificates/storage build
+
+WORKDIR /usr/src/app/packages/backend/storage
+
+EXPOSE 4010
+
+CMD ["node", "dist/main.js"]

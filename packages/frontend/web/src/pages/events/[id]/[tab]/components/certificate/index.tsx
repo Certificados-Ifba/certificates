@@ -21,10 +21,14 @@ interface Props {
   displayValidateGuide?: boolean
   validateVerticalPosition: 'bottom' | 'top'
   validateHorizontalPosition: 'right' | 'left' | 'center'
+  codeOrientation?: 'horizontal' | 'vertical'
   setPreview?: Dispatch<SetStateAction<string>>
   preview?: string
   image?: string
 }
+
+const validateUrl =
+  (typeof window !== 'undefined' ? window.location.origin : '') + '/validate'
 
 export const Certificate: React.FC<Props> = ({
   padding,
@@ -40,6 +44,7 @@ export const Certificate: React.FC<Props> = ({
   validateHorizontalPadding,
   validateVerticalPadding,
   displayValidateGuide,
+  codeOrientation = 'horizontal',
   preview,
   setPreview,
   image
@@ -130,15 +135,13 @@ export const Certificate: React.FC<Props> = ({
               verticalPosition={validateVerticalPosition}
               horizontalPadding={validateHorizontalPadding}
               verticalPadding={validateVerticalPadding}
+              orientation={codeOrientation}
             >
               <div className="text">
                 Código: <b>afae7289-6af4-4cbd-a16d-71247119914a</b> | Para
-                validar clique
-                <a href="http://certificados.ifba.edu.br/validar"> aqui</a> ou
-                 acesse:
-                <a href="http://certificados.ifba.edu.br/validar">
-                  http://certificados.ifba.edu.br/validar
-                </a>
+                validar clique{' '}
+                <a href={validateUrl}>aqui</a> ou acesse{' '}
+                <a href={validateUrl}>{validateUrl}</a>
               </div>
             </ValidateContainer>
           </>

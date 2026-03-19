@@ -1,6 +1,7 @@
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import {
+  MutableRefObject,
   useCallback,
   useRef,
   useState
@@ -16,6 +17,7 @@ import { Divider } from '../../styles/components/divider'
 import { useDebounce } from '../../utils/debounce'
 import { Button } from '../button'
 import { Dropdown } from '../dropdown'
+import { Input } from '../input'
 import { VariableModal } from '../modals/variableModal'
 import { RichTextEditor } from '../richTextEditor'
 import { Select } from '../select'
@@ -37,7 +39,8 @@ const initialValidatePadding = {
 const initialTextPosition = 'center'
 const initialValidatePosition = {
   validateVerticalPosition: 'bottom',
-  validateHorizontalPosition: 'right'
+  validateHorizontalPosition: 'right',
+  codeOrientation: 'horizontal'
 }
 
 export const initialTextConfig = {
@@ -119,6 +122,8 @@ const CertificateLayout: React.FC<Props> = ({
     >
       <Section paddingTop="sm" paddingBottom="sm">
         <div>
+          {/* Campo hidden para manter o HTML no formulário */}
+          <Input type="hidden" name="html" value={textConfig.html} />
           <RichTextEditor
             onChange={({ html }) =>
               onConfigChange({ ...textConfig, html: html })
@@ -263,98 +268,113 @@ const CertificateLayout: React.FC<Props> = ({
                   handleOnSelect={data => {
                     setTextConfig({
                       ...textConfig,
-                      validateVerticalPosition: data.value
+                      codeOrientation: data.value
                     })
                   }}
-                  label="Posição vertical"
-                  name="validateVerticalPosition"
+                  initialValue="horizontal"
+                  label="Orientação do código"
+                  name="codeOrientation"
                   options={[
                     {
-                      value: 'top',
-                      label: 'Cima'
+                      value: 'horizontal',
+                      label: 'Horizontal'
                     },
                     {
-                      value: 'bottom',
-                      label: 'Baixo'
+                      value: 'vertical',
+                      label: 'Vertical'
                     }
                   ]}
                   marginBottom="sm"
                   menuPortalTarget={null}
                 />
-                <SliderBar
-                  formRef={formRef}
-                  name="validateVerticalPadding"
-                  label={
-                    'Margem ' +
-                    (textConfig.validateVerticalPosition === 'top'
-                      ? 'cima'
-                      : 'baixo')
-                  }
-                  step="0.5"
-                  marginBottom="sm"
-                  min="0"
-                  max="10"
-                  onChange={data => {
-                    run({
-                      ...textConfig,
-                      validateVerticalPadding: data.target.value
-                    })
-                  }}
-                />
-                <Select
-                  formRef={formRef}
-                  handleOnSelect={data => {
-                    setTextConfig({
-                      ...textConfig,
-                      validateHorizontalPosition: data.value
-                    })
-                  }}
-                  label="Posição horizontal"
-                  name="validateHorizontalPosition"
-                  options={[
-                    {
-                      value: 'left',
-                      label: 'Esquerda'
-                    },
-                    {
-                      value: 'center',
-                      label: 'Centro'
-                    },
-                    {
-                      value: 'right',
-                      label: 'Direita'
-                    }
-                  ]}
-                  marginBottom="sm"
-                  menuPortalTarget={null}
-                />
-                {(textConfig.validateHorizontalPosition === 'left' ||
-                  textConfig.validateHorizontalPosition === 'right') && (
-                    <SliderBar
-                      step="0.5"
-                      formRef={formRef}
-                      name="validateHorizontalPadding"
-                      label={
-                        'Margem ' +
-                        (textConfig.validateHorizontalPosition === 'left'
-                          ? 'esquerda'
-                          : 'direita')
+                {textConfig?.codeOrientation === 'horizontal' && (
+                  <Select
+                    formRef={formRef}
+                    handleOnSelect={data => {
+                      setTextConfig({
+                        ...textConfig,
+                        validateVerticalPosition: data.value
+                      })
+                    }}
+                    label="Posição vertical"
+                    name="validateVerticalPosition"
+                    options={[
+                      {
+                        value: 'top',
+                        label: 'Cima'
+                      },
+                      {
+                        value: 'bottom',
+                        label: 'Baixo'
                       }
-                      marginBottom="sm"
-                      min="0"
-                      max="10"
-                      onChange={data => {
-                        run({
-                          ...textConfig,
-                          validateHorizontalPadding: data.target.value
-                        })
-                      }}
-                    />
-                  )}
+                    ]}
+                    marginBottom="sm"
+                    menuPortalTarget={null}
+                  />
+                )}
+                {textConfig?.codeOrientation === 'horizontal' && (
+                  <SliderBar
+                    formRef={formRef}
+                    name="validateHorizontalPadding"
+                    label="Margem horizontal"
+                    step="0.5"
+                    marginBottom="sm"
+                    min="0"
+                    max="50"
+                    onChange={data => {
+                      run({
+                        ...textConfig,
+                        validateHorizontalPadding: data.target.value
+                      })
+                    }}
+                  />
+                )}
+                {textConfig?.codeOrientation === 'vertical' && (
+                  <Select
+                    formRef={formRef}
+                    handleOnSelect={data => {
+                      setTextConfig({
+                        ...textConfig,
+                        validateHorizontalPosition: data.value
+                      })
+                    }}
+                    label="Posição horizontal"
+                    name="validateHorizontalPosition"
+                    options={[
+                      {
+                        value: 'left',
+                        label: 'Esquerda'
+                      },
+                      {
+                        value: 'right',
+                        label: 'Direita'
+                      }
+                    ]}
+                    marginBottom="sm"
+                    menuPortalTarget={null}
+                  />
+                )}
+                {textConfig?.codeOrientation === 'vertical' && (
+                  <SliderBar
+                    step="0.5"
+                    formRef={formRef}
+                    name="validateVerticalPadding"
+                    label="Margem vertical"
+                    marginBottom="sm"
+                    min="0"
+                    max="50"
+                    onChange={data => {
+                      run({
+                        ...textConfig,
+                        validateVerticalPadding: data.target.value
+                      })
+                    }}
+                  />
+                )}
               </div>
             }
           >
-            Editar Layout Validação
+            Editar Layout Código Certificado
           </Dropdown>
         </EditContainer>
         <div style={{ display: 'flex' }}>
@@ -367,6 +387,7 @@ const CertificateLayout: React.FC<Props> = ({
               validateVerticalPosition={textConfig.validateVerticalPosition}
               validateHorizontalPadding={textConfig.validateHorizontalPadding}
               validateVerticalPadding={textConfig.validateVerticalPadding}
+              codeOrientation={textConfig.codeOrientation}
               displayTextGuide={displayTextGuide}
               padding={textConfig.padding}
               position={textConfig.position}

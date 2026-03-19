@@ -16,9 +16,14 @@ interface ValidateContainerProps {
   horizontalPadding: number
   verticalPadding: number
   displayGuide: boolean
+  orientation?: 'horizontal' | 'vertical'
 }
 
 export const ImageContainer = styled.div`
+  position: relative;
+  width: 1280px;
+  height: 878px;
+  overflow: hidden;
   > div {
     width: 1280px;
   }
@@ -33,28 +38,28 @@ export const ValidateContainer = styled.div<ValidateContainerProps>`
     position: absolute;
     font-size: small;
     ${props =>
-      props.verticalPosition === 'top' && 'top:' + props.verticalPadding + '%;'} 
+    props.orientation === 'horizontal' || !props.orientation
+      ? css`
+            /* Horizontal: fica na borda top/bottom, margem controla esquerda/direita */
+            ${props.verticalPosition === 'top' && 'top: 0;'}
+            ${props.verticalPosition === 'bottom' && 'bottom: 0;'}
+            left: ${props.horizontalPadding}%;
+            white-space: nowrap;
+          `
+      : css`
+            /* Vertical: fica na borda left/right, margem controla cima/baixo */
+            white-space: nowrap;
+            top: ${props.verticalPadding}%;
+            ${props.horizontalPosition === 'left'
+          ? 'left: 0; transform: rotate(-90deg) translateX(-100%); transform-origin: 0 0;'
+          : 'right: 0; transform: rotate(90deg) translateX(100%); transform-origin: 100% 0;'}
+          `}
     ${props =>
-      props.verticalPosition === 'bottom' &&
-      'bottom:' + props.verticalPadding + '%;'}
-    ${props =>
-      props.horizontalPosition === 'left' &&
-      'left:' + props.horizontalPadding + '%;'}
-    ${props =>
-      props.horizontalPosition === 'right' &&
-      'right:' + props.horizontalPadding + '%;'}
-      ${props =>
-      props.horizontalPosition === 'center' &&
-      css`
-        right: 0;
-        width: 100%;
-        text-align: center;
-      `}
-    ${props =>
-      props.displayGuide &&
-      css`
+    props.displayGuide &&
+    css`
         z-index: 3;
         background-color: rgba(0, 0, 0, 0.3);
+        padding: 2px 5px;
       `}
   }
   ${props =>

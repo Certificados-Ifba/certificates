@@ -1,0 +1,47 @@
+name: Deploy Activity Service
+
+on:
+  push:
+    branches:
+      - develop
+
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: "Forçar deploy mesmo sem mudanças"
+        required: false
+        default: "false"
+
+jobs:
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      activity: ${{ steps.filter.outputs.activity }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            activity:
+              - 'packages/backend/activity/**'
+
+  deploy:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+
+    if: |
+      needs.detect-changes.outputs.activity == 'true' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
+
+    steps:
+      - name: Trigger Coolify Deploy
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_DEPLOY_TOKEN }}" \
+            "${{ secrets.COOLIFY_ACTIVITY_WEBHOOK }}"

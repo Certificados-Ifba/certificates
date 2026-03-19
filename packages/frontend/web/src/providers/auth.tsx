@@ -94,34 +94,25 @@ export const AuthProvider: React.FC = ({ children }) => {
   const signIn = useCallback(
     async (data: SignInCredentials) => {
       let token
-      console.log('🔑 [AUTH DEBUG] signIn chamado com:', { login: data.login, hasPassword: !!data.password })
 
       if (data.login && data.password) {
-        console.log('📡 [AUTH DEBUG] Fazendo POST para /sessions')
         try {
           const response = await api.post('/sessions', {
             email: data.login,
             password: data.password
           })
-          console.log('✅ [AUTH DEBUG] Resposta da API:', response.status, response.data)
           token = response.data?.data.token
         } catch (error) {
-          console.error('❌ [AUTH DEBUG] Erro na requisição:', error?.response?.status, error?.response?.data)
           throw error
         }
       } else {
         token = data.token
       }
 
-      console.log('🎫 [AUTH DEBUG] Token recebido:', token ? 'SIM' : 'NÃO')
-
       const payload: any = decode(token || '')
-      console.log('👤 [AUTH DEBUG] Payload decodificado:', payload)
 
       setToken(token)
       setData({ token, user: payload?.user })
-
-      console.log('✅ [AUTH DEBUG] Login concluído com sucesso')
     },
     [setToken]
   )
