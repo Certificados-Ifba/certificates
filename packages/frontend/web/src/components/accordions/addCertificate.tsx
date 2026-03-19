@@ -27,11 +27,13 @@ import CertificateLayout from './certificateLayout'
 interface Props {
   eventId: string
   edit?: boolean
+  onSuccess?: () => void
 }
 
 const AddCertificate: React.FC<Props> = ({
   eventId,
-  edit
+  edit,
+  onSuccess
 }) => {
   const formRef = useRef<FormHandles>(null)
   const layoutFrontFormRef = useRef<FormHandles>(null)
@@ -45,7 +47,14 @@ const AddCertificate: React.FC<Props> = ({
 
   const handleClose = useCallback(() => {
     setIsOpen(false)
-  }, [])
+    formRef.current?.reset()
+    setPreviewFront('')
+    setPreviewVerse('')
+    setIsVerse(false)
+    if (onSuccess) {
+      onSuccess()
+    }
+  }, [onSuccess])
 
   const handleSubmit = useCallback(
     async data => {
@@ -135,11 +144,8 @@ const AddCertificate: React.FC<Props> = ({
           title: 'Modelo adicionado',
           description: 'O modelo de certificado foi adicionado com sucesso.'
         })
-        handleClose()
-        formRef.current?.reset()
-        setPreviewFront('')
-        setPreviewVerse('')
         setLoading(false)
+        handleClose()
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err)
@@ -238,22 +244,20 @@ const AddCertificate: React.FC<Props> = ({
               onClick={handleClose}
             >
               <FiX size={20} />
-              <span>{edit ? 'Fechar' : 'Cancelar'}</span>
+              <span>Cancelar</span>
             </Button>
           </div>
-          {!edit && (
-            <div>
-              <Button
-                color={edit ? 'secondary' : 'primary'}
-                size="default"
-                type="submit"
-                loading={loading}
-              >
-                <FiPlus size={20} />
-                <span>Adicionar Modelo</span>
-              </Button>
-            </div>
-          )}
+          <div>
+            <Button
+              color="primary"
+              size="default"
+              type="submit"
+              loading={loading}
+            >
+              <FiPlus size={20} />
+              <span>{edit ? 'Atualizar Modelo' : 'Adicionar Modelo'}</span>
+            </Button>
+          </div>
         </Footer>
       </Form>
     </Accordion>

@@ -1,11 +1,10 @@
 import { Accordion, Button, Divider, Grid, Input } from '@components'
-import { IEvent, IModelCertificate } from '@dtos'
 import { useToast } from '@providers'
 import { api } from '@services'
 import { FormHandles } from '@unform/core'
 import { Form } from '@unform/web'
 import { getValidationErrors } from '@utils'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import {
   FiCheckSquare,
   FiEdit,
@@ -18,13 +17,14 @@ import {
 } from 'react-icons/fi'
 import * as Yup from 'yup'
 
-import { Roles, CertificateLayout } from '..'
+import { CertificateLayout } from '..'
 
 const { Section, Footer } = Accordion
 
 interface Props {
   eventId: string
   edit?: boolean
+  onSuccess?: () => void
   // certificate: IModelCertificate
   // handleOnClose?: () => void
   // handleOnOpen?: (data: { isOpen: boolean; edit: boolean }) => void
@@ -32,7 +32,8 @@ interface Props {
 
 export const AddCertificate: React.FC<Props> = ({
   eventId,
-  edit
+  edit,
+  onSuccess
   // certificate,
   // handleOnClose,
   // handleOnOpen
@@ -48,8 +49,13 @@ export const AddCertificate: React.FC<Props> = ({
   const { addToast } = useToast()
 
   const handleClose = useCallback(() => {
-    setIsOpen(true)
-  }, [])
+    setIsOpen(false)
+    formRef.current?.reset()
+    setIsVerse(false)
+    if (onSuccess) {
+      onSuccess()
+    }
+  }, [onSuccess])
 
   const handleSubmit = useCallback(
     async data => {
@@ -71,9 +77,8 @@ export const AddCertificate: React.FC<Props> = ({
           title: 'Modelo adicionado',
           description: 'O modelo de certificado foi adicionado com sucesso.'
         })
-        handleClose()
-        formRef.current?.reset()
         setLoading(false)
+        handleClose()
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err)
@@ -189,22 +194,20 @@ export const AddCertificate: React.FC<Props> = ({
               onClick={handleClose}
             >
               <FiX size={20} />
-              <span>{edit ? 'Fechar' : 'Cancelar'}</span>
+              <span>Cancelar</span>
             </Button>
           </div>
-          {!edit && (
-            <div>
-              <Button
-                color={edit ? 'secondary' : 'primary'}
-                size="default"
-                type="submit"
-                loading={loading}
-              >
-                <FiPlus size={20} />
-                <span>Adicionar Modelo</span>
-              </Button>
-            </div>
-          )}
+          <div>
+            <Button
+              color="primary"
+              size="default"
+              type="submit"
+              loading={loading}
+            >
+              <FiPlus size={20} />
+              <span>{edit ? 'Atualizar Modelo' : 'Adicionar Modelo'}</span>
+            </Button>
+          </div>
         </Footer>
       </Form>
     </Accordion>

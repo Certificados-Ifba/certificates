@@ -134,8 +134,8 @@ export const Certificate: React.FC<Props> = ({
               <div className="text">
                 Código: <b>afae7289-6af4-4cbd-a16d-71247119914a</b> | Para
                 validar clique
-                <a href="http://certificados.ifba.edu.br/validar">aqui</a> ou
-                acesse
+                <a href="http://certificados.ifba.edu.br/validar"> aqui</a> ou
+                 acesse:
                 <a href="http://certificados.ifba.edu.br/validar">
                   http://certificados.ifba.edu.br/validar
                 </a>

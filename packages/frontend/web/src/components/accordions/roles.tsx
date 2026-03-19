@@ -226,10 +226,9 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles, id }) => {
         {defaultModel && (
           <Section paddingTop={preview ? 'md' : undefined} paddingBottom="md">
             <Alert type="warning" icon={FiAlertCircle}>
-              Atenção! Esse certificado será usado para todos os tipos de
-              atividades e funções que não tenham nenhum modelo definido.
-              <br />
-              <b>Verifique se o texto fica consistente nesses casos</b>.
+              Atenção! Este certificado será utilizado para atividades
+              e funções que não possuam um modelo definido.<br />
+              <b>Verifique se o texto é adequado para esses casos.</b>.
             </Alert>
           </Section>
         )}
