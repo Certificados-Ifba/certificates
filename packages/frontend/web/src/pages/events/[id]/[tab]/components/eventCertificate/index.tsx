@@ -168,15 +168,26 @@ export const EventCertificate: React.FC<Props> = ({ event }) => {
                   Modelos do Evento
                 </h3>
                 {isEditable && (
-                  <Button
-                    color="primary"
-                    onClick={() => setShowAddCertificateForm(true)}
-                    type="button"
-                    size="small"
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      marginBottom: '1rem'
+                    }}
                   >
-                    <FiPlus size={16} />
-                    <span>Adicionar novo modelo</span>
-                  </Button>
+                    <Button
+                      color="primary"
+                      onClick={() => setShowAddCertificateForm(true)}
+                      type="button"
+                      size="small"
+                      style={{ width: 'auto' }}
+                    >
+                      <FiPlus size={14} />
+                      <span>Adicionar novo modelo</span>
+                    </Button>
+                  </div>
+
                 )}
               </div>
               <Grid firstWidth="1460px" cols={2}>
