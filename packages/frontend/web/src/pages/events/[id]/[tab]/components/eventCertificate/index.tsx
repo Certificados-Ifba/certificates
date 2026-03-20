@@ -146,96 +146,116 @@ export const EventCertificate: React.FC<Props> = ({ event }) => {
 
   return (
     <Container>
+      {/* Formulário de adição de novo modelo */}
       {isEditable && showAddCertificateForm && (
-        <AddCertificate eventId={event?.id} onSuccess={handleAddCertificateSuccess} />
+        <div style={{ marginBottom: '2rem' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#555', marginBottom: '1rem' }}>
+            Adicionar novo modelo
+          </h3>
+          <AddCertificate eventId={event?.id} onSuccess={handleAddCertificateSuccess} />
+        </div>
       )}
 
-      {/* Modelos cadastrados no evento */}
-      {loadingModels ? (
-        <div style={{ padding: '1rem', color: '#718096' }}>Carregando modelos...</div>
-      ) : models.length > 0 ? (
-        <div style={{ marginTop: '1.5rem' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#555', marginBottom: '0.75rem' }}>
-            Modelos do Evento
-          </h3>
-          <Grid firstWidth="1460px" cols={2}>
-            {models.map(model => (
-              <div key={model.id}>
-                <CertificatePreview
-                  certificate={apiModelToCertificate(model)}
-                  handleEdit={() => {/* TODO: edição */ }}
-                  handleDelete={() => handleDelete(model.id)}
-                />
-              </div>
-            ))}
-          </Grid>
-          {isEditable && (
+      {/* Modelos cadastrados no evento — não aparecem quando o formulário está aberto */}
+      {!showAddCertificateForm && (
+        <>
+          {loadingModels ? (
+            <div style={{ padding: '1rem', color: '#718096' }}>Carregando modelos...</div>
+          ) : models.length > 0 ? (
             <div style={{ marginTop: '1.5rem' }}>
-              <Button
-                color="primary"
-                onClick={() => setShowAddCertificateForm(true)}
-                disabled={showAddCertificateForm}
-                type="button"
-                size="small"
-              >
-                <FiPlus size={16} />
-                <span>Adicionar novo modelo</span>
-              </Button>
-            </div>
-          )}
-        </div>
-      ) : isEditable ? (
-        /* Templates padrão — só aparecem quando não há modelos e o evento ainda não foi publicado */
-        <div style={{ marginTop: '1.5rem' }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <Button
-              color="primary"
-              onClick={() => setShowAddCertificateForm(true)}
-              disabled={showAddCertificateForm}
-              type="button"
-              size="small"
-            >
-              <FiPlus size={16} />
-              <span>Adicionar novo modelo</span>
-            </Button>
-          </div>
-
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#555', marginBottom: '0.5rem' }}>
-            Modelos Padrão
-          </h3>
-          <small style={{ color: '#888' }}>
-            Use um dos modelos padrão como ponto de partida ou crie um novo.
-          </small>
-          <Grid firstWidth="1460px" cols={2} marginBottom="md">
-            {MODELOS_PADRAO.map(certificate => (
-              <div key={certificate.id}>
-                <CertificatePreview
-                  certificate={certificate}
-                  handleEdit={() => {}}
-                  handleDelete={() => {}}
-                />
-                <div style={{ marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#555', margin: 0 }}>
+                  Modelos do Evento
+                </h3>
+                {isEditable && (
                   <Button
                     color="primary"
-                    size="small"
-                    inline
-                    loading={loadingTemplate === certificate.id}
-                    disabled={!!loadingTemplate}
-                    onClick={() => handleUseTemplate(certificate)}
+                    onClick={() => setShowAddCertificateForm(true)}
                     type="button"
+                    size="small"
                   >
-                    <FiCopy size={16} />
-                    <span>Usar este modelo</span>
+                    <FiPlus size={16} />
+                    <span>Adicionar novo modelo</span>
                   </Button>
-                </div>
+                )}
               </div>
-            ))}
-          </Grid>
-        </div>
-      ) : (
-        <div style={{ padding: '1rem', marginTop: '1rem', color: '#718096', border: '1px solid #e2e8f0', borderRadius: '0.375rem' }}>
-          Nenhum modelo de certificado cadastrado para este evento.
-        </div>
+              <Grid firstWidth="1460px" cols={2}>
+                {models.map(model => (
+                  <div key={model.id}>
+                    <CertificatePreview
+                      certificate={apiModelToCertificate(model)}
+                      handleEdit={() => {/* TODO: edição */ }}
+                      handleDelete={() => handleDelete(model.id)}
+                    />
+                  </div>
+                ))}
+              </Grid>
+            </div>
+          ) : isEditable ? (
+            /* Templates padrão — só aparecem quando não há modelos e o evento ainda não foi publicado */
+            <div style={{ marginTop: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div />
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      marginBottom: '1rem'
+                    }}
+                  >
+                    <Button
+                      color="primary"
+                      onClick={() => setShowAddCertificateForm(true)}
+                      type="button"
+                      size="small"
+                      style={{ width: 'auto' }}
+                    >
+                      <FiPlus size={14} />
+                      <span>Adicionar novo modelo</span>
+                    </Button>
+                  </div>
+
+              </div>
+
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#555', marginBottom: '0.5rem' }}>
+                Modelos Padrão
+              </h3>
+              <small style={{ color: '#888' }}>
+                Use um dos modelos padrão como ponto de partida ou crie um novo.
+              </small>
+              <Grid firstWidth="1460px" cols={2} marginBottom="md">
+                {MODELOS_PADRAO.map(certificate => (
+                  <div key={certificate.id}>
+                    <CertificatePreview
+                      certificate={certificate}
+                      handleEdit={() => {}}
+                      handleDelete={() => {}}
+                    />
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <Button
+                        color="primary"
+                        size="small"
+                        inline
+                        loading={loadingTemplate === certificate.id}
+                        disabled={!!loadingTemplate}
+                        onClick={() => handleUseTemplate(certificate)}
+                        type="button"
+                      >
+                        <FiCopy size={16} />
+                        <span>Usar este modelo</span>
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </Grid>
+            </div>
+          ) : (
+            <div style={{ padding: '1rem', marginTop: '1rem', color: '#718096', border: '1px solid #e2e8f0', borderRadius: '0.375rem' }}>
+              Nenhum modelo de certificado cadastrado para este evento.
+            </div>
+          )}
+        </>
       )}
     </Container>
   )
