@@ -15,6 +15,9 @@
       "**/@certificates/web/**"
     ]
   },
+  "resolutions": {
+    "@types/node": "14.18.63"
+  },
   "devDependencies": {
     "@certificates/eslint-config": "*",
     "@types/react": "^19.2.10",
