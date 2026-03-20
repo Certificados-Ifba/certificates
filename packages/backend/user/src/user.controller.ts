@@ -1,5 +1,5 @@
 import { Controller, HttpStatus, Inject } from '@nestjs/common'
-import { MessagePattern, ClientProxy } from '@nestjs/microservices'
+import { ClientProxy, MessagePattern } from '@nestjs/microservices'
 
 import { IParticipantRegisteredResponse } from './interfaces/participant-registered-response.interface'
 import { IUserConfirmResponse } from './interfaces/user-confirm-response.interface'
@@ -23,7 +23,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     @Inject('MAILER_SERVICE') private readonly mailerServiceClient: ClientProxy
-  ) {}
+  ) { }
 
   @MessagePattern('user_auth_participant')
   public async userAuthParticipant(searchParams: {
@@ -37,16 +37,44 @@ export class UserController {
       const user = await this.userService.searchUserByCpf(searchParams.cpf)
 
       if (user && user.role === 'PARTICIPANT') {
-        if (
-          new Date(user.personal_data.dob).getTime() ===
-          new Date(searchParams.dob).getTime()
-        ) {
-          const userUpdeted = await this.userService.updateUserById(user.id, {
-            last_login: new Date()
-          })
+        const isValid = await this.userService.validToken(searchParams.token)
 
-          const isValid = await this.userService.validToken(searchParams.token)
-          if (isValid) {
+        if (!isValid) {
+          result = {
+            status: HttpStatus.UNAUTHORIZED,
+            message: 'user_search_by_credentials_invalid',
+            data: null
+          }
+        } else {
+          const defaultDate = new Date('2017-12-23T00:00:00.000Z')
+          const userDobTime = user.personal_data.dob ? new Date(user.personal_data.dob).getTime() : null
+          const isDefaultDate = userDobTime === defaultDate.getTime()
+          
+          // Se o usuário não tem data de nascimento cadastrada ou tem a data padrão, atualiza com a fornecida
+          if (!user.personal_data.dob || isDefaultDate) {
+            const userUpdated = await this.userService.updateUserById(user.id, {
+              last_login: new Date(),
+              personal_data: {
+                cpf: user.personal_data.cpf,
+                dob: new Date(searchParams.dob),
+                institution: user.personal_data.institution,
+                phone: user.personal_data.phone
+              }
+            })
+
+            result = {
+              status: HttpStatus.OK,
+              message: 'user_search_by_credentials_success',
+              data: { user: userUpdated }
+            }
+          } else if (
+            new Date(user.personal_data.dob).getTime() ===
+            new Date(searchParams.dob).getTime()
+          ) {
+            const userUpdeted = await this.userService.updateUserById(user.id, {
+              last_login: new Date()
+            })
+
             result = {
               status: HttpStatus.OK,
               message: 'user_search_by_credentials_success',
@@ -54,16 +82,10 @@ export class UserController {
             }
           } else {
             result = {
-              status: HttpStatus.UNAUTHORIZED,
-              message: 'user_search_by_credentials_invalid',
+              status: HttpStatus.NOT_FOUND,
+              message: 'user_search_by_credentials_not_match',
               data: null
             }
-          }
-        } else {
-          result = {
-            status: HttpStatus.NOT_FOUND,
-            message: 'user_search_by_credentials_not_match',
-            data: null
           }
         }
       } else {
@@ -377,8 +399,7 @@ export class UserController {
       userParams &&
       (userParams.role !== 'PARTICIPANT' ||
         (userParams.role === 'PARTICIPANT' &&
-          userParams.personal_data.cpf &&
-          userParams.personal_data.dob))
+          userParams.personal_data.cpf))
     ) {
       const usersWithEmail = await this.userService.searchUserByEmail(
         userParams.email
