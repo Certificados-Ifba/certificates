@@ -1,24 +1,24 @@
 import {
+  Body,
   Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Param,
   Post,
   Put,
-  Get,
-  Body,
-  Inject,
-  HttpStatus,
-  HttpException,
-  Param,
-  Res,
   Query,
-  Delete,
-  Req
+  Req,
+  Res
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import {
-  ApiTags,
-  ApiOkResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
-  ApiBearerAuth
+  ApiOkResponse,
+  ApiTags
 } from '@nestjs/swagger'
 import { Request, Response } from 'express'
 import * as requestIp from 'request-ip'
@@ -43,6 +43,7 @@ import { AuthParticipantDto } from '../interfaces/user/dto/auth-participant.dto'
 import { DeleteUserResponseDto } from '../interfaces/user/dto/delete-user-response.dto'
 import { LoginUserResponseDto } from '../interfaces/user/dto/login-user-response.dto'
 import { UserIdDto } from '../interfaces/user/dto/user-id.dto'
+import { IServiceUserConfirmResponse } from '../interfaces/user/service-user-confirm-response.interface'
 import { IServiceUserDeleteResponse } from '../interfaces/user/service-user-delete-response.interface'
 import { IServiceUserSearchResponse } from '../interfaces/user/service-user-search-response.interface'
 import { ParticipantIdDto } from './../interfaces/participant/dto/participant-id.dto'
@@ -54,7 +55,7 @@ export class ParticipantsController {
   constructor(
     @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy
-  ) {}
+  ) { }
 
   @Get()
   @Authorization(true)
@@ -140,6 +141,35 @@ export class ParticipantsController {
       data: {
         user: createParticipantResponse.data.user
       },
+      errors: null
+    }
+  }
+
+  @Get('confirm/:token')
+  @ApiOkResponse({
+    description: 'Confirm participant email address'
+  })
+  public async confirmParticipantEmail(
+    @Param('token') token: string
+  ): Promise<{ message: string; data: null; errors: null }> {
+    const confirmResponse: IServiceUserConfirmResponse = await this.userServiceClient
+      .send('participant_confirm', token)
+      .toPromise()
+
+    if (confirmResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: confirmResponse.message,
+          data: null,
+          errors: null
+        },
+        confirmResponse.status
+      )
+    }
+
+    return {
+      message: confirmResponse.message,
+      data: null,
       errors: null
     }
   }
@@ -273,9 +303,8 @@ export class ParticipantsController {
       .send('token_create', {
         user: getUserResponse.data.user,
         ip: requestIp.getClientIp(req).split(':').pop(),
-        device: `${agent.device.model ? agent.device.model + ' - ' : ''}${
-          agent.os.name
-        } ${agent.os.version} - ${agent.browser.name}`,
+        device: `${agent.device.model ? agent.device.model + ' - ' : ''}${agent.os.name
+          } ${agent.os.version} - ${agent.browser.name}`,
         where: req.headers.location
       })
       .toPromise()

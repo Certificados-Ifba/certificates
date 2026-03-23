@@ -8,11 +8,13 @@ import {
   Header,
   Input,
   PaginatedTable,
-  TableRow
+  TableRow,
+  Tooltip
 } from '@components'
 import { withAuth } from '@hocs'
 import { useAuth, useToast } from '@providers'
 import { api, usePaginatedRequest } from '@services'
+import { theme } from '@styles'
 import { Form } from '@unform/web'
 import { maskEmail } from '@utils'
 import Head from 'next/head'
@@ -21,9 +23,11 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   FiEdit,
   FiFilePlus,
+  FiMail,
   FiPlus,
   FiSearch,
   FiTrash2,
+  FiUnlock,
   FiUserCheck
 } from 'react-icons/fi'
 
@@ -61,6 +65,26 @@ const Participants: React.FC = () => {
   const [typeModal, setTypeModal] = useState<'update' | 'add'>(null)
   const { addToast } = useToast()
   const { isAdmin } = useAuth()
+
+  const handleResendMail = useCallback(
+    async id => {
+      try {
+        await api.get(`users/${id}/resend`)
+        addToast({
+          title: 'E-mail reenviado',
+          type: 'success',
+          description: 'Peça para o participante verificar a caixa de mensagens.'
+        })
+      } catch (err) {
+        addToast({
+          title: 'Erro no reenvio',
+          type: 'error',
+          description: err
+        })
+      }
+    },
+    [addToast]
+  )
 
   const request = usePaginatedRequest<any>({
     url: 'participants',
@@ -219,6 +243,7 @@ const Participants: React.FC = () => {
                   Atualizado em
                 </Column>
               </th>
+              <th>E-mail confirmado</th>
               {show && <th style={{ width: 32 }} />}
             </tr>
           </thead>
@@ -232,6 +257,34 @@ const Participants: React.FC = () => {
                 <td>{participant.personal_data.phone}</td>
                 <td>{participant.personal_data.institution ? 'Sim' : 'Não'}</td>
                 <td>{new Date(participant.updated_at).toLocaleString()}</td>
+                <td>
+                  {participant.email ? (
+                    participant.is_confirmed ? (
+                      <TableRow>
+                        <FiUnlock size={16} color={theme.colors.success} />
+                        <span style={{ color: theme.colors.success, fontSize: 13 }}>
+                          Confirmado
+                        </span>
+                      </TableRow>
+                    ) : (
+                      <Tooltip title="Reenviar e-mail de confirmação">
+                        <Button
+                          inline
+                          ghost
+                          square
+                          color="info"
+                          size="small"
+                          onClick={() => handleResendMail(participant.id)}
+                        >
+                          <FiMail size={20} />
+                          <span style={{ fontSize: 13 }}>Reenviar</span>
+                        </Button>
+                      </Tooltip>
+                    )
+                  ) : (
+                    '—'
+                  )}
+                </td>
                 {show && (
                   <td>
                     <TableRow>
