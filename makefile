@@ -14,19 +14,8 @@ dev.up:
 	COMPOSE_PROJECT_NAME=$(PROJECT) docker compose \
 		-f docker-compose.yml -f docker-compose.dev.yml \
 		up -d --remove-orphans
-	@echo "✅ Containers Docker iniciados"
-	@echo "🚀 Iniciando frontend local..."
-	@nohup npx yarn workspace @certificates/web dev > /tmp/certificates-web.log 2>&1 & echo $$! > /tmp/certificates-web.pid
-	@sleep 3
-	@echo "✅ Frontend iniciado em http://localhost:3000"
-	@echo "📋 Logs do frontend: tail -f /tmp/certificates-web.log"
 
 dev.down:
-	@if [ -f /tmp/certificates-web.pid ]; then \
-		kill $$(cat /tmp/certificates-web.pid) 2>/dev/null || true; \
-		rm -f /tmp/certificates-web.pid; \
-		echo "✅ Frontend parado"; \
-	fi
 	COMPOSE_PROJECT_NAME=$(PROJECT) docker compose \
 		-f docker-compose.yml -f docker-compose.dev.yml \
 		down
