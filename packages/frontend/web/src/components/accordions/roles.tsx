@@ -227,8 +227,8 @@ const Roles: React.FC<Props> = ({ onFormChange, preview, roles, id }) => {
           <Section paddingTop={preview ? 'md' : undefined} paddingBottom="md">
             <Alert type="warning" icon={FiAlertCircle}>
               Atenção! Este certificado será utilizado para atividades
-              e funções que não possuam um modelo definido.<br />
-              <b>Verifique se o texto é adequado para esses casos.</b>.
+              e funções que não possuem um modelo definido.<br />
+              <b>Verifique se o texto é adequado para esses casos.</b>
             </Alert>
           </Section>
         )}
