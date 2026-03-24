@@ -17,7 +17,7 @@ export class UserService {
     @InjectModel('User') private readonly UserModel: Model<IUser>,
     @InjectModel('UserLink') private readonly UserLinkModel: Model<IUserLink>,
     private readonly configService: ConfigService
-  ) {}
+  ) { }
 
   public async searchUserByEmail(email: string): Promise<IUser> {
     return this.UserModel.findOne({
@@ -138,6 +138,10 @@ export class UserService {
 
   public getConfirmationLink(link: string): string {
     return `${this.configService.get('webUrl')}/confirm/${link}`
+  }
+
+  public getParticipantConfirmationLink(link: string): string {
+    return `${this.configService.get('webUrl')}/participants/confirm/${link}`
   }
 
   public getWebUrl(): string {

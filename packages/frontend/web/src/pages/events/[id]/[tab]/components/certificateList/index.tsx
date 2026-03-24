@@ -28,6 +28,13 @@ interface Props {
   event: IEvent
   openAccordion: () => void
 }
+
+const maskCpf = (cpf: string): string => {
+  if (!cpf) return ''
+  const clean = cpf.replace(/\D/g, '')
+  if (clean.length !== 11) return cpf
+  return `***.${clean.slice(3, 6)}.${clean.slice(6, 9)}-**`
+}
 interface ICertificate {
   id: string
   activity: IActivity
@@ -65,8 +72,8 @@ export const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
       filters && order !== ''
         ? Object.assign(filters, { sort_by: column, order_by: order })
         : order !== ''
-        ? { sort_by: column, order_by: order }
-        : filters
+          ? { sort_by: column, order_by: order }
+          : filters
   })
 
   const handleFilter = useCallback(
@@ -178,7 +185,7 @@ export const CertificateList: React.FC<Props> = ({ event, openAccordion }) => {
             }) => (
               <tr key={id}>
                 <td>{name}</td>
-                <td>{cpf}</td>
+                <td>{maskCpf(cpf)}</td>
                 <td>{activity}</td>
                 <td>{capitalize(_function)}</td>
                 <td>

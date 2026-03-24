@@ -49,7 +49,7 @@ export class UserController {
           const defaultDate = new Date('2017-12-23T00:00:00.000Z')
           const userDobTime = user.personal_data.dob ? new Date(user.personal_data.dob).getTime() : null
           const isDefaultDate = userDobTime === defaultDate.getTime()
-          
+
           // Se o usuário não tem data de nascimento cadastrada ou tem a data padrão, atualiza com a fornecida
           if (!user.personal_data.dob || isDefaultDate) {
             const userUpdated = await this.userService.updateUserById(user.id, {
@@ -363,6 +363,9 @@ export class UserController {
         if (!userLink) {
           userLink = await this.userService.createUserLink(user.id)
         }
+        const confirmLink = user.role === 'PARTICIPANT'
+          ? this.userService.getParticipantConfirmationLink(userLink.link)
+          : this.userService.getConfirmationLink(userLink.link)
         this.mailerServiceClient
           .send('mail_send', {
             to: user.email,
@@ -371,7 +374,7 @@ export class UserController {
             context: {
               name: user.name,
               email: user.email,
-              link: this.userService.getConfirmationLink(userLink.link),
+              link: confirmLink,
               site: this.userService.getWebUrl()
             }
           })
@@ -438,6 +441,7 @@ export class UserController {
                 }
               }
             }
+            userParams.is_confirmed = false
           }
 
           const createdUser = await this.userService.createUser(userParams)
@@ -461,6 +465,23 @@ export class UserController {
                   name: createdUser.name,
                   email: createdUser.email,
                   link: this.userService.getConfirmationLink(userLink.link),
+                  site: this.userService.getWebUrl()
+                }
+              })
+              .toPromise()
+          } else if (createdUser.email) {
+            const userLink = await this.userService.createUserLink(
+              createdUser.id
+            )
+            this.mailerServiceClient
+              .send('mail_send', {
+                to: createdUser.email,
+                subject: 'Confirmação de E-mail',
+                template: '/templates/confirm_email',
+                context: {
+                  name: createdUser.name,
+                  email: createdUser.email,
+                  link: this.userService.getParticipantConfirmationLink(userLink.link),
                   site: this.userService.getWebUrl()
                 }
               })
@@ -519,25 +540,32 @@ export class UserController {
                 }
               }
             }
+            if (user.role === 'PARTICIPANT') {
+              updatedUser.is_confirmed = false
+            }
           }
           await this.userService.updateUserById(updatedUser.id, updatedUser)
-          // await updatedUser.save()
-          // if (params.user.role !== 'PARTICIPANT') {
-          //   const userLink = await this.userService.createUserLink(user.id)
-          //   this.mailerServiceClient
-          //     .send('mail_send', {
-          //       to: user.email,
-          //       subject: 'E-mail de Confirmação',
-          //       template: '/templates/confirm_email',
-          //       context: {
-          //         name: user.name,
-          //         email: user.email,
-          //         link: this.userService.getConfirmationLink(userLink.link),
-          //         site: this.userService.getWebUrl()
-          //       }
-          //     })
-          //     .toPromise()
-          // }
+          if (
+            params.user.email &&
+            params.user.email !== user.email &&
+            user.role === 'PARTICIPANT' &&
+            updatedUser.email
+          ) {
+            const userLink = await this.userService.createUserLink(updatedUser.id)
+            this.mailerServiceClient
+              .send('mail_send', {
+                to: updatedUser.email,
+                subject: 'Confirme seu novo e-mail',
+                template: '/templates/confirm_email',
+                context: {
+                  name: updatedUser.name,
+                  email: updatedUser.email,
+                  link: this.userService.getParticipantConfirmationLink(userLink.link),
+                  site: this.userService.getWebUrl()
+                }
+              })
+              .toPromise()
+          }
           result = {
             status: HttpStatus.OK,
             message: 'user_update_by_id_success',
@@ -629,5 +657,44 @@ export class UserController {
       message: 'get_participant_registered_success',
       data: quantity
     }
+  }
+
+  @MessagePattern('participant_confirm')
+  public async confirmParticipant(link: string): Promise<IUserConfirmResponse> {
+    let result: IUserConfirmResponse
+
+    if (link) {
+      const userLink = await this.userService.getUserLink(link)
+      if (userLink) {
+        const user = await this.userService.updateUserById(userLink.user, {
+          is_confirmed: true
+        })
+        await this.userService.updateUserLinkById(userLink.id, {
+          is_used: true
+        })
+        result = {
+          status: HttpStatus.OK,
+          message: 'participant_confirm_success',
+          user,
+          errors: null
+        }
+      } else {
+        result = {
+          status: HttpStatus.NOT_FOUND,
+          message: 'participant_confirm_not_found',
+          user: null,
+          errors: null
+        }
+      }
+    } else {
+      result = {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'participant_confirm_bad_request',
+        user: null,
+        errors: null
+      }
+    }
+
+    return result
   }
 }

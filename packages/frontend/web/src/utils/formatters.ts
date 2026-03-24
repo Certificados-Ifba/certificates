@@ -48,3 +48,16 @@ export const isDate = (value: string): boolean => {
 
 export const removeMask = (value: string): string =>
   value.replace(/[^\d]+/g, '')
+
+export const maskEmail = (email: string): string => {
+  if (!email) return ''
+  const atIndex = email.indexOf('@')
+  if (atIndex <= 0) return email
+  const local = email.slice(0, atIndex)
+  const domain = email.slice(atIndex)
+  if (local.length <= 2) return email
+  const first = local[0]
+  const last = local[local.length - 1]
+  const stars = '*'.repeat(local.length - 2)
+  return `${first}${stars}${last}${domain}`
+}
