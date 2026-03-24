@@ -4,7 +4,6 @@ services:
     user: '${UID:-1000}:${GID:-1000}'
     volumes:
       - ./packages/frontend/web:/usr/src/app/packages/frontend/web
-      - web_node_modules:/usr/src/app/packages/frontend/web/node_modules
   gateway:
     command: yarn workspace @certificates/gateway dev
     volumes:
@@ -45,5 +44,3 @@ services:
     command: yarn workspace @certificates/user dev
     volumes:
       - ./packages/backend/user:/usr/src/app/packages/backend/user
-volumes:
-  web_node_modules:
