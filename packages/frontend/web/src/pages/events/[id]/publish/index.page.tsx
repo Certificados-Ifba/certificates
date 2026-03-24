@@ -3,7 +3,8 @@ import {
   Button,
   Card,
   Container,
-  Header
+  Header,
+  Stepper
 } from '@components'
 import { withAuth } from '@hocs'
 import { useToast } from '@providers'
@@ -11,19 +12,30 @@ import { api } from '@services'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
-import { FiCheck, FiChevronLeft, FiSend } from 'react-icons/fi'
-
+import {
+  FiCheck,
+  FiChevronLeft,
+  FiChevronRight,
+  FiSend
+} from 'react-icons/fi'
 import { EventInfo } from '../components'
-import { PublishSuccess } from './components'
+import { EventActivity, EventCertificate, PublishSuccess } from './components'
 import { CardHeader } from './styles'
+
+const STEPS = [
+  { id: 0, name: 'Informações' },
+  { id: 1, name: 'Atividades' },
+  { id: 2, name: 'Modelos de Certificados' },
+  { id: 3, name: 'Pronto' }
+]
 
 const Publish: React.FC = () => {
   const router = useRouter()
   const { id } = router?.query
-  const [event, setEvent] = useState<any>(null)
+  const [event, setEvent] = useState(null)
   const { addToast } = useToast()
   const [loading, setLoading] = useState(false)
-  const [published, setPublished] = useState(false)
+  const [currentStep, setCurrentStep] = useState(0)
 
   useEffect(() => {
     const loadData = async () => {
@@ -31,7 +43,9 @@ const Publish: React.FC = () => {
         const response = await api.get(`events/${id}`)
         const event = response?.data?.data
 
-        if (event) setEvent(event)
+        if (event) {
+          setEvent(event)
+        }
       } catch (err) {
         addToast({
           title: 'Erro no carregamento',
@@ -41,106 +55,112 @@ const Publish: React.FC = () => {
         router.back()
       }
     }
-
     if (id) loadData()
   }, [id, addToast, router])
 
   const publish = useCallback(async () => {
-    if (!event) return
-
     setLoading(true)
-
     try {
-      await api.put(`events/${id}`, {
-        name: event.name,
-        local: event.local,
-        initials: event.initials,
-        year: event.year,
-        edition: event.edition,
-        start_date: event.start_date,
-        end_date: event.end_date,
-        status: 'PUBLISHED'
-      })
-
-      setPublished(true)
-
-      addToast({
-        type: 'success',
-        title: 'Evento publicado com sucesso!'
-      })
+      await api.post(`events/${id}/publish`, {})
+      setLoading(false)
+      return true
     } catch (err) {
       addToast({
         type: 'error',
         title: 'Erro ao publicar evento',
         description: err
       })
-    } finally {
       setLoading(false)
+      return false
     }
-  }, [event, id, addToast])
+  }, [addToast, id])
+
+  const handlePrevious = () => {
+    if (currentStep === 0) {
+      router.push(`/events/${event?.id}/info`)
+    } else {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const handleNext = async () => {
+    if (currentStep === STEPS.length - 1) {
+      router.push(`/events/${event?.id}/info`)
+    } else if (currentStep === 2) {
+      const success = await publish()
+      if (success) setCurrentStep(currentStep + 1)
+    } else {
+      setCurrentStep(currentStep + 1)
+    }
+  }
 
   return (
     <Container>
       <Head>
         <title>Publicar {event?.name} | Evento</title>
       </Head>
-
       <Header title={`Publicar ${event?.name}`} icon={FiSend} />
+      <Stepper steps={STEPS} current={currentStep} />
 
-      {!published ? (
-        <>
-          <Alert marginBottom="md" card type="warning">
-            <b>Atenção!</b> Revise todas as informações antes de publicar. Após isso,
-            o evento ficará disponível para os participantes.
-          </Alert>
-
-          <Card>
-            <CardHeader>
-              <Button
-                ghost
-                color="secondary"
-                onClick={() => router.back()}
-              >
-                <FiChevronLeft size={20} />
-                <span>Voltar</span>
-              </Button>
-
-              <Button
-                color="primary"
-                loading={loading}
-                disabled={loading || !event}
-                onClick={publish}
-              >
-                <FiCheck size={20} />
-                <span>Publicar evento</span>
-              </Button>
-            </CardHeader>
-
-            {/* 🔥 AQUI É A REVISÃO */}
-            <EventInfo edit={false} event={event} setEvent={setEvent} />
-          </Card>
-        </>
-      ) : (
-        <>
-          <PublishSuccess />
-
-          <div
-            style={{
-              marginTop: '1rem',
-              display: 'flex',
-              justifyContent: 'center'
-            }}
-          >
-            <Button
-              color="primary"
-              onClick={() => router.push(`/events/${id}/info`)}
-            >
-              <FiCheck size={20} />
-              <span>Concluir</span>
-            </Button>
-          </div>
-        </>
+      {currentStep !== STEPS.length - 1 && (
+        <Alert marginBottom="md" card={true} type="warning">
+          <b>Atenção!</b> Revise as informações antes de publicar o evento.
+        </Alert>
       )}
+
+      <Card>
+        <CardHeader>
+          <Button
+            disabled={currentStep === STEPS.length - 1}
+            ghost
+            color="secondary"
+            size="default"
+            type="button"
+            onClick={handlePrevious}
+            inline
+          >
+            <FiChevronLeft size={20} />
+            <span>Voltar</span>
+          </Button>
+          <Button
+            color="primary"
+            size="default"
+            type="button"
+            loading={loading}
+            disabled={loading}
+            onClick={handleNext}
+            inline
+          >
+            {currentStep === STEPS.length - 1 && (
+              <>
+                <FiCheck size={20} />
+                <span>Concluir</span>
+              </>
+            )}
+            {currentStep === 2 && (
+              <>
+                <FiCheck size={20} />
+                <span>Publicar</span>
+              </>
+            )}
+            {currentStep !== 2 && currentStep !== STEPS.length - 1 && (
+              <>
+                <FiChevronRight size={20} />
+                <span>Avançar</span>
+              </>
+            )}
+          </Button>
+        </CardHeader>
+
+        {currentStep === 0 && (
+          <EventInfo edit={false} event={event} setEvent={setEvent} />
+        )}
+        {currentStep === 1 && (
+          <EventActivity addToast={addToast} event={event} />
+        )}
+        {currentStep === 2 && <EventCertificate event={event} />}
+        {currentStep === 3 && <PublishSuccess />}
+      </Card>
     </Container>
   )
 }

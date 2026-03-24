@@ -11,135 +11,117 @@ import {
 import { IModelCertificate } from '@dtos'
 import { Certificate } from '@pages/events/[id]/[tab]/components'
 import { initialTextConfig } from '@pages/events/[id]/[tab]/components/certificateLayout'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FiAward, FiCheck, FiCheckSquare, FiSquare, FiX } from 'react-icons/fi'
+import { api } from '@services'
+import Image from 'next/image'
 
 import { CardContainer, Container, Header } from './styles'
 
-// import { ICertificate } from '../../dtos/ICertificate'
-// import { Row } from '../../styles/components/grid'
-// import {
-//   CardContainer,
-//   Header,
-//   Container
-// } from '../../styles/components/steps/eventCertificate'
-// import Certificate from '../accordions/certificate'
-// import { initialTextConfig } from '../accordions/certificateLayout'
-// import Button from '../button'
-// import Modal from '../modal'
-// import Table from '../table'
+interface IApiModel {
+  id: string
+  name: string
+  pages: Array<{
+    type: string
+    image: string
+    text: string
+    layout: any
+  }>
+  created_at: string
+}
 
-export const EventCertificate: React.FC = () => {
+interface IProcessedCertificate {
+  id: string
+  name: string
+  front?: {
+    img: string
+    text: string
+  }
+  verse?: {
+    img: string
+    text: string
+  }
+  pages: IApiModel['pages']
+}
+
+interface Props {
+  event?: any
+}
+
+const STORAGE_URL = process.env.baseURL || 'http://localhost:4001'
+
+const apiModelToCertificate = (model: IApiModel): IProcessedCertificate => {
+  const frontPage = model.pages.find(p => p.type === 'frente')
+  const versePage = model.pages.find(p => p.type === 'verso')
+
+  return {
+    id: model.id,
+    name: model.name,
+    pages: model.pages,
+    front: frontPage
+      ? { img: frontPage.image ? `${STORAGE_URL}/upload/${frontPage.image}` : '', text: frontPage.text }
+      : { img: '', text: '' },
+    verse: versePage
+      ? { img: versePage.image ? `${STORAGE_URL}/upload/${versePage.image}` : '', text: versePage.text }
+      : undefined
+  }
+}
+
+export const EventCertificate: React.FC<Props> = ({ event }) => {
   const [openModal, setOpenModal] = useState(false)
+  const [certificateList, setCertificateList] = useState<IProcessedCertificate[]>([])
+  const [loadingModels, setLoadingModels] = useState(true)
+
+  useEffect(() => {
+    const loadModels = async () => {
+      if (!event?.id) return
+      try {
+        setLoadingModels(true)
+        const response = await api.get(`events/${event.id}/models`)
+        const models: IApiModel[] = response?.data?.data || []
+        const processedModels = models.map(apiModelToCertificate)
+        setCertificateList(processedModels)
+      } catch (err) {
+        console.error('Erro ao carregar modelos:', err)
+      } finally {
+        setLoadingModels(false)
+      }
+    }
+    if (event) loadModels()
+  }, [event])
 
   const handleCloseModal = useCallback(() => {
     setOpenModal(false)
   }, [])
 
-  const [certificateSelected, setCertificateSelected] = useState(null)
-
-  const [certificateList, setCertificateList] = useState<IModelCertificate[]>([
-    // {
-    //   confirmed: true,
-    //   id: '1',
-    //   name: 'Modelo Padrão 3',
-    //   front: {
-    //     img: "'/teste1.png'",
-    //     text:
-    //       '<p>Certificamos que <strong>[participante_nome]</strong> participou da <strong>[evento_edicao] [evento_nome] ([evento_sigla])</strong> do Instituto Federal de Educação, Ciência e Tecnologia da Bahia (IFBA) Campus Vitória da Conquista, realizada no período de <strong>[participacao_periodo]</strong>, com carga horária de <strong>[participacao_carga_horaria]</strong></p>'
-    //   },
-    //   roles: [
-    //     {
-    //       number: 1,
-    //       activity: {
-    //         name: 'Mesa Redonda',
-    //         id: '1'
-    //       },
-    //       function: {
-    //         name: 'Palestrante',
-    //         id: '1'
-    //       }
-    //     },
-    //     {
-    //       number: 2,
-    //       activity: {
-    //         name: 'Mesa Redonda',
-    //         id: '1'
-    //       },
-    //       function: {
-    //         name: 'Professor',
-    //         id: '1'
-    //       }
-    //     }
-    //   ]
-    // },
-    // {
-    //   confirmed: false,
-    //   id: '2',
-    //   name: 'Modelo para Professores',
-    //   front: {
-    //     img: "'/teste.jpeg'",
-    //     text:
-    //       '<p>Certificamos que <strong>[participante_nome]</strong> participou da <strong>[evento_edicao] [evento_nome] ([evento_sigla])</strong> do Instituto Federal de Educação, Ciência e Tecnologia da Bahia (IFBA) Campus Vitória da Conquista, realizada no período de <strong>[participacao_periodo]</strong>, com carga horária de <strong>[participacao_carga_horaria]</strong></p>'
-    //   },
-    //   verse: {
-    //     img: "'/teste.jpeg'",
-    //     text:
-    //       '<p>Certificamos que <strong>[participante_nome]</strong> participou da <strong>[evento_edicao] [evento_nome] ([evento_sigla])</strong> do Instituto Federal de Educação, Ciência e Tecnologia da Bahia (IFBA) Campus Vitória da Conquista, realizada no período de <strong>[participacao_periodo]</strong>, com carga horária de <strong>[participacao_carga_horaria]</strong></p>'
-    //   },
-    //   roles: [
-    //     {
-    //       number: 1,
-    //       activity: {
-    //         name: 'Mesa Redonda',
-    //         id: '1'
-    //       },
-    //       function: {
-    //         name: 'Palestrante',
-    //         id: '1'
-    //       }
-    //     },
-    //     {
-    //       number: 2,
-    //       activity: {
-    //         name: 'Mesa Redonda',
-    //         id: '1'
-    //       },
-    //       function: {
-    //         name: 'Professor',
-    //         id: '1'
-    //       }
-    //     }
-    //   ]
-    // }
-  ])
+  const [certificateSelected, setCertificateSelected] = useState<IProcessedCertificate | null>(null)
   return (
     <Container>
       <Grid cols={3}>
-        {certificateList.map((certificate, index) => (
-          <CardContainer key={index}>
+        {certificateList.map((certificate) => (
+          <CardContainer key={certificate.id}>
             <Header>
               <div className="icon">
                 <FiAward size={20} />
               </div>
               <h2>{certificate.name}</h2>
             </Header>
-            <main>
-              <Table>
-                <tbody>
-                  {certificate.criterions.map((criterion, index) => (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      {/* <td>{criterion.activity.name}</td>
-                      <td>{criterion.function.name}</td> */}
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+            <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', overflow: 'hidden' }}>
+              {certificate.front?.img ? (
+                <Image
+                  src={certificate.front.img}
+                  alt={certificate.name}
+                  width={300}
+                  height={200}
+                  unoptimized
+                  style={{ objectFit: 'contain', maxWidth: '100%', maxHeight: '200px' }}
+                />
+              ) : (
+                <p style={{ color: '#999' }}>Sem imagem</p>
+              )}
             </main>
-            <footer>
+            <footer style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
               <Button
-                // outline={!certificate.confirmed}
                 color="secondary"
                 size="small"
                 type="button"
@@ -149,16 +131,8 @@ export const EventCertificate: React.FC = () => {
                 }}
                 inline
               >
-                {/* {certificate.confirmed && (
-                  <>
-                    <FiCheckSquare size={20} /> <span>Confirmado</span>
-                  </>
-                )}
-                {!certificate.confirmed && (
-                  <>
-                    <FiSquare size={20} /> <span>Confirmar</span>
-                  </>
-                )} */}
+                <FiCheck size={20} />
+                <span>Visualizar</span>
               </Button>
             </footer>
           </CardContainer>
@@ -169,37 +143,39 @@ export const EventCertificate: React.FC = () => {
         <HeaderModal>
           <h2>
             <FiCheckSquare size={20} />
-            Revise o texto do certificado
+            Modelo: {certificateSelected?.name}
           </h2>
         </HeaderModal>
         <ScrollWrapper>
           <MainModal>
-            <Certificate
-              preview="true"
-              image={certificateSelected?.front.img}
-              validateHorizontalPosition={
-                initialTextConfig.validateHorizontalPosition as
-                  | 'center'
-                  | 'right'
-                  | 'left'
-              }
-              validateVerticalPosition={
-                initialTextConfig.validateVerticalPosition as 'bottom' | 'top'
-              }
-              validateHorizontalPadding={
-                initialTextConfig.validateHorizontalPadding
-              }
-              validateVerticalPadding={
-                initialTextConfig.validateVerticalPadding
-              }
-              padding={initialTextConfig.padding}
-              position={initialTextConfig.position as 'center' | 'custom'}
-              html={certificateSelected?.front.text}
-              paddingBottom={initialTextConfig.paddingBottom}
-              paddingTop={initialTextConfig.paddingTop}
-              paddingLeft={initialTextConfig.paddingLeft}
-              paddingRight={initialTextConfig.paddingRight}
-            />
+            {certificateSelected?.front?.img && (
+              <Certificate
+                preview="true"
+                image={certificateSelected.front.img}
+                validateHorizontalPosition={
+                  initialTextConfig.validateHorizontalPosition as
+                    | 'center'
+                    | 'right'
+                    | 'left'
+                }
+                validateVerticalPosition={
+                  initialTextConfig.validateVerticalPosition as 'bottom' | 'top'
+                }
+                validateHorizontalPadding={
+                  initialTextConfig.validateHorizontalPadding
+                }
+                validateVerticalPadding={
+                  initialTextConfig.validateVerticalPadding
+                }
+                padding={initialTextConfig.padding}
+                position={initialTextConfig.position as 'center' | 'custom'}
+                html={certificateSelected.front.text}
+                paddingBottom={initialTextConfig.paddingBottom}
+                paddingTop={initialTextConfig.paddingTop}
+                paddingLeft={initialTextConfig.paddingLeft}
+                paddingRight={initialTextConfig.paddingRight}
+              />
+            )}
           </MainModal>
         </ScrollWrapper>
 
@@ -212,11 +188,7 @@ export const EventCertificate: React.FC = () => {
             outline
           >
             <FiX size={20} />
-            <span>Cancelar</span>
-          </Button>
-          <Button inline color="secondary" type="button">
-            <FiCheck size={20} />
-            <span>Confirmar</span>
+            <span>Fechar</span>
           </Button>
         </FooterModal>
       </Modal>

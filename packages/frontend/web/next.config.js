@@ -11,6 +11,14 @@ module.exports = withImages({
     siteKey: process.env?.HCAPTCHA_SITEKEY,
     sheetPass: process.env.SHEET_PASSWORD || '',
   },
+  images: {
+    domains: [
+      'localhost',
+      '*.cloudflare.net',
+      '*.amazonaws.com',
+      '*.azure.net',
+    ],
+  },
   async redirects() {
     return [
       {
