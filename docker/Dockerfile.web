@@ -17,9 +17,6 @@ RUN yarn install --frozen-lockfile
 # copia código
 COPY packages/frontend/web ./packages/frontend/web
 
-# build do frontend (API_URI precisa estar disponível em build-time para o Next.js)
-ARG API_URI=http://localhost:4001
-ENV API_URI=$API_URI
 RUN yarn workspace @certificates/web build
 
 WORKDIR /usr/src/app/packages/frontend/web
