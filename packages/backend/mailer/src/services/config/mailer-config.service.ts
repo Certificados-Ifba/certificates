@@ -8,7 +8,7 @@ export class MailerConfigService implements MailerOptionsFactory {
         host: process.env.MAILER_HOST,
         port: Number(process.env.MAILER_PORT),
         // ignoreTLS: !Number(process.env.MAILER_TLS),
-        // secure: !!Number(process.env.MAILER_SECURE),
+        secure: !!Number(process.env.MAILER_SECURE),
         auth: {
           user: process.env.MAILER_USER,
           pass: process.env.MAILER_PASS

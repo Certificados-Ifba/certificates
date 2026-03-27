@@ -44,6 +44,7 @@ import { DeleteUserResponseDto } from '../interfaces/user/dto/delete-user-respon
 import { LoginUserResponseDto } from '../interfaces/user/dto/login-user-response.dto'
 import { UserIdDto } from '../interfaces/user/dto/user-id.dto'
 import { IServiceUserConfirmResponse } from '../interfaces/user/service-user-confirm-response.interface'
+import { IServiceCertificateListResponse } from '../interfaces/certificate/service-certificate-list-response.interface'
 import { IServiceUserDeleteResponse } from '../interfaces/user/service-user-delete-response.interface'
 import { IServiceUserSearchResponse } from '../interfaces/user/service-user-search-response.interface'
 import { ParticipantIdDto } from './../interfaces/participant/dto/participant-id.dto'
@@ -54,7 +55,8 @@ import { ParticipantIdDto } from './../interfaces/participant/dto/participant-id
 export class ParticipantsController {
   constructor(
     @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
-    @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy
+    @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
+    @Inject('CERTIFICATE_SERVICE') private readonly certificateServiceClient: ClientProxy
   ) { }
 
   @Get()
@@ -249,6 +251,25 @@ export class ParticipantsController {
   public async deleteUser(
     @Param() params: UserIdDto
   ): Promise<DeleteUserResponseDto> {
+    const certificateListResponse: IServiceCertificateListResponse = await this.certificateServiceClient
+      .send('certificate_list', {
+        user: params.id,
+        page: 1,
+        perPage: 1
+      })
+      .toPromise()
+
+    if (certificateListResponse?.data?.totalCount > 0) {
+      throw new HttpException(
+        {
+          message: 'participant_delete_conflict',
+          errors: null,
+          data: null
+        },
+        HttpStatus.CONFLICT
+      )
+    }
+
     const deleteUserResponse: IServiceUserDeleteResponse = await this.userServiceClient
       .send('user_delete_by_id', {
         id: params.id,

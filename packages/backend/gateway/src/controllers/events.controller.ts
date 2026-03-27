@@ -1,25 +1,24 @@
 import {
-  Controller,
-  Inject,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
   Body,
-  Req,
+  Controller,
+  Delete,
+  Get,
   HttpException,
   HttpStatus,
-  Res,
+  Inject,
+  Param,
+  Post,
+  Put,
   Query,
-  Module
+  Req,
+  Res
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import {
-  ApiTags,
-  ApiOkResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
-  ApiBearerAuth
+  ApiOkResponse,
+  ApiTags
 } from '@nestjs/swagger'
 import { Response } from 'express'
 
@@ -39,8 +38,8 @@ import { IServiceEventCreateResponse } from '../interfaces/event/service-event-c
 import { IServiceEventDeleteResponse } from '../interfaces/event/service-event-delete-response.interface'
 import { IServiceEventGetByIdResponse } from '../interfaces/event/service-event-get-by-id-response.interface'
 import { IServiceEventListResponse } from '../interfaces/event/service-event-list-response.interface'
+import { IServiceEventPublishByIdResponse } from '../interfaces/event/service-event-publish-by-id-response.interface'
 import { IServiceEventUpdateByIdResponse } from '../interfaces/event/service-event-update-by-id-response.interface'
-import { ActivitiesController } from './activities.controller'
 
 @Controller('events')
 @ApiBearerAuth('JWT')
@@ -48,7 +47,7 @@ import { ActivitiesController } from './activities.controller'
 export class EventsController {
   constructor(
     @Inject('EVENT_SERVICE') private readonly eventServiceClient: ClientProxy
-  ) {}
+  ) { }
 
   @Get(':id')
   @Authorization(true)
@@ -217,6 +216,35 @@ export class EventsController {
       data: {
         event: updateEventResponse.event
       },
+      errors: null
+    }
+  }
+
+  @Post(':id/publish')
+  @Authorization(true)
+  @Permission('event_publish_by_id')
+  public async publishEvent(
+    @Req() request: IAuthorizedRequest,
+    @Param() params: EventIdDto
+  ): Promise<{ message: string; data: { event: any } | null; errors: any }> {
+    const publishResponse: IServiceEventPublishByIdResponse = await this.eventServiceClient
+      .send('event_publish_by_id', { id: params.id, user: request.user })
+      .toPromise()
+
+    if (publishResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: publishResponse.message,
+          data: null,
+          errors: publishResponse.errors
+        },
+        publishResponse.status
+      )
+    }
+
+    return {
+      message: publishResponse.message,
+      data: { event: publishResponse.event },
       errors: null
     }
   }
